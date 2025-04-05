@@ -6,7 +6,8 @@ import { ProductService } from './product.service';
 
 @Controller('products')
 @ApiTags('Product')
-export class ProductController { 
+export class ProductController {
+
   public constructor(private readonly productService: ProductService) { }
 
   @Post()
@@ -36,9 +37,9 @@ export class ProductController {
     summary: "Retrieves a product by its ID."
   })
   public readProductById(@Param() param: ProductIdDto) {
-    const { productId: id } = param;
+    const { productId } = param;
 
-    return this.productService.readProductById(id);
+    return this.productService.readProductById(productId);
   }
 
   @Patch(':productId')
@@ -48,9 +49,9 @@ export class ProductController {
     summary: "Updates a product by its ID."
   })
   public updateProductById(@Param() param: ProductIdDto, @Body() body: ProductUpdateDto): ProductDto {
-    const { productId: id } = param;
+    const { productId } = param;
 
-    return this.productService.updateProductById(id, body);
+    return this.productService.updateProductById(productId, body);
   }
 
 
