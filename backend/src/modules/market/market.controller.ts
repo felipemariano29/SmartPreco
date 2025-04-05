@@ -1,11 +1,13 @@
 import { Body, Controller, Get, NotImplementedException, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { UseUser } from '../../shared/guards/use-user.decorator';
 import { MarketCreateDto, MarketDto, MarketIdDto, MarketReadDto, MarketsDto, MarketUpdateDto } from './market.dto';
 import { MarketService } from './market.service';
 
 @Controller('markets')
 @ApiTags('Market')
+@UseUser()
 export class MarketController {
 
    public constructor(private readonly marketService: MarketService) { }

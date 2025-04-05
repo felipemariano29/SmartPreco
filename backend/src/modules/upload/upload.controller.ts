@@ -1,10 +1,12 @@
 import { Body, Controller, NotImplementedException, Post } from '@nestjs/common';
 import { ApiConsumes, ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { UseUser } from '../../shared/guards/use-user.decorator';
 import { UploadCreateDto, UploadImageDto } from './upload.dto';
 
 @Controller('upload')
 @ApiTags('Upload')
+@UseUser()
 export class UploadController {
 
   @Post()

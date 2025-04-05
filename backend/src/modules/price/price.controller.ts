@@ -1,11 +1,13 @@
 import { Body, Controller, Get, NotImplementedException, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { UseUser } from '../../shared/guards/use-user.decorator';
 import { PriceCreateDto, PriceDto, PriceReadDto, PricesDto } from './price.dto';
 import { PriceService } from './price.service';
 
 @Controller('prices')
 @ApiTags('Price')
+@UseUser()
 export class PriceController {
 
   public constructor(private readonly priceService: PriceService) { }
