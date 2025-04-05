@@ -7,6 +7,7 @@ import { ReportService } from './report.service';
 
 @Controller('reports')
 @ApiTags('Report')
+@UseUser()
 export class ReportController {
 
   public constructor(private readonly reportService: ReportService) { }
@@ -17,7 +18,6 @@ export class ReportController {
     operationId: "Create Report",
     summary: "Creates a new report."
   })
-  @UseUser()
   public createReport(@Body() body: ReportCreateDto): ReportDto {
     throw new NotImplementedException("Not implemented yet.");
   }
