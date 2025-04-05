@@ -1,12 +1,14 @@
 import { Controller, Delete, Get, NotImplementedException, Param, Post } from '@nestjs/common';
 import { ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { UseUser } from '../../shared/guards/use-user.decorator';
 import { MarketIdDto, MarketsDto } from '../market/market.dto';
 import { ProductIdDto, ProductsDto } from '../product/product.dto';
 import { FavoriteService } from './favorite.service';
 
 @Controller('favorites')
 @ApiTags('Favorite')
+@UseUser()
 export class FavoriteController {
 
   public constructor(private readonly favoriteService: FavoriteService) { }

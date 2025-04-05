@@ -1,11 +1,13 @@
 import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { UseUser } from '../../shared/guards/use-user.decorator';
 import { ProductCreateDto, ProductDto, ProductIdDto, ProductReadDto, ProductsDto, ProductUpdateDto } from './product.dto';
 import { ProductService } from './product.service';
 
 @Controller('products')
 @ApiTags('Product')
+@UseUser()
 export class ProductController {
 
   public constructor(private readonly productService: ProductService) { }

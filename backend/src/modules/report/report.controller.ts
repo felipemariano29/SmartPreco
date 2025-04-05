@@ -1,6 +1,7 @@
 import { Body, Controller, Get, NotImplementedException, Patch, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { UseUser } from '../../shared/guards/use-user.decorator';
 import { ReportCreateDto, ReportDto, ReportReadDto, ReportsDto, ReportUpdateDto } from './report.dto';
 import { ReportService } from './report.service';
 
@@ -16,6 +17,7 @@ export class ReportController {
     operationId: "Create Report",
     summary: "Creates a new report."
   })
+  @UseUser()
   public createReport(@Body() body: ReportCreateDto): ReportDto {
     throw new NotImplementedException("Not implemented yet.");
   }
@@ -27,6 +29,7 @@ export class ReportController {
     summary: "Retrieves a list of reports."
   })
   public readReports(@Query() query: ReportReadDto): ReportsDto {
+    // TODO: Está rota deve ser protegida para que apenas o admin consiga acessar
     throw new NotImplementedException("Not implemented yet.");
   }
 
@@ -37,6 +40,7 @@ export class ReportController {
     summary: "Updates a report by its ID."
   })
   public updateReportById(@Body() body: ReportUpdateDto): ReportDto {
+    // TODO: Está rota deve ser protegida para que apenas o admin consiga acessar
     throw new NotImplementedException("Not implemented yet.");
   }
 
