@@ -8,10 +8,12 @@ import { ProductModule } from './modules/product/product.module';
 import { ReportModule } from './modules/report/report.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { SharedModule } from "./shared/shared.module";
+import { SupabaseModule } from "./shared/supabase/supabase.module";
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    SupabaseModule.forRoot(),
     SharedModule,
     ProductModule,
     MarketModule,
