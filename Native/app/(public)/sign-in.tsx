@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Alert, StyleSheet, Image } from "react-native";
-import { useSignIn } from "@clerk/clerk-expo";
+import { useSignIn, useOAuth } from "@clerk/clerk-expo";
 import {
   Button,
   TextInput,
@@ -13,9 +13,11 @@ import {
 } from "react-native-paper";
 import { appColors } from "@/constants/theme";
 import Logo from "@/assets/images/logo.png";
+import { router } from "expo-router";
 
 export default function LoginScreen() {
   const { signIn, setActive, isLoaded } = useSignIn();
+  const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [secureTextEntry, setSecureTextEntry] = useState(true);
@@ -52,19 +54,19 @@ export default function LoginScreen() {
 
     setLoading(true);
 
-    // try {
-    //   await signIn.authenticateWithRedirect({
-    //     // strategy: "oauth_google",
-    //     // redirectUrl: "/",
-    //   });
-    // } catch (err) {
-    //   Alert.alert("Erro", "Não foi possível realizar o login com Google.");
-    //   console.error("Erro no login com Google:", err);
-    // } finally {
-    //   setLoading(false);
-    // }
+    try {
+      const { createdSessionId, setActive } = await startOAuthFlow();
 
-    setLoading(false);
+      if (createdSessionId) {
+        await setActive?.({ session: createdSessionId });
+        router.replace("/");
+      }
+    } catch (err) {
+      Alert.alert("Erro", "Não foi possível realizar o login com Google.");
+      console.error("Erro no login com Google:", err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -76,6 +78,27 @@ export default function LoginScreen() {
 
         <Text style={styles.title}>Bem-vindo</Text>
         <Text style={styles.subtitle}>Acesse sua conta</Text>
+
+        <Button
+          mode="outlined"
+          icon="google"
+          onPress={handleGoogleSignIn}
+          style={styles.googleButton}
+          textColor={appColors.accent}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator animating={true} color={appColors.accent} />
+          ) : (
+            "Continuar com Google"
+          )}
+        </Button>
+
+        <View style={styles.dividerContainer}>
+          <Divider style={styles.divider} />
+          <Text style={styles.dividerText}>ou</Text>
+          <Divider style={styles.divider} />
+        </View>
 
         <TextInput
           label="Email"
@@ -117,26 +140,14 @@ export default function LoginScreen() {
           )}
         </Button>
 
-        <View style={styles.dividerContainer}>
-          <Divider style={styles.divider} />
-          <Text style={styles.dividerText}>ou</Text>
-          <Divider style={styles.divider} />
-        </View>
-
-        <Button
-          mode="outlined"
-          icon="google"
-          onPress={handleGoogleSignIn}
-          style={styles.googleButton}
-          textColor={appColors.accent}
-          disabled={loading}
-        >
-          Continuar com Google
-        </Button>
-
         <View style={styles.footer}>
           <Text>Não tem uma conta? </Text>
-          <Text style={styles.signUpText}>Registre-se</Text>
+          <Text
+            style={styles.signUpText}
+            onPress={() => router.replace("/sign-up")}
+          >
+            Registre-se
+          </Text>
         </View>
       </Surface>
     </View>
