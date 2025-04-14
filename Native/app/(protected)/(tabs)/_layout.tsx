@@ -35,6 +35,15 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="add-product"
+        options={{
+          title: "Add Product",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="add.circle" color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

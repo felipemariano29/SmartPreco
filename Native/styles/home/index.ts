@@ -16,7 +16,7 @@ export const styles = StyleSheet.create({
   searchBar: {
     elevation: 2,
     backgroundColor: "#f0f0f0",
-    borderRadius: 8,
+    borderRadius: 25,
   },
   searchInput: {
     fontSize: 14,
@@ -109,7 +109,7 @@ export const styles = StyleSheet.create({
   detailsButton: {
     backgroundColor: "#F4A261",
     padding: 6,
-    borderRadius: 4,
+    borderRadius: 25,
     alignItems: "center",
     maxWidth: 120,
   },
