@@ -11,8 +11,28 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { IconButton } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
+import { z } from "zod";
 import { Header } from "@/components/Header";
 import { styles } from "@/styles/add-product";
+
+const productSchema = z.object({
+  name: z.string().min(1, "Nome do produto é obrigatório"),
+  price: z
+    .string()
+    .min(1, "Preço é obrigatório")
+    .refine(
+      (val) => {
+        return /^\d+([.,]\d+)?$/.test(val);
+      },
+      {
+        message: "Preço deve ser um valor numérico válido",
+      }
+    ),
+  market: z.string().min(1, "Nome do mercado é obrigatório"),
+  imageUri: z.string().nullable().optional(),
+});
+
+type ProductData = z.infer<typeof productSchema>;
 
 export default function AddProductScreen() {
   const [productName, setProductName] = useState("");
@@ -20,31 +40,57 @@ export default function AddProductScreen() {
   const [market, setMarket] = useState("");
   const [image, setImage] = useState<string | null>(null);
 
+  const [errors, setErrors] = useState<{
+    name?: string;
+    price?: string;
+    market?: string;
+    imageUri?: string;
+  }>({});
+
+  const validateForm = (): boolean => {
+    try {
+      productSchema.parse({
+        name: productName,
+        price,
+        market,
+        imageUri: image,
+      });
+
+      setErrors({});
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const formattedErrors: { [key: string]: string } = {};
+        error.errors.forEach((err) => {
+          const path = err.path[0] as string;
+          formattedErrors[path] = err.message;
+        });
+
+        setErrors(formattedErrors);
+
+        const firstError = error.errors[0];
+        Alert.alert("Erro de Validação", firstError.message);
+      } else {
+        Alert.alert("Erro", "Ocorreu um erro ao validar os dados");
+      }
+      return false;
+    }
+  };
+
   const handleSave = () => {
-    if (!productName.trim()) {
-      Alert.alert("Atenção", "Por favor, informe o nome do produto");
+    if (!validateForm()) {
       return;
     }
 
-    if (!price.trim()) {
-      Alert.alert("Atenção", "Por favor, informe o preço");
-      return;
-    }
-
-    if (!market.trim()) {
-      Alert.alert("Atenção", "Por favor, informe o mercado");
-      return;
-    }
-
-    const productData = {
+    const productData: ProductData = {
       name: productName,
       price,
       market,
       imageUri: image,
     };
 
+    console.log("Dados validados:", productData);
     Alert.alert("Sucesso", "Produto cadastrado com sucesso!");
-    console.log(productData);
 
     setProductName("");
     setPrice("");
@@ -76,6 +122,7 @@ export default function AddProductScreen() {
 
       if (!result.canceled) {
         setImage(result.assets[0].uri);
+        setErrors((prev) => ({ ...prev, imageUri: undefined }));
       }
     } catch (error) {
       console.error("Erro ao selecionar imagem:", error);
@@ -94,14 +141,20 @@ export default function AddProductScreen() {
       return;
     }
 
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.8,
-    });
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      if (!result.canceled) {
+        setImage(result.assets[0].uri);
+        setErrors((prev) => ({ ...prev, imageUri: undefined }));
+      }
+    } catch (error) {
+      console.error("Erro ao capturar foto:", error);
+      Alert.alert("Erro", "Houve um problema ao capturar a foto");
     }
   };
 
@@ -155,33 +208,58 @@ export default function AddProductScreen() {
                 <IconButton icon="pencil" size={18} style={styles.editIcon} />
               </TouchableOpacity>
             </TouchableOpacity>
+            {errors.imageUri && (
+              <Text style={styles.errorText}>{errors.imageUri}</Text>
+            )}
           </View>
 
           <View style={styles.formSection}>
             <Text style={styles.inputLabel}>Nome do produto</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, errors.name && styles.inputError]}
               value={productName}
-              onChangeText={setProductName}
+              onChangeText={(text) => {
+                setProductName(text);
+                if (text.trim() && errors.name) {
+                  setErrors((prev) => ({ ...prev, name: undefined }));
+                }
+              }}
               placeholder="Ex: Arroz Integral 1kg"
             />
+            {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
 
             <Text style={styles.inputLabel}>Preço</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, errors.price && styles.inputError]}
               value={price}
-              onChangeText={setPrice}
+              onChangeText={(text) => {
+                setPrice(text);
+                if (text.trim() && errors.price) {
+                  setErrors((prev) => ({ ...prev, price: undefined }));
+                }
+              }}
               placeholder="Ex: 10,90"
               keyboardType="numeric"
             />
+            {errors.price && (
+              <Text style={styles.errorText}>{errors.price}</Text>
+            )}
 
             <Text style={styles.inputLabel}>Mercado</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, errors.market && styles.inputError]}
               value={market}
-              onChangeText={setMarket}
+              onChangeText={(text) => {
+                setMarket(text);
+                if (text.trim() && errors.market) {
+                  setErrors((prev) => ({ ...prev, market: undefined }));
+                }
+              }}
               placeholder="Ex: Supermercado ABC"
             />
+            {errors.market && (
+              <Text style={styles.errorText}>{errors.market}</Text>
+            )}
           </View>
 
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
