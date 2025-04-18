@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, StyleSheet, Alert, ScrollView, Image } from "react-native";
-import { useSignUp } from "@clerk/clerk-expo";
+import { useSignUp, useOAuth } from "@clerk/clerk-expo";
 import { useRouter } from "expo-router";
 import {
   Button,
@@ -8,12 +8,14 @@ import {
   Text,
   Surface,
   ActivityIndicator,
+  Divider,
 } from "react-native-paper";
 import Logo from "@/assets/images/logo.png";
 import { appColors } from "@/constants/theme";
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();
+  const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
   const router = useRouter();
 
   const [emailAddress, setEmailAddress] = useState("");
@@ -48,8 +50,8 @@ export default function SignUpScreen() {
       await signUp.create({
         emailAddress,
         password,
-        firstName: firstName.trim() || undefined,
-        lastName: lastName.trim() || undefined,
+        // firstName: firstName.trim() || undefined,
+        // lastName: lastName.trim() || undefined,
       });
 
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
@@ -93,6 +95,29 @@ export default function SignUpScreen() {
       }
     } catch (err) {
       Alert.alert("Erro", "Código de verificação inválido.");
+      console.error(JSON.stringify(err, null, 2));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onGoogleSignUpPress = async () => {
+    if (!isLoaded || loading) return;
+
+    setLoading(true);
+
+    try {
+      const { createdSessionId, setActive } = await startOAuthFlow();
+
+      if (createdSessionId && setActive) {
+        await setActive({ session: createdSessionId });
+        router.replace("/");
+      }
+    } catch (err) {
+      Alert.alert(
+        "Erro no login com Google",
+        "Não foi possível fazer login com o Google. Tente novamente."
+      );
       console.error(JSON.stringify(err, null, 2));
     } finally {
       setLoading(false);
@@ -160,6 +185,26 @@ export default function SignUpScreen() {
             Preencha o formulário abaixo para se cadastrar
           </Text>
 
+          <Button
+            mode="outlined"
+            icon="google"
+            onPress={onGoogleSignUpPress}
+            style={styles.googleButton}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator animating={true} color={appColors.primary} />
+            ) : (
+              "Continuar com Google"
+            )}
+          </Button>
+
+          <View style={styles.dividerContainer}>
+            <Divider style={styles.divider} />
+            <Text style={styles.dividerText}>ou</Text>
+            <Divider style={styles.divider} />
+          </View>
+
           <TextInput
             label="Nome"
             mode="outlined"
@@ -211,7 +256,7 @@ export default function SignUpScreen() {
             style={styles.button}
             disabled={loading}
           >
-            {loading ? (
+            {loading && !onGoogleSignUpPress ? (
               <ActivityIndicator animating={true} color="white" />
             ) : (
               "Cadastrar"
@@ -222,7 +267,7 @@ export default function SignUpScreen() {
             <Text>Já tem uma conta? </Text>
             <Text
               style={styles.loginText}
-              onPress={() => router.replace("/login")}
+              onPress={() => router.replace("/sign-in")}
             >
               Entrar
             </Text>
@@ -279,6 +324,11 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     backgroundColor: appColors.primary,
   },
+  googleButton: {
+    marginBottom: 16,
+    paddingVertical: 6,
+    borderColor: appColors.primary,
+  },
   textButton: {
     marginTop: 16,
   },
@@ -290,5 +340,19 @@ const styles = StyleSheet.create({
   loginText: {
     fontWeight: "bold",
     color: appColors.accent,
+  },
+  dividerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+  },
+  dividerText: {
+    marginHorizontal: 8,
+    color: appColors.text,
+    opacity: 0.7,
   },
 });
