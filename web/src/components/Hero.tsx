@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 
 const Hero = () => {
   return (
-    <section className="pt-16 pb-16 h-auto flex items-center">
+    <section className="pt-16 pb-16 flex items-center">
       <div className="container mx-auto px-4">
         {/* Grid que vira coluna única no mobile e 2 colunas a partir de md */}
         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-12 gap-4 items-center">
@@ -34,31 +34,6 @@ const Hero = () => {
                 Saiba Mais
               </Button>
             </div>
-            <div className="flex gap-4 pt-4">
-              <Button
-                variant="outline"
-                className="hover:scale-105 transition-all"
-                onClick={() =>
-                  window.open("https://apps.apple.com/app/smartpreco", "_blank")
-                }
-              >
-                <AppleIcon className="mr-2" />
-                App Store
-              </Button>
-              <Button
-                variant="outline"
-                className="hover:scale-105 transition-all"
-                onClick={() =>
-                  window.open(
-                    "https://play.google.com/store/apps/details?id=com.smartpreco",
-                    "_blank"
-                  )
-                }
-              >
-                <Gamepad2 className="mr-2" />
-                Google Play
-              </Button>
-            </div>
           </div>
 
           {/* Imagem: centralizada e com largura controlada no mobile */}
@@ -69,7 +44,7 @@ const Hero = () => {
               className="
                 hidden md:block
                 animate-fade-in transition-all duration-500 hover:scale-105
-                w-full
+                max-h-[90vh]
               "
             />
 

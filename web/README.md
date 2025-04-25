@@ -20,6 +20,7 @@ bun dev
 
 This project is built with:
 
+- Bun
 - Vite
 - TypeScript
 - React
