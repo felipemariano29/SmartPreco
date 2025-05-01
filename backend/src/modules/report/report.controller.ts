@@ -25,8 +25,7 @@ export class ReportController {
   @ApiOperation({ operationId: 'Read Reports', summary: 'Admin list of reports' })
   @UseAdmin()
   public async readReports(): Promise<ReportsDto> {
-    const reports = await this.reportService.readReports();
-    return { reports };
+    return this.reportService.readReports();
   }
 
   @Patch(':reportId')

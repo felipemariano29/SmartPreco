@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { ReportCreateDto, ReportDto, ReportUpdateDto } from './report.dto';
+import { ReportCreateDto, ReportDto, ReportsDto, ReportUpdateDto } from './report.dto';
 import { ReportRepository } from './report.repository';
 
 @Injectable()
@@ -8,16 +8,18 @@ export class ReportService {
 
   public constructor(private readonly reportRepository: ReportRepository) {}
 
-  public createReport(dto: ReportCreateDto): Promise<ReportDto> {
-    return this.reportRepository.createReport(dto);
+  public createReport(params: ReportCreateDto): Promise<ReportDto> {
+    return this.reportRepository.createReport(params);
   }
 
-  public readReports(): Promise<ReportDto[]> {
-    return this.reportRepository.readReports();
+  public async readReports(): Promise<ReportsDto> {
+    const reports = await this.reportRepository.readReports();
+
+    return { reports };
   }
 
-  public updateReportById(reportId: string, dto: ReportUpdateDto): Promise<ReportDto> {
-    return this.reportRepository.updateReportById(reportId, dto);
+  public updateReportById(reportId: string, params: ReportUpdateDto): Promise<ReportDto> {
+    return this.reportRepository.updateReportById(reportId, params);
   }
 
 }
