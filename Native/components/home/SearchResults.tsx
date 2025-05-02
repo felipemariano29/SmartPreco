@@ -3,7 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, Image } from "react-native";
 import { Card, IconButton, Chip } from "react-native-paper";
 import { router } from "expo-router";
 import { ItemType } from "@/app/(protected)/(tabs)";
-import { styles } from "@/styles/home/home-components";
+import { styles } from "@/styles/home/SearchResults";
 
 type SearchResultsProps = {
   results: ItemType[];

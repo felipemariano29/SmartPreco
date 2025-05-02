@@ -3,7 +3,7 @@ import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
 import { Avatar } from "react-native-paper";
 import { ItemType } from "@/app/(protected)/(tabs)";
-import { styles } from "@/styles/home/home-components";
+import { styles } from "@/styles/home/FavoriteRow";
 
 type FavoritesRowProps = {
   favorites: ItemType[];
