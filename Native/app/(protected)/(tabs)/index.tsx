@@ -1,42 +1,92 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  FlatList,
-} from "react-native";
-import { Searchbar, Card, IconButton } from "react-native-paper";
+import { View, Text, FlatList } from "react-native";
+import { Searchbar } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Header } from "@/components/Header";
+import { SearchResults } from "@/components/home/SearchResults";
 import { styles } from "@/styles/home";
-import { router } from "expo-router";
+import { FavoritesRow } from "@/components/home/FavoritesRow";
+import { ProductCard } from "@/components/home/ProductsCard";
 
-type ItemType = {
+export type ItemType = {
   id: number;
   name: string;
   price: string;
   image: null;
+  type: "product" | "market";
 };
 
 export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<ItemType[]>([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const favoriteProducts = [
-    { id: 1, name: "Produto 1", price: "R$ 10,00", image: null },
-    { id: 2, name: "Produto 2", price: "R$ 20,00", image: null },
-    { id: 3, name: "Produto 3", price: "R$ 30,00", image: null },
-    { id: 4, name: "Produto 4", price: "R$ 40,00", image: null },
+  const recentProducts: ItemType[] = [
+    {
+      id: 1,
+      name: "Leite Integral 1L",
+      price: "R$ 5,49",
+      image: null,
+      type: "product",
+    },
+    {
+      id: 2,
+      name: "Arroz 5kg",
+      price: "R$ 21,90",
+      image: null,
+      type: "product",
+    },
+    {
+      id: 3,
+      name: "Feijão Carioca 1kg",
+      price: "R$ 7,85",
+      image: null,
+      type: "product",
+    },
+    {
+      id: 4,
+      name: "Óleo de Soja 900ml",
+      price: "R$ 6,49",
+      image: null,
+      type: "product",
+    },
+    {
+      id: 5,
+      name: "Açúcar Refinado 1kg",
+      price: "R$ 4,29",
+      image: null,
+      type: "product",
+    },
+    {
+      id: 6,
+      name: "Café Torrado 500g",
+      price: "R$ 13,75",
+      image: null,
+      type: "product",
+    },
+    {
+      id: 7,
+      name: "Macarrão Espaguete 500g",
+      price: "R$ 3,99",
+      image: null,
+      type: "product",
+    },
+    {
+      id: 8,
+      name: "Molho de Tomate 340g",
+      price: "R$ 2,59",
+      image: null,
+      type: "product",
+    },
   ];
 
-  const favoriteMarkets = [
-    { id: 1, name: "Mercado 1", price: "", image: null },
-    { id: 2, name: "Mercado 2", price: "", image: null },
-    { id: 3, name: "Mercado 3", price: "", image: null },
-    { id: 4, name: "Mercado 4", price: "", image: null },
+  const favorites: ItemType[] = [
+    { id: 101, name: "Extra", price: "", image: null, type: "market" },
+    { id: 102, name: "Local", price: "", image: null, type: "market" },
+    { id: 1, name: "Leite", price: "R$ 5,49", image: null, type: "product" },
+    { id: 103, name: "Atacadão", price: "", image: null, type: "market" },
+    { id: 3, name: "Feijão", price: "R$ 7,85", image: null, type: "product" },
   ];
 
   const handleSearch = (query: string) => {
@@ -50,68 +100,56 @@ export default function HomeScreen() {
 
     setIsSearching(true);
 
-    const mockResults = [
-      { id: 1, name: "Nome do Produto 1", price: "R$ 19,90", image: null },
-      { id: 2, name: "Nome do Produto 2", price: "R$ 24,50", image: null },
-      { id: 3, name: "Nome do Produto 3", price: "R$ 9,99", image: null },
+    const mockResults: ItemType[] = [
+      {
+        id: 1,
+        name: "Leite Integral Piracanjuba",
+        price: "R$ 5,49",
+        image: null,
+        type: "product",
+      },
+      {
+        id: 104,
+        name: "Mercado Pague Menos",
+        price: "",
+        image: null,
+        type: "market",
+      },
+      {
+        id: 2,
+        name: "Leite Desnatado Elegê",
+        price: "R$ 5,99",
+        image: null,
+        type: "product",
+      },
     ];
 
     setSearchResults(mockResults);
   };
 
-  const renderFavoriteItem = ({ item }: { item: ItemType }) => (
-    <TouchableOpacity style={styles.favoriteItem}>
-      <View style={styles.favoriteImageContainer}>
-        {item.image ? (
-          <Image source={item.image} style={styles.favoriteImage} />
-        ) : (
-          <View style={styles.placeholderImage} />
-        )}
+  const handleLoadMore = () => {
+    if (isLoadingMore) return;
+
+    setIsLoadingMore(true);
+
+    setTimeout(() => {
+      setIsLoadingMore(false);
+    }, 1000);
+  };
+
+  const renderListHeader = () => (
+    <View>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Favoritos</Text>
+        <FavoritesRow favorites={favorites} />
       </View>
-    </TouchableOpacity>
-  );
 
-  const renderSearchResult = ({ item }: { item: ItemType }) => (
-    <Card style={styles.resultCard}>
-      <View style={styles.resultContent}>
-        <View style={styles.resultImageContainer}>
-          {item.image ? (
-            <Image source={item.image} style={styles.resultImage} />
-          ) : (
-            <View style={styles.resultPlaceholderImage} />
-          )}
-        </View>
+      <View style={styles.divider} />
 
-        <View style={styles.resultInfo}>
-          <Text style={styles.resultName}>{item.name}</Text>
-          <Text style={styles.resultPrice}>{item.price}</Text>
-
-          <TouchableOpacity
-            style={styles.detailsButton}
-            onPress={() =>
-              router.push({
-                pathname: "/product-details",
-                params: {
-                  id: item.id,
-                  name: item.name,
-                  price: item.price,
-                  image: item.image,
-                },
-              })
-            }
-          >
-            <Text style={styles.detailsButtonText}>Ver detalhes</Text>
-          </TouchableOpacity>
-        </View>
-
-        <IconButton
-          icon="star-outline"
-          size={24}
-          onPress={() => console.log(`Favoritar produto ${item.id}`)}
-          style={styles.favoriteButton}
-        />
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Produtos recentes</Text>
       </View>
-    </Card>
+    </View>
   );
 
   return (
@@ -130,41 +168,17 @@ export default function HomeScreen() {
       </View>
 
       {isSearching ? (
-        <View style={styles.resultsContainer}>
-          <Text style={styles.resultsTitle}>Resultados</Text>
-          <FlatList
-            data={searchResults}
-            renderItem={renderSearchResult}
-            keyExtractor={(item) => item.id.toString()}
-            contentContainerStyle={styles.resultsList}
-          />
-        </View>
+        <SearchResults results={searchResults} />
       ) : (
-        <ScrollView style={styles.scrollView}>
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Produtos favoritos</Text>
-            <FlatList
-              data={favoriteProducts}
-              renderItem={renderFavoriteItem}
-              keyExtractor={(item) => item.id.toString()}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.favoritesList}
-            />
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Mercados favoritos</Text>
-            <FlatList
-              data={favoriteMarkets}
-              renderItem={renderFavoriteItem}
-              keyExtractor={(item) => item.id.toString()}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.favoritesList}
-            />
-          </View>
-        </ScrollView>
+        <FlatList
+          data={recentProducts}
+          renderItem={({ item }) => <ProductCard product={item} />}
+          keyExtractor={(item) => item.id.toString()}
+          ListHeaderComponent={renderListHeader}
+          contentContainerStyle={styles.productList}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.5}
+        />
       )}
     </SafeAreaView>
   );
