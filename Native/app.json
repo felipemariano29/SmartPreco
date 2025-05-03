@@ -21,6 +21,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.leomarzeuski.smartpreco",
+      "googleServicesFile": "./google-services.json",
       "permissions": [
         "android.permission.RECORD_AUDIO"
       ]
@@ -31,6 +32,7 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "expo-notifications",
       "expo-router",
       [
         "expo-image-picker",

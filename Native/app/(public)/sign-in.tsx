@@ -1,19 +1,17 @@
-import React, { useState } from "react";
-import { View, Alert, StyleSheet, Image } from "react-native";
-import { useSignIn, useOAuth } from "@clerk/clerk-expo";
-import {
-  Button,
-  TextInput,
-  Text,
-  Surface,
-  IconButton,
-  ActivityIndicator,
-  Divider,
-  useTheme,
-} from "react-native-paper";
-import { appColors } from "@/constants/theme";
 import Logo from "@/assets/images/logo.png";
+import { appColors } from "@/constants/theme";
+import { useOAuth, useSignIn } from "@clerk/clerk-expo";
 import { router } from "expo-router";
+import React, { useState } from "react";
+import { Alert, Image, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  Button,
+  Divider,
+  Surface,
+  Text,
+  TextInput,
+} from "react-native-paper";
 
 export default function LoginScreen() {
   const { signIn, setActive, isLoaded } = useSignIn();
