@@ -37,6 +37,7 @@ yarn-error.*
 app-example
 
 app.json
+app.config.js
 google-services.json
 /ios
 /android
