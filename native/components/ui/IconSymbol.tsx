@@ -17,6 +17,7 @@ const MAPPING = {
   "star.fill": "star",
   "star.slash": "star-border",
   doubt: "help-outline",
+  ai: "auto-awesome",
 };
 
 export type IconSymbolName = keyof typeof MAPPING;
