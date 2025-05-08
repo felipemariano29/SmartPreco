@@ -10,7 +10,7 @@ export class AdminGuard implements CanActivate {
   public canActivate(_context: ExecutionContext): boolean {
     const user = this.contextService.get(ContextEnum.USER);
 
-    if (!user?.publicMetadata?.isAdmin) {
+    if (!user?.privateMetadata?.isAdmin) {
       throw new ForbiddenException('Access denied: Admins only');
     }
 
