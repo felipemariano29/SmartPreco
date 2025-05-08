@@ -30,6 +30,7 @@ export class ClerkAuthGuard implements CanActivate {
         email: user.emailAddresses[0].emailAddress,
         imageUrl: user.imageUrl,
         publicMetadata: user.publicMetadata,
+        privateMetadata: user.privateMetadata,
       });
 
       return true;
