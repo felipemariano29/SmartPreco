@@ -8,7 +8,7 @@ import { FavoriteStrategy } from '../favorite.strategy';
 import { FavoriteProductRepository } from './favorite-product.repository';
 
 @Injectable()
-export class FavoriteProductService implements FavoriteStrategy {
+export class FavoriteProductService implements FavoriteStrategy<ProductDto> {
   public constructor(
     private readonly contextService: ContextService,
     private readonly productService: ProductService,

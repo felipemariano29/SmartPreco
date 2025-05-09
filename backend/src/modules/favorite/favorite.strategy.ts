@@ -1,6 +1,6 @@
-export interface FavoriteStrategy {
+export interface FavoriteStrategy<T> {
 
-  getFavorites(): Promise<any[]>;
+  getFavorites(): Promise<T[]>;
 
   favorite(id: string): Promise<void>;
 
