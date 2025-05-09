@@ -1,6 +1,6 @@
 import { IsBoolean } from "@nestjs/class-validator";
 import { ApiProperty, IntersectionType, PickType } from "@nestjs/swagger";
-import { IsEnum, IsObject, IsString, IsUUID } from "class-validator";
+import { IsEnum, IsObject, IsOptional, IsString, IsUUID } from "class-validator";
 
 import { UserIdDto, UserIdRepositoryDto } from "../../shared/user/user.dto";
 import { PriceDto, PriceIdDto, PriceRepositoryIdDto } from "../price/price.dto";
@@ -44,9 +44,10 @@ export class ReportDto extends IntersectionType(UserIdDto) {
   @ApiProperty({ type: () => PriceDto })
   public price: PriceDto;
 
+  @IsOptional()
   @IsEnum(ReportStatusEnum)
   @ApiProperty({ enum: ReportStatusEnum })
-  public status: ReportStatusEnum;
+  public status?: ReportStatusEnum;
 }
 
 export class ReportRepositoryDto extends IntersectionType(
