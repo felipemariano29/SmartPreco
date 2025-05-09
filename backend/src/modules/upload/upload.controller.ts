@@ -1,23 +1,52 @@
-import { Body, Controller, NotImplementedException, Post } from '@nestjs/common';
-import { ApiConsumes, ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 
-import { UseUser } from '../../shared/guards/use-user.decorator';
-import { UploadCreateDto, UploadImageDto } from './upload.dto';
+import { UploadImageDto } from './upload.dto';
+import { UploadService } from './upload.service';
 
 @Controller('upload')
 @ApiTags('Upload')
-@UseUser()
 export class UploadController {
 
-  @Post()
-  @ApiCreatedResponse({ description: 'Image uploaded successfully', type: UploadImageDto })
-  @ApiConsumes("multipart/form-data")
-  @ApiOperation({
-    operationId: "Upload Image",
-    summary: "Uploads an image."
+  public constructor(private readonly uploadService: UploadService) {}
+
+  @Post('image')
+  @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(FileInterceptor('file', {
+    limits: { fileSize: 200 * 1024 }, // 200KB
+    fileFilter: (req, file, callback) => {
+      const allowedTypes = [ 'image/png', 'image/jpeg' ];
+      if (!allowedTypes.includes(file.mimetype)) {
+        return callback(new Error('Only PNG and JPEG images are allowed'), false);
+      }
+      callback(null, true);
+    },
+  }))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Uploads an image and returns the public URL' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary' },
+      },
+    },
   })
-  public uploadImage(@Body() body: UploadCreateDto): UploadImageDto {
-    throw new NotImplementedException("Not implemented yet");
+  public async uploadImage(@UploadedFile() file: Express.Multer.File): Promise<UploadImageDto> {
+    return this.uploadService.uploadImage(file);
   }
 
 }
