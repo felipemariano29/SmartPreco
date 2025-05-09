@@ -1,5 +1,5 @@
-import { DynamicModule, Logger, Module } from "@nestjs/common";
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { DynamicModule, Logger, Module } from '@nestjs/common';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 @Module({})
 export class SupabaseModule {
@@ -10,18 +10,18 @@ export class SupabaseModule {
       provide: SupabaseClient,
       useFactory: () => {
         return createClient(
-          process.env.SUPABASE_URL,
-          process.env.SUPABASE_KEY,
+          process.env.SUPABASE_URL!,
+          process.env.SUPABASE_KEY!,
         );
-      }
+      },
     };
 
-    logger.debug("Supabase configured! 🚀");
+    logger.debug('Supabase configured! 🚀');
     return {
       module: SupabaseModule,
+      global: true,
       providers: [ supabaseProvider ],
       exports: [ supabaseProvider ],
-      global: true,
     };
   }
 }
