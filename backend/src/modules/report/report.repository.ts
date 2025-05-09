@@ -5,13 +5,22 @@ import { SupabaseClient } from "@supabase/supabase-js";
 
   @Injectable()
   export class ReportRepository {
+    private readonly selectFields = `
+      *,
+      prices (
+        *,
+        product:products (*),
+        market:markets (*)
+      )
+    `;
+
     public constructor(private readonly supabase: SupabaseClient) {}
 
     public async createReport(params: ReportCreateRepositoryDto): Promise<ReportRepositoryDto> {
       const { data: report, error: reportError } = await this.supabase
         .from('reports')
         .insert({ ...params, resolved: false })
-        .select()
+        .select(this.selectFields)
         .single();
 
       if (reportError) throw new BadRequestException(reportError.message);
@@ -19,16 +28,19 @@ import { SupabaseClient } from "@supabase/supabase-js";
       return report;
     }
 
-    public async readReports(): Promise<ReportRepositoryDto[]> {
-      const { data, error } = await this.supabase.from('reports').select('*');
+    public async readReports(): Promise<any[]> {
+      const { data, error } = await this.supabase
+        .from('reports')
+        .select(this.selectFields);
+
       if (error) throw new BadRequestException(error.message);
       return data;
     }
 
-    public async readReportById(reportId: string): Promise<ReportRepositoryDto> {
+    public async readReportById(reportId: string): Promise<any> {
       const { data, error } = await this.supabase
         .from('reports')
-        .select('*')
+        .select(this.selectFields)
         .eq('id', reportId)
         .single();
 
@@ -44,7 +56,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
         .from('reports')
         .update(dto)
         .eq('id', reportId)
-        .select()
+        .select(this.selectFields)
         .single();
 
       if (error) throw new BadRequestException(error.message);
