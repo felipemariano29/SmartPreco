@@ -25,16 +25,7 @@ export class UploadController {
 
   @Post('image')
   @HttpCode(HttpStatus.CREATED)
-  @UseInterceptors(FileInterceptor('file', {
-    limits: { fileSize: 200 * 1024 }, // 200KB
-    fileFilter: (req, file, callback) => {
-      const allowedTypes = [ 'image/png', 'image/jpeg' ];
-      if (!allowedTypes.includes(file.mimetype)) {
-        return callback(new Error('Only PNG and JPEG images are allowed'), false);
-      }
-      callback(null, true);
-    },
-  }))
+  @UseInterceptors(FileInterceptor('file', {  limits: { fileSize: 50 * 1024 * 1024 }  }))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Uploads an image and returns the public URL' })
   @ApiBody({
