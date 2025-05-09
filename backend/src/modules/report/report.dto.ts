@@ -3,7 +3,7 @@ import { ApiProperty, IntersectionType, PickType } from "@nestjs/swagger";
 import { IsEnum, IsObject, IsString, IsUUID } from "class-validator";
 
 import { UserIdDto, UserIdRepositoryDto } from "../../shared/user/user.dto";
-import { PriceIdDto, PriceRepositoryIdDto } from "../price/price.dto";
+import { PriceDto, PriceIdDto, PriceRepositoryIdDto } from "../price/price.dto";
 import { ReportStatusEnum } from "./report.enum";
 
 export class ReportIdDto {
@@ -28,32 +28,25 @@ export class ReportIdDto {
 
  }
 
-export class ReportDto extends IntersectionType(
-  PriceIdDto,
-  UserIdDto
-) {
-
+export class ReportDto extends IntersectionType(UserIdDto) {
   @IsUUID()
-  @ApiProperty({
-    description: "Report's unique identifier",
-    example: "3d5d1d6d-3d5d-1d6d-3d5d-1d6d3d5d1d6d"
-  })
+  @ApiProperty()
   public id: string;
 
   @IsString()
-  @ApiProperty({
-    description: "Report's reason",
-    example: "Price is out of date",
-  })
+  @ApiProperty()
   public reason: string;
 
   @IsBoolean()
-  @ApiProperty({
-    description: "Report's resolved status",
-    example: false,
-  })
+  @ApiProperty()
   public resolved: boolean;
 
+  @ApiProperty({ type: () => PriceDto })
+  public price: PriceDto;
+
+  @IsEnum(ReportStatusEnum)
+  @ApiProperty({ enum: ReportStatusEnum })
+  public status: ReportStatusEnum;
 }
 
 export class ReportRepositoryDto extends IntersectionType(
@@ -65,16 +58,11 @@ export class ReportRepositoryDto extends IntersectionType(
 export class ReportReadDto extends PickType(ReportDto, [ "resolved" ] as const) { }
 
 export class ReportCreateDto extends IntersectionType(
-  PickType(ReportDto, [ "priceId", "reason" ] as const),
+  PriceIdDto,
+  PickType(ReportDto, [ "reason" ] as const),
 ) { }
 
-export class ReportUpdateDto extends PickType(ReportDto, [ "resolved" ] as const) {
-
-  @IsEnum(ReportStatusEnum)
-  @ApiProperty({ enum: ReportStatusEnum })
-  public status: ReportStatusEnum;
-
- }
+export class ReportUpdateDto extends PickType(ReportDto, [ "status", "resolved" ] as const) {}
 
 export class ReportsDto {
 

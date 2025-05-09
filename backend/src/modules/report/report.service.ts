@@ -55,13 +55,35 @@ export class ReportService {
   }
 
   private toReportDto(report: any): ReportDto {
-    return {
-      id: report.id,
-      priceId: report.price_id,
-      reason: report.reason,
-      resolved: report.resolved,
-      userId: report.user_id,
-    };
-  }
+  const price = report.prices;
+
+  return {
+    id: report.id,
+    reason: report.reason,
+    resolved: report.resolved,
+    userId: report.user_id,
+    status: report.status,
+    price: {
+      id: price.id,
+      price: price.price,
+      imageUrl: price.image_url,
+      moderated: price.moderated,
+      userId: price.user_id,
+      product: {
+        id: price.product.id,
+        name: price.product.name,
+        category: price.product.category,
+        description: price.product.description,
+      },
+      market: {
+        id: price.market.id,
+        name: price.market.name,
+        city: price.market.city,
+        state: price.market.state,
+        address: price.market.address,
+      },
+    },
+  };
+}
 
 }
