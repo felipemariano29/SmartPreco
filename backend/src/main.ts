@@ -1,13 +1,15 @@
-import { Logger, ValidationPipe } from "@nestjs/common";
+import { Logger } from "@nestjs/common";
 import { HttpAdapterHost, NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
-import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { SwaggerModule } from "@nestjs/swagger";
 import * as cookieParser from "cookie-parser";
 import * as dotenv from "dotenv";
 
 import { AllExceptionsFilter } from "./all-exception.filter";
 import { AppModule } from "./app.module";
 import { MainTag } from "./main.enum";
+import { createSwaggerConfig } from "./shared/config/swagger.config";
+import { createGlobalValidationPipe } from "./shared/config/validation.config";
 
 dotenv.config();
 
@@ -21,23 +23,11 @@ async function bootstrap() {
   });
 
   app.use(cookieParser());
+  app.useGlobalPipes(createGlobalValidationPipe());
 
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-    transformOptions: { enableImplicitConversion: true },
-  }));
-
-  const options = new DocumentBuilder()
-    .setTitle("SmartPreço API")
-    .setDescription("SmartPreço API é uma API RESTful que fornece informações sobre mercados, produtos e seus preços.")
-    .setVersion("1.0")
-    .addBearerAuth()
-    .build();
-
-  const document = SwaggerModule.createDocument(app, options);
+  const document = SwaggerModule.createDocument(app, createSwaggerConfig());
   SwaggerModule.setup("api", app, document);
+
   const { httpAdapter } = app.get(HttpAdapterHost);
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
 
