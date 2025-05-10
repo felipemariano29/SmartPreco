@@ -22,6 +22,8 @@ async function bootstrap() {
     logger: [ "error", "warn", "debug" ],
   });
 
+  app.enableCors();
+
   app.use(cookieParser());
   app.useGlobalPipes(createGlobalValidationPipe());
 
