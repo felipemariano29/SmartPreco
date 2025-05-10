@@ -113,13 +113,13 @@ export interface ReportCreateDto {
   reason: string;
 }
 
-export type ReportDtoStatus = typeof ReportDtoStatus[keyof typeof ReportDtoStatus];
-
+export type ReportDtoStatus =
+  (typeof ReportDtoStatus)[keyof typeof ReportDtoStatus];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ReportDtoStatus = {
-  APPROVED: 'APPROVED',
-  REJECTED: 'REJECTED',
+  APPROVED: "APPROVED",
+  REJECTED: "REJECTED",
 } as const;
 
 export interface ReportDto {
@@ -136,13 +136,13 @@ export interface ReportsDto {
   reports: ReportDto[];
 }
 
-export type ReportUpdateDtoStatus = typeof ReportUpdateDtoStatus[keyof typeof ReportUpdateDtoStatus];
-
+export type ReportUpdateDtoStatus =
+  (typeof ReportUpdateDtoStatus)[keyof typeof ReportUpdateDtoStatus];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ReportUpdateDtoStatus = {
-  APPROVED: 'APPROVED',
-  REJECTED: 'REJECTED',
+  APPROVED: "APPROVED",
+  REJECTED: "REJECTED",
 } as const;
 
 export interface ReportUpdateDto {
@@ -151,35 +151,34 @@ export interface ReportUpdateDto {
 }
 
 export type ReadProductsParams = {
-/**
- * Search term to filter the results
- */
-search?: string;
-/**
- * Product's category
- */
-category?: string;
+  /**
+   * Search term to filter the results
+   */
+  search?: string;
+  /**
+   * Product's category
+   */
+  category?: string;
 };
 
 export type ReadMarketsParams = {
-/**
- * Search term to filter the results
- */
-search?: string;
-/**
- * Market's city
- */
-city?: string;
+  /**
+   * Search term to filter the results
+   */
+  search?: string;
+  /**
+   * Market's city
+   */
+  city?: string;
 };
 
 export type ReadPricesParams = {
-/**
- * Product's unique identifier
- */
-productId?: string;
-/**
- * Market's unique identifier
- */
-marketId?: string;
+  /**
+   * Product's unique identifier
+   */
+  productId?: string;
+  /**
+   * Market's unique identifier
+   */
+  marketId?: string;
 };
-

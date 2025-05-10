@@ -3,13 +3,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 "use client";
 
-import { useState } from "react";
 import { useReadReports, useUpdateReport } from "@/api/generated/report/report";
 import {
   type ReportDto,
-  ReportUpdateDtoStatus,
+  ReportUpdateDtoStatus
 } from "@/api/generated/smartPreçoAPI.schemas";
-import { Badge } from "@/components/ui/badge";
+import { ReportDetails } from "@/components/reports/report-details";
+import { ReportStatusBadge } from "@/components/reports/report-status-badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -33,9 +33,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ChevronDown, Copy, Eye, Filter, Search } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { ReportDetails } from "@/components/reports/report-details";
-import { ChevronDown, Eye, Filter, MoreHorizontal, Search } from "lucide-react";
 
 export default function ReportsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -60,7 +60,7 @@ export default function ReportsPage() {
     },
   });
 
-  const reports = data?.data?.reports ?? [];
+  const reports = data?.reports ?? [];
 
   const filteredReports = reports.filter((report) => {
     const matchesSearch =
@@ -93,6 +93,11 @@ export default function ReportsPage() {
         status: ReportUpdateDtoStatus.REJECTED,
       },
     });
+  };
+
+  const handleCopyToClipboard = (text: string) => {
+    void navigator.clipboard.writeText(text);
+    toast.success("Copied to clipboard");
   };
 
   return (
@@ -179,10 +184,30 @@ export default function ReportsPage() {
                     filteredReports.map((report) => (
                       <TableRow key={report.id ?? ""}>
                         <TableCell className="font-medium">
-                          {report.id?.substring(0, 8)}...
+                          <div className="flex items-center gap-2">
+                            <span>{report.id?.substring(0, 8)}...</span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => handleCopyToClipboard(report.id ?? "")}
+                            >
+                              <Copy className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </TableCell>
                         <TableCell>
-                          {report.price?.id?.substring(0, 8)}...
+                          <div className="flex items-center gap-2">
+                            <span>{report.price?.id?.substring(0, 8)}...</span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => handleCopyToClipboard(report.price?.id ?? "")}
+                            >
+                              <Copy className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </TableCell>
                         <TableCell>{report.price?.product?.name}</TableCell>
                         <TableCell>{report.price?.market?.name}</TableCell>
@@ -190,18 +215,7 @@ export default function ReportsPage() {
                           {report.reason}
                         </TableCell>
                         <TableCell>
-                          {report.resolved ? (
-                            <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                              {report.status}
-                            </Badge>
-                          ) : (
-                            <Badge
-                              variant="outline"
-                              className="bg-orange-100 text-orange-800 hover:bg-orange-100"
-                            >
-                              Pending
-                            </Badge>
-                          )}
+                          <ReportStatusBadge status={report.status} resolved={report.resolved} />
                         </TableCell>
                         <TableCell className="text-right">
                           <Button

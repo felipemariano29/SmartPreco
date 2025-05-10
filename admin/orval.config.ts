@@ -7,6 +7,13 @@ export default defineConfig({
       mode: "tags-split",
       target: "./src/api/generated",
       mock: true,
+      prettier: true,
+      override: {
+        mutator: {
+          path: "./src/api/axios.ts",
+          name: "axiosInstance",
+        },
+      },
     },
     input: {
       target: "https://api.smartpreco.mindsnap.tech/api-json",

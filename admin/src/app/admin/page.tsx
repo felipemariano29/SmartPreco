@@ -6,7 +6,7 @@ import { AlertCircle, CheckCircle, Clock } from "lucide-react"
 
 export default function AdminDashboard() {
   const { data } = useReadReports()
-  const reports = data?.data?.reports ?? []
+  const reports = data?.reports ?? []
 
   const totalReports = reports.length
   const resolvedReports = reports.filter((report) => report.resolved || report.status ).length

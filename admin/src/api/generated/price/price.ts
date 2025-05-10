@@ -5,10 +5,7 @@
  * SmartPreço API é uma API RESTful que fornece informações sobre mercados, produtos e seus preços.
  * OpenAPI spec version: 1.0
  */
-import {
-  useMutation,
-  useQuery
-} from '@tanstack/react-query';
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
   DataTag,
   DefinedInitialDataOptions,
@@ -21,172 +18,231 @@ import type {
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
-  UseQueryResult
-} from '@tanstack/react-query';
-
-import axios from 'axios';
-import type {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
+  UseQueryResult,
+} from "@tanstack/react-query";
 
 import type {
   PriceCreateDto,
   PriceDto,
   PricesDto,
-  ReadPricesParams
-} from '../smartPreçoAPI.schemas';
+  ReadPricesParams,
+} from "../smartPreçoAPI.schemas";
 
-
-
-
+import { axiosInstance } from "../../axios";
 
 /**
  * @summary Create a new price
  */
 export const createPrice = (
-    priceCreateDto: PriceCreateDto, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<PriceDto>> => {
-    
-    
-    return axios.post(
-      `/prices`,
-      priceCreateDto,options
-    );
-  }
+  priceCreateDto: PriceCreateDto,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<PriceDto>({
+    url: `/prices`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: priceCreateDto,
+    signal,
+  });
+};
 
+export const getCreatePriceMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createPrice>>,
+    TError,
+    { data: PriceCreateDto },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createPrice>>,
+  TError,
+  { data: PriceCreateDto },
+  TContext
+> => {
+  const mutationKey = ["createPrice"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
 
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createPrice>>,
+    { data: PriceCreateDto }
+  > = (props) => {
+    const { data } = props ?? {};
 
-export const getCreatePriceMutationOptions = <TError = AxiosError<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPrice>>, TError,{data: PriceCreateDto}, TContext>, axios?: AxiosRequestConfig}
-): UseMutationOptions<Awaited<ReturnType<typeof createPrice>>, TError,{data: PriceCreateDto}, TContext> => {
+    return createPrice(data);
+  };
 
-const mutationKey = ['createPrice'];
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+  return { mutationFn, ...mutationOptions };
+};
 
-      
+export type CreatePriceMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createPrice>>
+>;
+export type CreatePriceMutationBody = PriceCreateDto;
+export type CreatePriceMutationError = unknown;
 
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createPrice>>, {data: PriceCreateDto}> = (props) => {
-          const {data} = props ?? {};
-
-          return  createPrice(data,axiosOptions)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CreatePriceMutationResult = NonNullable<Awaited<ReturnType<typeof createPrice>>>
-    export type CreatePriceMutationBody = PriceCreateDto
-    export type CreatePriceMutationError = AxiosError<unknown>
-
-    /**
+/**
  * @summary Create a new price
  */
-export const useCreatePrice = <TError = AxiosError<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPrice>>, TError,{data: PriceCreateDto}, TContext>, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof createPrice>>,
-        TError,
-        {data: PriceCreateDto},
-        TContext
-      > => {
+export const useCreatePrice = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createPrice>>,
+      TError,
+      { data: PriceCreateDto },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createPrice>>,
+  TError,
+  { data: PriceCreateDto },
+  TContext
+> => {
+  const mutationOptions = getCreatePriceMutationOptions(options);
 
-      const mutationOptions = getCreatePriceMutationOptions(options);
-
-      return useMutation(mutationOptions , queryClient);
-    }
-    /**
+  return useMutation(mutationOptions, queryClient);
+};
+/**
  * @summary Read all prices
  */
-export const readPrices = (
-    params?: ReadPricesParams, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<PricesDto>> => {
-    
-    
-    return axios.get(
-      `/prices`,{
-    ...options,
-        params: {...params, ...options?.params},}
-    );
-  }
+export const readPrices = (params?: ReadPricesParams, signal?: AbortSignal) => {
+  return axiosInstance<PricesDto>({
+    url: `/prices`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
 
+export const getReadPricesQueryKey = (params?: ReadPricesParams) => {
+  return [`/prices`, ...(params ? [params] : [])] as const;
+};
 
-export const getReadPricesQueryKey = (params?: ReadPricesParams,) => {
-    return [`/prices`, ...(params ? [params]: [])] as const;
-    }
-
-    
-export const getReadPricesQueryOptions = <TData = Awaited<ReturnType<typeof readPrices>>, TError = AxiosError<unknown>>(params?: ReadPricesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readPrices>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getReadPricesQueryOptions = <
+  TData = Awaited<ReturnType<typeof readPrices>>,
+  TError = unknown,
+>(
+  params?: ReadPricesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readPrices>>, TError, TData>
+    >;
+  },
 ) => {
+  const { query: queryOptions } = options ?? {};
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getReadPricesQueryKey(params);
 
-  const queryKey =  queryOptions?.queryKey ?? getReadPricesQueryKey(params);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof readPrices>>> = ({
+    signal,
+  }) => readPrices(params, signal);
 
-  
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof readPrices>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof readPrices>>> = ({ signal }) => readPrices(params, { signal, ...axiosOptions });
+export type ReadPricesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof readPrices>>
+>;
+export type ReadPricesQueryError = unknown;
 
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof readPrices>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type ReadPricesQueryResult = NonNullable<Awaited<ReturnType<typeof readPrices>>>
-export type ReadPricesQueryError = AxiosError<unknown>
-
-
-export function useReadPrices<TData = Awaited<ReturnType<typeof readPrices>>, TError = AxiosError<unknown>>(
- params: undefined |  ReadPricesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readPrices>>, TError, TData>> & Pick<
+export function useReadPrices<
+  TData = Awaited<ReturnType<typeof readPrices>>,
+  TError = unknown,
+>(
+  params: undefined | ReadPricesParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readPrices>>, TError, TData>
+    > &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readPrices>>,
           TError,
           Awaited<ReturnType<typeof readPrices>>
-        > , 'initialData'
-      >, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadPrices<TData = Awaited<ReturnType<typeof readPrices>>, TError = AxiosError<unknown>>(
- params?: ReadPricesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readPrices>>, TError, TData>> & Pick<
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useReadPrices<
+  TData = Awaited<ReturnType<typeof readPrices>>,
+  TError = unknown,
+>(
+  params?: ReadPricesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readPrices>>, TError, TData>
+    > &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readPrices>>,
           TError,
           Awaited<ReturnType<typeof readPrices>>
-        > , 'initialData'
-      >, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadPrices<TData = Awaited<ReturnType<typeof readPrices>>, TError = AxiosError<unknown>>(
- params?: ReadPricesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readPrices>>, TError, TData>>, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useReadPrices<
+  TData = Awaited<ReturnType<typeof readPrices>>,
+  TError = unknown,
+>(
+  params?: ReadPricesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readPrices>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 /**
  * @summary Read all prices
  */
 
-export function useReadPrices<TData = Awaited<ReturnType<typeof readPrices>>, TError = AxiosError<unknown>>(
- params?: ReadPricesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readPrices>>, TError, TData>>, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useReadPrices<
+  TData = Awaited<ReturnType<typeof readPrices>>,
+  TError = unknown,
+>(
+  params?: ReadPricesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readPrices>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getReadPricesQueryOptions(params, options);
 
-  const queryOptions = getReadPricesQueryOptions(params,options)
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  query.queryKey = queryOptions.queryKey ;
+  query.queryKey = queryOptions.queryKey;
 
   return query;
 }
-
-
-

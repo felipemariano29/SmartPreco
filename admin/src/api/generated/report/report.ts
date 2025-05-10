@@ -5,10 +5,7 @@
  * SmartPreço API é uma API RESTful que fornece informações sobre mercados, produtos e seus preços.
  * OpenAPI spec version: 1.0
  */
-import {
-  useMutation,
-  useQuery
-} from '@tanstack/react-query';
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
   DataTag,
   DefinedInitialDataOptions,
@@ -21,233 +18,301 @@ import type {
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
-  UseQueryResult
-} from '@tanstack/react-query';
-
-import axios from 'axios';
-import type {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
+  UseQueryResult,
+} from "@tanstack/react-query";
 
 import type {
   ReportCreateDto,
   ReportDto,
   ReportUpdateDto,
-  ReportsDto
-} from '../smartPreçoAPI.schemas';
+  ReportsDto,
+} from "../smartPreçoAPI.schemas";
 
-
-
-
+import { axiosInstance } from "../../axios";
 
 /**
  * @summary Create a price report
  */
 export const createReport = (
-    reportCreateDto: ReportCreateDto, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ReportDto>> => {
-    
-    
-    return axios.post(
-      `/reports`,
-      reportCreateDto,options
-    );
-  }
+  reportCreateDto: ReportCreateDto,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<ReportDto>({
+    url: `/reports`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: reportCreateDto,
+    signal,
+  });
+};
 
+export const getCreateReportMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createReport>>,
+    TError,
+    { data: ReportCreateDto },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createReport>>,
+  TError,
+  { data: ReportCreateDto },
+  TContext
+> => {
+  const mutationKey = ["createReport"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
 
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createReport>>,
+    { data: ReportCreateDto }
+  > = (props) => {
+    const { data } = props ?? {};
 
-export const getCreateReportMutationOptions = <TError = AxiosError<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createReport>>, TError,{data: ReportCreateDto}, TContext>, axios?: AxiosRequestConfig}
-): UseMutationOptions<Awaited<ReturnType<typeof createReport>>, TError,{data: ReportCreateDto}, TContext> => {
+    return createReport(data);
+  };
 
-const mutationKey = ['createReport'];
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+  return { mutationFn, ...mutationOptions };
+};
 
-      
+export type CreateReportMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createReport>>
+>;
+export type CreateReportMutationBody = ReportCreateDto;
+export type CreateReportMutationError = unknown;
 
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createReport>>, {data: ReportCreateDto}> = (props) => {
-          const {data} = props ?? {};
-
-          return  createReport(data,axiosOptions)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CreateReportMutationResult = NonNullable<Awaited<ReturnType<typeof createReport>>>
-    export type CreateReportMutationBody = ReportCreateDto
-    export type CreateReportMutationError = AxiosError<unknown>
-
-    /**
+/**
  * @summary Create a price report
  */
-export const useCreateReport = <TError = AxiosError<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createReport>>, TError,{data: ReportCreateDto}, TContext>, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof createReport>>,
-        TError,
-        {data: ReportCreateDto},
-        TContext
-      > => {
+export const useCreateReport = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createReport>>,
+      TError,
+      { data: ReportCreateDto },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createReport>>,
+  TError,
+  { data: ReportCreateDto },
+  TContext
+> => {
+  const mutationOptions = getCreateReportMutationOptions(options);
 
-      const mutationOptions = getCreateReportMutationOptions(options);
-
-      return useMutation(mutationOptions , queryClient);
-    }
-    /**
+  return useMutation(mutationOptions, queryClient);
+};
+/**
  * @summary Admin list of reports
  */
-export const readReports = (
-     options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ReportsDto>> => {
-    
-    
-    return axios.get(
-      `/reports`,options
-    );
-  }
-
+export const readReports = (signal?: AbortSignal) => {
+  return axiosInstance<ReportsDto>({ url: `/reports`, method: "GET", signal });
+};
 
 export const getReadReportsQueryKey = () => {
-    return [`/reports`] as const;
-    }
+  return [`/reports`] as const;
+};
 
-    
-export const getReadReportsQueryOptions = <TData = Awaited<ReturnType<typeof readReports>>, TError = AxiosError<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readReports>>, TError, TData>>, axios?: AxiosRequestConfig}
-) => {
+export const getReadReportsQueryOptions = <
+  TData = Awaited<ReturnType<typeof readReports>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof readReports>>, TError, TData>
+  >;
+}) => {
+  const { query: queryOptions } = options ?? {};
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getReadReportsQueryKey();
 
-  const queryKey =  queryOptions?.queryKey ?? getReadReportsQueryKey();
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof readReports>>> = ({
+    signal,
+  }) => readReports(signal);
 
-  
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof readReports>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof readReports>>> = ({ signal }) => readReports({ signal, ...axiosOptions });
+export type ReadReportsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof readReports>>
+>;
+export type ReadReportsQueryError = unknown;
 
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof readReports>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type ReadReportsQueryResult = NonNullable<Awaited<ReturnType<typeof readReports>>>
-export type ReadReportsQueryError = AxiosError<unknown>
-
-
-export function useReadReports<TData = Awaited<ReturnType<typeof readReports>>, TError = AxiosError<unknown>>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readReports>>, TError, TData>> & Pick<
+export function useReadReports<
+  TData = Awaited<ReturnType<typeof readReports>>,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readReports>>, TError, TData>
+    > &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readReports>>,
           TError,
           Awaited<ReturnType<typeof readReports>>
-        > , 'initialData'
-      >, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadReports<TData = Awaited<ReturnType<typeof readReports>>, TError = AxiosError<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readReports>>, TError, TData>> & Pick<
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useReadReports<
+  TData = Awaited<ReturnType<typeof readReports>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readReports>>, TError, TData>
+    > &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readReports>>,
           TError,
           Awaited<ReturnType<typeof readReports>>
-        > , 'initialData'
-      >, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadReports<TData = Awaited<ReturnType<typeof readReports>>, TError = AxiosError<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readReports>>, TError, TData>>, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useReadReports<
+  TData = Awaited<ReturnType<typeof readReports>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readReports>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 /**
  * @summary Admin list of reports
  */
 
-export function useReadReports<TData = Awaited<ReturnType<typeof readReports>>, TError = AxiosError<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readReports>>, TError, TData>>, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useReadReports<
+  TData = Awaited<ReturnType<typeof readReports>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readReports>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getReadReportsQueryOptions(options);
 
-  const queryOptions = getReadReportsQueryOptions(options)
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  query.queryKey = queryOptions.queryKey ;
+  query.queryKey = queryOptions.queryKey;
 
   return query;
 }
-
-
 
 /**
  * @summary Resolve a report
  */
 export const updateReport = (
-    reportId: string,
-    reportUpdateDto: ReportUpdateDto, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ReportDto>> => {
-    
-    
-    return axios.patch(
-      `/reports/${reportId}`,
-      reportUpdateDto,options
-    );
-  }
+  reportId: string,
+  reportUpdateDto: ReportUpdateDto,
+) => {
+  return axiosInstance<ReportDto>({
+    url: `/reports/${reportId}`,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    data: reportUpdateDto,
+  });
+};
 
+export const getUpdateReportMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateReport>>,
+    TError,
+    { reportId: string; data: ReportUpdateDto },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateReport>>,
+  TError,
+  { reportId: string; data: ReportUpdateDto },
+  TContext
+> => {
+  const mutationKey = ["updateReport"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
 
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateReport>>,
+    { reportId: string; data: ReportUpdateDto }
+  > = (props) => {
+    const { reportId, data } = props ?? {};
 
-export const getUpdateReportMutationOptions = <TError = AxiosError<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateReport>>, TError,{reportId: string;data: ReportUpdateDto}, TContext>, axios?: AxiosRequestConfig}
-): UseMutationOptions<Awaited<ReturnType<typeof updateReport>>, TError,{reportId: string;data: ReportUpdateDto}, TContext> => {
+    return updateReport(reportId, data);
+  };
 
-const mutationKey = ['updateReport'];
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+  return { mutationFn, ...mutationOptions };
+};
 
-      
+export type UpdateReportMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateReport>>
+>;
+export type UpdateReportMutationBody = ReportUpdateDto;
+export type UpdateReportMutationError = unknown;
 
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateReport>>, {reportId: string;data: ReportUpdateDto}> = (props) => {
-          const {reportId,data} = props ?? {};
-
-          return  updateReport(reportId,data,axiosOptions)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdateReportMutationResult = NonNullable<Awaited<ReturnType<typeof updateReport>>>
-    export type UpdateReportMutationBody = ReportUpdateDto
-    export type UpdateReportMutationError = AxiosError<unknown>
-
-    /**
+/**
  * @summary Resolve a report
  */
-export const useUpdateReport = <TError = AxiosError<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateReport>>, TError,{reportId: string;data: ReportUpdateDto}, TContext>, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof updateReport>>,
-        TError,
-        {reportId: string;data: ReportUpdateDto},
-        TContext
-      > => {
+export const useUpdateReport = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateReport>>,
+      TError,
+      { reportId: string; data: ReportUpdateDto },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateReport>>,
+  TError,
+  { reportId: string; data: ReportUpdateDto },
+  TContext
+> => {
+  const mutationOptions = getUpdateReportMutationOptions(options);
 
-      const mutationOptions = getUpdateReportMutationOptions(options);
-
-      return useMutation(mutationOptions , queryClient);
-    }
-    
+  return useMutation(mutationOptions, queryClient);
+};

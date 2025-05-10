@@ -5,10 +5,7 @@
  * SmartPreço API é uma API RESTful que fornece informações sobre mercados, produtos e seus preços.
  * OpenAPI spec version: 1.0
  */
-import {
-  useMutation,
-  useQuery
-} from '@tanstack/react-query';
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
   DataTag,
   DefinedInitialDataOptions,
@@ -21,381 +18,529 @@ import type {
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
-  UseQueryResult
-} from '@tanstack/react-query';
-
-import axios from 'axios';
-import type {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
+  UseQueryResult,
+} from "@tanstack/react-query";
 
 import type {
   MarketCreateDto,
   MarketDto,
   MarketUpdateDto,
   MarketsDto,
-  ReadMarketsParams
-} from '../smartPreçoAPI.schemas';
+  ReadMarketsParams,
+} from "../smartPreçoAPI.schemas";
 
-
-
-
+import { axiosInstance } from "../../axios";
 
 /**
  * @summary Creates a new market.
  */
 export const createMarket = (
-    marketCreateDto: MarketCreateDto, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<MarketDto>> => {
-    
-    
-    return axios.post(
-      `/markets`,
-      marketCreateDto,options
-    );
-  }
+  marketCreateDto: MarketCreateDto,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<MarketDto>({
+    url: `/markets`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: marketCreateDto,
+    signal,
+  });
+};
 
+export const getCreateMarketMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createMarket>>,
+    TError,
+    { data: MarketCreateDto },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createMarket>>,
+  TError,
+  { data: MarketCreateDto },
+  TContext
+> => {
+  const mutationKey = ["createMarket"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
 
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createMarket>>,
+    { data: MarketCreateDto }
+  > = (props) => {
+    const { data } = props ?? {};
 
-export const getCreateMarketMutationOptions = <TError = AxiosError<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createMarket>>, TError,{data: MarketCreateDto}, TContext>, axios?: AxiosRequestConfig}
-): UseMutationOptions<Awaited<ReturnType<typeof createMarket>>, TError,{data: MarketCreateDto}, TContext> => {
+    return createMarket(data);
+  };
 
-const mutationKey = ['createMarket'];
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+  return { mutationFn, ...mutationOptions };
+};
 
-      
+export type CreateMarketMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createMarket>>
+>;
+export type CreateMarketMutationBody = MarketCreateDto;
+export type CreateMarketMutationError = unknown;
 
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createMarket>>, {data: MarketCreateDto}> = (props) => {
-          const {data} = props ?? {};
-
-          return  createMarket(data,axiosOptions)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CreateMarketMutationResult = NonNullable<Awaited<ReturnType<typeof createMarket>>>
-    export type CreateMarketMutationBody = MarketCreateDto
-    export type CreateMarketMutationError = AxiosError<unknown>
-
-    /**
+/**
  * @summary Creates a new market.
  */
-export const useCreateMarket = <TError = AxiosError<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createMarket>>, TError,{data: MarketCreateDto}, TContext>, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof createMarket>>,
-        TError,
-        {data: MarketCreateDto},
-        TContext
-      > => {
+export const useCreateMarket = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createMarket>>,
+      TError,
+      { data: MarketCreateDto },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createMarket>>,
+  TError,
+  { data: MarketCreateDto },
+  TContext
+> => {
+  const mutationOptions = getCreateMarketMutationOptions(options);
 
-      const mutationOptions = getCreateMarketMutationOptions(options);
-
-      return useMutation(mutationOptions , queryClient);
-    }
-    /**
+  return useMutation(mutationOptions, queryClient);
+};
+/**
  * @summary Retrieves a list of markets.
  */
 export const readMarkets = (
-    params?: ReadMarketsParams, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<MarketsDto>> => {
-    
-    
-    return axios.get(
-      `/markets`,{
-    ...options,
-        params: {...params, ...options?.params},}
-    );
-  }
-
-
-export const getReadMarketsQueryKey = (params?: ReadMarketsParams,) => {
-    return [`/markets`, ...(params ? [params]: [])] as const;
-    }
-
-    
-export const getReadMarketsQueryOptions = <TData = Awaited<ReturnType<typeof readMarkets>>, TError = AxiosError<unknown>>(params?: ReadMarketsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readMarkets>>, TError, TData>>, axios?: AxiosRequestConfig}
+  params?: ReadMarketsParams,
+  signal?: AbortSignal,
 ) => {
+  return axiosInstance<MarketsDto>({
+    url: `/markets`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+export const getReadMarketsQueryKey = (params?: ReadMarketsParams) => {
+  return [`/markets`, ...(params ? [params] : [])] as const;
+};
 
-  const queryKey =  queryOptions?.queryKey ?? getReadMarketsQueryKey(params);
+export const getReadMarketsQueryOptions = <
+  TData = Awaited<ReturnType<typeof readMarkets>>,
+  TError = unknown,
+>(
+  params?: ReadMarketsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readMarkets>>, TError, TData>
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
 
-  
+  const queryKey = queryOptions?.queryKey ?? getReadMarketsQueryKey(params);
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof readMarkets>>> = ({ signal }) => readMarkets(params, { signal, ...axiosOptions });
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof readMarkets>>> = ({
+    signal,
+  }) => readMarkets(params, signal);
 
-      
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof readMarkets>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
-      
+export type ReadMarketsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof readMarkets>>
+>;
+export type ReadMarketsQueryError = unknown;
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof readMarkets>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type ReadMarketsQueryResult = NonNullable<Awaited<ReturnType<typeof readMarkets>>>
-export type ReadMarketsQueryError = AxiosError<unknown>
-
-
-export function useReadMarkets<TData = Awaited<ReturnType<typeof readMarkets>>, TError = AxiosError<unknown>>(
- params: undefined |  ReadMarketsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readMarkets>>, TError, TData>> & Pick<
+export function useReadMarkets<
+  TData = Awaited<ReturnType<typeof readMarkets>>,
+  TError = unknown,
+>(
+  params: undefined | ReadMarketsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readMarkets>>, TError, TData>
+    > &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readMarkets>>,
           TError,
           Awaited<ReturnType<typeof readMarkets>>
-        > , 'initialData'
-      >, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadMarkets<TData = Awaited<ReturnType<typeof readMarkets>>, TError = AxiosError<unknown>>(
- params?: ReadMarketsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readMarkets>>, TError, TData>> & Pick<
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useReadMarkets<
+  TData = Awaited<ReturnType<typeof readMarkets>>,
+  TError = unknown,
+>(
+  params?: ReadMarketsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readMarkets>>, TError, TData>
+    > &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readMarkets>>,
           TError,
           Awaited<ReturnType<typeof readMarkets>>
-        > , 'initialData'
-      >, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadMarkets<TData = Awaited<ReturnType<typeof readMarkets>>, TError = AxiosError<unknown>>(
- params?: ReadMarketsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readMarkets>>, TError, TData>>, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useReadMarkets<
+  TData = Awaited<ReturnType<typeof readMarkets>>,
+  TError = unknown,
+>(
+  params?: ReadMarketsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readMarkets>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 /**
  * @summary Retrieves a list of markets.
  */
 
-export function useReadMarkets<TData = Awaited<ReturnType<typeof readMarkets>>, TError = AxiosError<unknown>>(
- params?: ReadMarketsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readMarkets>>, TError, TData>>, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useReadMarkets<
+  TData = Awaited<ReturnType<typeof readMarkets>>,
+  TError = unknown,
+>(
+  params?: ReadMarketsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readMarkets>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getReadMarketsQueryOptions(params, options);
 
-  const queryOptions = getReadMarketsQueryOptions(params,options)
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  query.queryKey = queryOptions.queryKey ;
+  query.queryKey = queryOptions.queryKey;
 
   return query;
 }
 
-
-
 /**
  * @summary Retrieves a market by its ID.
  */
-export const readMarket = (
-    marketId: string, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<MarketDto>> => {
-    
-    
-    return axios.get(
-      `/markets/${marketId}`,options
-    );
-  }
+export const readMarket = (marketId: string, signal?: AbortSignal) => {
+  return axiosInstance<MarketDto>({
+    url: `/markets/${marketId}`,
+    method: "GET",
+    signal,
+  });
+};
 
+export const getReadMarketQueryKey = (marketId: string) => {
+  return [`/markets/${marketId}`] as const;
+};
 
-export const getReadMarketQueryKey = (marketId: string,) => {
-    return [`/markets/${marketId}`] as const;
-    }
-
-    
-export const getReadMarketQueryOptions = <TData = Awaited<ReturnType<typeof readMarket>>, TError = AxiosError<unknown>>(marketId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readMarket>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getReadMarketQueryOptions = <
+  TData = Awaited<ReturnType<typeof readMarket>>,
+  TError = unknown,
+>(
+  marketId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readMarket>>, TError, TData>
+    >;
+  },
 ) => {
+  const { query: queryOptions } = options ?? {};
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getReadMarketQueryKey(marketId);
 
-  const queryKey =  queryOptions?.queryKey ?? getReadMarketQueryKey(marketId);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof readMarket>>> = ({
+    signal,
+  }) => readMarket(marketId, signal);
 
-  
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!marketId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof readMarket>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof readMarket>>> = ({ signal }) => readMarket(marketId, { signal, ...axiosOptions });
+export type ReadMarketQueryResult = NonNullable<
+  Awaited<ReturnType<typeof readMarket>>
+>;
+export type ReadMarketQueryError = unknown;
 
-      
-
-      
-
-   return  { queryKey, queryFn, enabled: !!(marketId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof readMarket>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type ReadMarketQueryResult = NonNullable<Awaited<ReturnType<typeof readMarket>>>
-export type ReadMarketQueryError = AxiosError<unknown>
-
-
-export function useReadMarket<TData = Awaited<ReturnType<typeof readMarket>>, TError = AxiosError<unknown>>(
- marketId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readMarket>>, TError, TData>> & Pick<
+export function useReadMarket<
+  TData = Awaited<ReturnType<typeof readMarket>>,
+  TError = unknown,
+>(
+  marketId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readMarket>>, TError, TData>
+    > &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readMarket>>,
           TError,
           Awaited<ReturnType<typeof readMarket>>
-        > , 'initialData'
-      >, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadMarket<TData = Awaited<ReturnType<typeof readMarket>>, TError = AxiosError<unknown>>(
- marketId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readMarket>>, TError, TData>> & Pick<
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useReadMarket<
+  TData = Awaited<ReturnType<typeof readMarket>>,
+  TError = unknown,
+>(
+  marketId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readMarket>>, TError, TData>
+    > &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readMarket>>,
           TError,
           Awaited<ReturnType<typeof readMarket>>
-        > , 'initialData'
-      >, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadMarket<TData = Awaited<ReturnType<typeof readMarket>>, TError = AxiosError<unknown>>(
- marketId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readMarket>>, TError, TData>>, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useReadMarket<
+  TData = Awaited<ReturnType<typeof readMarket>>,
+  TError = unknown,
+>(
+  marketId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readMarket>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 /**
  * @summary Retrieves a market by its ID.
  */
 
-export function useReadMarket<TData = Awaited<ReturnType<typeof readMarket>>, TError = AxiosError<unknown>>(
- marketId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readMarket>>, TError, TData>>, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useReadMarket<
+  TData = Awaited<ReturnType<typeof readMarket>>,
+  TError = unknown,
+>(
+  marketId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof readMarket>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getReadMarketQueryOptions(marketId, options);
 
-  const queryOptions = getReadMarketQueryOptions(marketId,options)
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  query.queryKey = queryOptions.queryKey ;
+  query.queryKey = queryOptions.queryKey;
 
   return query;
 }
-
-
 
 /**
  * @summary Updates a market by its ID.
  */
 export const updateMarket = (
-    marketId: string,
-    marketUpdateDto: MarketUpdateDto, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<MarketDto>> => {
-    
-    
-    return axios.patch(
-      `/markets/${marketId}`,
-      marketUpdateDto,options
-    );
-  }
+  marketId: string,
+  marketUpdateDto: MarketUpdateDto,
+) => {
+  return axiosInstance<MarketDto>({
+    url: `/markets/${marketId}`,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    data: marketUpdateDto,
+  });
+};
 
+export const getUpdateMarketMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateMarket>>,
+    TError,
+    { marketId: string; data: MarketUpdateDto },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateMarket>>,
+  TError,
+  { marketId: string; data: MarketUpdateDto },
+  TContext
+> => {
+  const mutationKey = ["updateMarket"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
 
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateMarket>>,
+    { marketId: string; data: MarketUpdateDto }
+  > = (props) => {
+    const { marketId, data } = props ?? {};
 
-export const getUpdateMarketMutationOptions = <TError = AxiosError<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMarket>>, TError,{marketId: string;data: MarketUpdateDto}, TContext>, axios?: AxiosRequestConfig}
-): UseMutationOptions<Awaited<ReturnType<typeof updateMarket>>, TError,{marketId: string;data: MarketUpdateDto}, TContext> => {
+    return updateMarket(marketId, data);
+  };
 
-const mutationKey = ['updateMarket'];
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+  return { mutationFn, ...mutationOptions };
+};
 
-      
+export type UpdateMarketMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateMarket>>
+>;
+export type UpdateMarketMutationBody = MarketUpdateDto;
+export type UpdateMarketMutationError = unknown;
 
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateMarket>>, {marketId: string;data: MarketUpdateDto}> = (props) => {
-          const {marketId,data} = props ?? {};
-
-          return  updateMarket(marketId,data,axiosOptions)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdateMarketMutationResult = NonNullable<Awaited<ReturnType<typeof updateMarket>>>
-    export type UpdateMarketMutationBody = MarketUpdateDto
-    export type UpdateMarketMutationError = AxiosError<unknown>
-
-    /**
+/**
  * @summary Updates a market by its ID.
  */
-export const useUpdateMarket = <TError = AxiosError<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMarket>>, TError,{marketId: string;data: MarketUpdateDto}, TContext>, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof updateMarket>>,
-        TError,
-        {marketId: string;data: MarketUpdateDto},
-        TContext
-      > => {
+export const useUpdateMarket = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateMarket>>,
+      TError,
+      { marketId: string; data: MarketUpdateDto },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateMarket>>,
+  TError,
+  { marketId: string; data: MarketUpdateDto },
+  TContext
+> => {
+  const mutationOptions = getUpdateMarketMutationOptions(options);
 
-      const mutationOptions = getUpdateMarketMutationOptions(options);
-
-      return useMutation(mutationOptions , queryClient);
-    }
-    /**
+  return useMutation(mutationOptions, queryClient);
+};
+/**
  * @summary Deletes a market by its ID.
  */
-export const deleteMarket = (
-    marketId: string, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<void>> => {
-    
-    
-    return axios.delete(
-      `/markets/${marketId}`,options
-    );
-  }
+export const deleteMarket = (marketId: string) => {
+  return axiosInstance<void>({ url: `/markets/${marketId}`, method: "DELETE" });
+};
 
+export const getDeleteMarketMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteMarket>>,
+    TError,
+    { marketId: string },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteMarket>>,
+  TError,
+  { marketId: string },
+  TContext
+> => {
+  const mutationKey = ["deleteMarket"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
 
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteMarket>>,
+    { marketId: string }
+  > = (props) => {
+    const { marketId } = props ?? {};
 
-export const getDeleteMarketMutationOptions = <TError = AxiosError<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteMarket>>, TError,{marketId: string}, TContext>, axios?: AxiosRequestConfig}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteMarket>>, TError,{marketId: string}, TContext> => {
+    return deleteMarket(marketId);
+  };
 
-const mutationKey = ['deleteMarket'];
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+  return { mutationFn, ...mutationOptions };
+};
 
-      
+export type DeleteMarketMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteMarket>>
+>;
 
+export type DeleteMarketMutationError = unknown;
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteMarket>>, {marketId: string}> = (props) => {
-          const {marketId} = props ?? {};
-
-          return  deleteMarket(marketId,axiosOptions)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteMarketMutationResult = NonNullable<Awaited<ReturnType<typeof deleteMarket>>>
-    
-    export type DeleteMarketMutationError = AxiosError<unknown>
-
-    /**
+/**
  * @summary Deletes a market by its ID.
  */
-export const useDeleteMarket = <TError = AxiosError<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteMarket>>, TError,{marketId: string}, TContext>, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof deleteMarket>>,
-        TError,
-        {marketId: string},
-        TContext
-      > => {
+export const useDeleteMarket = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteMarket>>,
+      TError,
+      { marketId: string },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteMarket>>,
+  TError,
+  { marketId: string },
+  TContext
+> => {
+  const mutationOptions = getDeleteMarketMutationOptions(options);
 
-      const mutationOptions = getDeleteMarketMutationOptions(options);
-
-      return useMutation(mutationOptions , queryClient);
-    }
-    
+  return useMutation(mutationOptions, queryClient);
+};

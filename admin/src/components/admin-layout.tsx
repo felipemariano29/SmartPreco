@@ -1,18 +1,5 @@
 "use client";
 
-import type React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import {
-  BarChart3,
-  LogOut,
-  Menu,
-  Settings,
-  User,
-  AlertCircle,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +9,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { SignedIn, SignIn, UserButton } from "@clerk/nextjs";
+import { SignedIn, UserButton } from "@clerk/nextjs";
+import {
+  AlertCircle,
+  BarChart3,
+  LogOut,
+  Settings,
+  User
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import type React from "react";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -50,10 +47,9 @@ export function AdminLayoutComponent({ children }: AdminLayoutProps) {
         <div className="ml-auto flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-
-            <SignedIn>
-              <UserButton/>
-            </SignedIn>
+              <SignedIn>
+                <UserButton />
+              </SignedIn>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
@@ -87,7 +83,7 @@ export function AdminLayoutComponent({ children }: AdminLayoutProps) {
                   href={item.href}
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                    isActive ? "bg-accent" : "transparent"
+                    isActive ? "bg-accent" : "transparent",
                   )}
                 >
                   <item.icon className="h-4 w-4" />

@@ -4,7 +4,6 @@
 "use client"
 
 import { type ReportDto } from "@/api/generated/smartPreçoAPI.schemas"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -16,6 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { CheckCircle, XCircle } from "lucide-react"
 import Image from "next/image"
+import { ReportStatusBadge } from "./report-status-badge"
 
 interface ReportDetailsProps {
   report: ReportDto | null
@@ -61,13 +61,7 @@ export function ReportDetails({ report, onClose, onApprove, onReject }: ReportDe
               <div className="grid grid-cols-4 items-center gap-4">
                 <div className="font-medium">Status:</div>
                 <div className="col-span-3">
-                  {report.resolved ? (
-                    <Badge className="bg-green-100 text-green-800">{report.status}</Badge>
-                  ) : (
-                    <Badge variant="outline" className="bg-orange-100 text-orange-800">
-                      Pending
-                    </Badge>
-                  )}
+                  <ReportStatusBadge status={report.status} resolved={report.resolved} />
                 </div>
               </div>
             </div>
@@ -75,8 +69,7 @@ export function ReportDetails({ report, onClose, onApprove, onReject }: ReportDe
             <div className="space-y-4">
               <div className="relative aspect-square w-full overflow-hidden rounded-lg border">
                 <Image
-                  // src={report.price.imageUrl ?? ""}
-                  src={"/placeholder.jpg"}
+                  src={report.price.imageUrl ?? ""}
                   alt={`${report.price.product.name} at ${report.price.market.name}`}
                   fill
                   className="object-contain"
