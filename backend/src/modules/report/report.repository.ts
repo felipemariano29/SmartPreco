@@ -1,7 +1,7 @@
   import { BadRequestException, Injectable } from "@nestjs/common";
 import { SupabaseClient } from "@supabase/supabase-js";
 
-  import { ReportCreateRepositoryDto, ReportRepositoryDto, ReportUpdateDto } from "./report.dto";
+import { ReportCreateRepositoryDto, ReportReadDto, ReportRepositoryDto, ReportsTimestampDto, ReportUpdateDto } from "./report.dto";
 
   @Injectable()
   export class ReportRepository {
@@ -28,27 +28,37 @@ import { SupabaseClient } from "@supabase/supabase-js";
       return report;
     }
 
-    public async readReports(): Promise<any[]> {
-      const { data, error } = await this.supabase
+    public async readReports(params: ReportReadDto): Promise<ReportsTimestampDto> {
+      const { search, limit = 20, offset = 0, orderBy, resolved } = params;
+
+      let query = this.supabase
         .from('reports')
-        .select(this.selectFields);
+        .select(this.selectFields, { count: 'exact' });
 
-      if (error) throw new BadRequestException(error.message);
-      return data;
-    }
-
-    public async readReportById(reportId: string): Promise<any> {
-      const { data, error } = await this.supabase
-        .from('reports')
-        .select(this.selectFields)
-        .eq('id', reportId)
-        .single();
-
-      if (error) {
-        throw new BadRequestException(`Failed to find report with ID ${reportId}: ${error.message}`);
+      if (resolved !== undefined) {
+        query = query.eq('resolved', resolved);
       }
 
-      return data;
+      if (search) {
+        query = query.or(`reason.ilike.%${search}%`);
+      }
+
+      if (orderBy) {
+        query = query.order(orderBy, { ascending: true });
+      }
+
+      query = query.range(offset, offset + limit - 1);
+
+      const { data, error, count: total } = await query;
+
+      if (error) {
+        throw new BadRequestException(error.message);
+      }
+
+      return {
+        records: data,
+        total: total ?? 0,
+      };
     }
 
     public async updateReportById(reportId: string, dto: ReportUpdateDto): Promise<ReportRepositoryDto> {

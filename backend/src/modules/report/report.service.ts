@@ -6,7 +6,7 @@ import { ContextEnum } from '../../shared/context/context.enum';
 import { ContextService } from '../../shared/context/context.service';
 import { EventEnum } from '../../shared/events/event.enum';
 import { DtoMapper } from '../../shared/utils/dto-mapper';
-import { ReportCreateDto, ReportDto, ReportsDto, ReportUpdateDto } from './report.dto';
+import { ReportCreateDto, ReportDto, ReportReadDto, ReportsDto, ReportUpdateDto } from './report.dto';
 import { ReportStatusEnum } from './report.enum';
 import { ReportRepository } from './report.repository';
 
@@ -35,10 +35,18 @@ export class ReportService {
     return DtoMapper.mapOne(report, this.toDto);
   }
 
-  public async readReports(): Promise<ReportsDto> {
-    const reports = await this.reportRepository.readReports();
+  public async readReports(params: ReportReadDto): Promise<ReportsDto> {
+    const { records, total } = await this.reportRepository.readReports(params);
 
-    return { reports: DtoMapper.mapMany(reports, this.toDto) };
+    const offset = params.offset ?? 0;
+    const limit = params.limit ?? 20;
+
+    return {
+      records: DtoMapper.mapMany(records, this.toDto),
+      count: records.length,
+      total,
+      nextOffset: (offset + limit) < total ? offset + limit : null,
+    };
   }
 
   public async updateReportById(reportId: string, params: ReportUpdateDto): Promise<ReportDto> {

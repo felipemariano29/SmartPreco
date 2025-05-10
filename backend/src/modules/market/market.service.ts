@@ -16,9 +16,17 @@ export class MarketService {
   }
 
   public async readMarkets(params: MarketReadDto): Promise<MarketsDto> {
-    const markets = await this.marketRepository.readMarkets(params);
+    const { records, total } = await this.marketRepository.readMarkets(params);
 
-    return { markets: DtoMapper.mapMany(markets, this.toDto) };
+    const offset = params.offset ?? 0;
+    const limit = params.limit ?? 20;
+
+    return {
+      records: DtoMapper.mapMany(records, this.toDto),
+      count: records.length,
+      total,
+      nextOffset: (offset + limit) < total ? offset + limit : null,
+    };
   }
 
   public async readMarketById(marketId: string): Promise<MarketDto> {

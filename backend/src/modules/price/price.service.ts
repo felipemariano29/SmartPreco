@@ -32,9 +32,17 @@ export class PriceService {
   }
 
   public async readPrices(params: PriceReadDto): Promise<PricesDto> {
-    const prices = await this.priceRepository.readPrices({ ...params, moderated: true });
+    const { records, total } = await this.priceRepository.readPrices(params);
 
-    return { prices: DtoMapper.mapMany(prices, this.toDto) };
+    const offset = params.offset ?? 0;
+    const limit = params.limit ?? 20;
+
+    return {
+      records: DtoMapper.mapMany(records, this.toDto),
+      count: records.length,
+      total,
+      nextOffset: (offset + limit) < total ? offset + limit : null,
+    };
   }
 
   private toDto(params: PriceTimestampDto): PriceDto {

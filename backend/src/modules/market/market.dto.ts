@@ -1,9 +1,9 @@
 import { IsNotEmpty, IsString } from "@nestjs/class-validator";
 import { ApiProperty, IntersectionType, OmitType, PartialType, PickType } from "@nestjs/swagger";
-import { IsObject, IsUUID } from "class-validator";
+import { IsArray, IsUUID } from "class-validator";
 
 import { TimestampDto } from "../..//shared/utils/timestamp.dto";
-import { ReadDto } from "../../shared/utils/read.dto";
+import { PaginationReadDto, PaginationResponseDto } from "../../shared/utils/pagination.dto";
 
 export class MarketIdDto {
 
@@ -76,18 +76,18 @@ export class MarketTimestampDto extends IntersectionType(
   TimestampDto,
 ) {}
 
-export class MarketReadDto extends IntersectionType(
-  ReadDto,
-  PartialType(PickType(MarketDto, [ "city" ] as const)),
-) {}
+export class MarketReadDto extends PaginationReadDto {}
 
 export class MarketCreateDto extends OmitType(MarketDto, [ "id" ] as const) {}
 
 export class MarketUpdateDto extends PartialType(MarketCreateDto) {}
 
-export class MarketsDto {
+export class MarketsDto extends PaginationResponseDto<MarketDto> { }
 
-  @IsObject({ each: true })
-  public markets: MarketDto[];
+export class MarketsTimestampDto extends PickType(PaginationResponseDto, [ 'total' ] as const) {
 
-}
+  @IsArray()
+  @ApiProperty({ description: 'List of records returned', isArray: true })
+  public records: MarketTimestampDto[];
+
+ }

@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { SupabaseClient } from "@supabase/supabase-js";
 
-import { ProductCreateDto, ProductReadDto, ProductTimestampDto, ProductUpdateDto } from "./product.dto";
+import { ProductCreateDto, ProductReadDto, ProductsTimestampDto, ProductTimestampDto, ProductUpdateDto } from "./product.dto";
 
 @Injectable()
 export class ProductRepository {
@@ -22,25 +22,33 @@ export class ProductRepository {
       return data;
     }
 
-    public async readProducts(params: ProductReadDto): Promise<ProductTimestampDto[]> {
-      let query = this.supabase.from('products').select('*');
+    public async readProducts(params: ProductReadDto): Promise<ProductsTimestampDto> {
+      const { search, limit = 20, offset = 0, orderBy } = params;
 
-      if (params.category) {
-        query = query.eq('category', params.category);
+      let query = this.supabase
+        .from('products')
+        .select('*', { count: 'exact' });
+
+      if (search) {
+        query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
       }
 
-      if (params.search) {
-        query = query.or(`name.ilike.%${params.search}%,description.ilike.%${params.search}%`);
+      if (orderBy) {
+        query = query.order(orderBy, { ascending: true });
       }
 
-      const { data, error } = await query;
+      query = query.range(offset, offset + limit - 1);
 
-      if (error) {
-        throw new BadRequestException(error.message);
-      }
+      const { data, error, count: total } = await query;
 
-      return data;
+      if (error) throw new BadRequestException(error.message);
+
+      return {
+        records: data,
+        total: total ?? 0,
+      };
     }
+
 
     public async readProductById(productId: string): Promise<ProductTimestampDto> {
       const { data, error } = await this.supabase

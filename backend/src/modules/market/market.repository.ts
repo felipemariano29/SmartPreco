@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { SupabaseClient } from "@supabase/supabase-js";
 
-import { MarketCreateDto, MarketReadDto, MarketTimestampDto, MarketUpdateDto } from "./market.dto";
+import { MarketCreateDto, MarketReadDto, MarketsTimestampDto, MarketTimestampDto, MarketUpdateDto } from "./market.dto";
 
 @Injectable()
 export class MarketRepository {
@@ -20,22 +20,33 @@ export class MarketRepository {
     return data;
   }
 
-  public async readMarkets(params: MarketReadDto): Promise<MarketTimestampDto[]> {
-    let query = this.supabase.from('markets').select('*');
+  public async readMarkets(params: MarketReadDto): Promise<MarketsTimestampDto> {
+    const { search, limit = 20, offset = 0, orderBy } = params;
 
-    if (params.city) {
-      query = query.eq('city', params.city);
+    let query = this.supabase
+      .from('markets')
+      .select('*', { count: 'exact' });
+
+    if (search) {
+      query = query.or(`name.ilike.%${search}%,address.ilike.%${search}%`);
     }
 
-    if (params.search) {
-      query = query.or(`name.ilike.%${params.search}%,address.ilike.%${params.search}%`);
+    if (orderBy) {
+      query = query.order(orderBy, { ascending: true });
     }
 
-    const { data, error } = await query;
+    query = query.range(offset, offset + limit - 1);
 
-    if (error) throw new BadRequestException(error.message);
+    const { data, error, count: total } = await query;
 
-    return data;
+    if (error) {
+      throw new BadRequestException(error.message);
+    }
+
+    return {
+      records: data,
+      total: total ?? 0,
+    };
   }
 
   public async readMarketById(marketId: string): Promise<MarketTimestampDto> {

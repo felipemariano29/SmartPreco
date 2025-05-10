@@ -1,15 +1,15 @@
-import { IsNotEmpty, IsObject, IsString, IsUUID } from "@nestjs/class-validator";
-import { ApiProperty, IntersectionType, OmitType, PartialType, PickType } from "@nestjs/swagger";
+import { ApiProperty, IntersectionType, OmitType, PartialType, PickType } from '@nestjs/swagger';
+import { IsArray, IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
-import { ReadDto } from "../../shared/utils/read.dto";
-import { TimestampDto } from "../../shared/utils/timestamp.dto";
+import { PaginationReadDto, PaginationResponseDto } from '../../shared/utils/pagination.dto';
+import { TimestampDto } from '../../shared/utils/timestamp.dto';
 
 export class ProductIdDto {
 
   @IsUUID()
   @ApiProperty({
     description: "Product's unique identifier",
-    example: "3d5d1d6d-3d5d-1d6d-3d5d-1d6d3d5d1d6d"
+    example: "3d5d1d6d-3d5d-1d6d-3d5d-1d6d3d5d1d6d",
   })
   public productId: string;
 
@@ -27,60 +27,46 @@ export class ProductRepositoryIdDto {
 
 }
 
-
 export class ProductDto {
 
   @IsUUID()
-  @ApiProperty({
-    description: "Product's unique identifier",
-    example: "3d5d1d6d-3d5d-1d6d-3d5d-1d6d3d5d1d6d"
-  })
+  @ApiProperty({ description: "Product's unique identifier" })
   public id: string;
 
-  @IsNotEmpty()
   @IsString()
-  @ApiProperty({
-    description: "Product's name",
-    example: "Rice"
-  })
+  @IsNotEmpty()
+  @ApiProperty({ description: "Product's name" })
   public name: string;
 
-  @IsNotEmpty()
   @IsString()
-  @ApiProperty({
-    description: "Product's description",
-    example: "This is a very good rice"
-  })
+  @IsNotEmpty()
+  @ApiProperty({ description: "Product's description" })
   public description: string;
 
-  @IsNotEmpty()
   @IsString()
-  @ApiProperty({
-    description: "Product's category",
-    example: "Food"
-  })
+  @IsNotEmpty()
+  @ApiProperty({ description: "Product's category" })
   public category: string;
 
 }
 
 export class ProductTimestampDto extends IntersectionType(
   ProductDto,
-  TimestampDto
+  TimestampDto,
 ) {}
 
-export class ProductReadDto extends IntersectionType(
-  ReadDto,
-  PartialType(PickType(ProductDto, [ "category" ] as const))
-) { }
+export class ProductReadDto extends PaginationReadDto {}
 
-export class ProductCreateDto extends OmitType(ProductDto, [ "id" ] as const) {}
+export class ProductCreateDto extends OmitType(ProductDto, [ 'id' ] as const) {}
 
 export class ProductUpdateDto extends PartialType(ProductCreateDto) {}
 
-export class ProductsDto {
+export class ProductsDto extends PaginationResponseDto<ProductDto> {}
 
-  @IsObject({ each: true })
-  public products: ProductDto[];
+export class ProductsTimestampDto extends PickType(PaginationResponseDto, [ 'total' ] as const) {
+
+  @IsArray()
+  @ApiProperty({ description: 'List of records returned', isArray: true })
+  public records: ProductTimestampDto[];
 
 }
-

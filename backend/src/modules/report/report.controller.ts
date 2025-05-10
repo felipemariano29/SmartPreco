@@ -3,7 +3,7 @@ import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestj
 
 import { UseAdmin } from '../../shared/guards/use-admin.decorator';
 import { UseUser } from '../../shared/guards/use-user.decorator';
-import { ReportCreateDto, ReportDto, ReportIdDto, ReportsDto, ReportUpdateDto } from './report.dto';
+import { ReportCreateDto, ReportDto, ReportIdDto, ReportReadDto, ReportsDto, ReportUpdateDto } from './report.dto';
 import { ReportService } from './report.service';
 
 @Controller('reports')
@@ -24,8 +24,8 @@ export class ReportController {
   @ApiOkResponse({ description: 'Reports retrieved successfully', type: ReportsDto })
   @ApiOperation({ operationId: 'Read Reports', summary: 'Admin list of reports' })
   @UseAdmin()
-  public async readReports(): Promise<ReportsDto> {
-    return this.reportService.readReports();
+  public async readReports(@Param()params: ReportReadDto): Promise<ReportsDto> {
+    return this.reportService.readReports(params);
   }
 
   @Patch(':reportId')

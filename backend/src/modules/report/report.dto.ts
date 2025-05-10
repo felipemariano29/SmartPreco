@@ -1,8 +1,10 @@
 import { IsBoolean } from "@nestjs/class-validator";
-import { ApiProperty, IntersectionType, PickType } from "@nestjs/swagger";
-import { IsEnum, IsObject, IsOptional, IsString, IsUUID } from "class-validator";
+import { ApiProperty, IntersectionType, PartialType, PickType } from "@nestjs/swagger";
+import { IsArray, IsEnum, IsOptional, IsString, IsUUID } from "class-validator";
 
 import { UserIdDto, UserIdRepositoryDto } from "../../shared/user/user.dto";
+import { PaginationReadDto, PaginationResponseDto } from "../../shared/utils/pagination.dto";
+import { TimestampDto } from "../../shared/utils/timestamp.dto";
 import { PriceDto, PriceIdDto, PriceRepositoryIdDto } from "../price/price.dto";
 import { ReportStatusEnum } from "./report.enum";
 
@@ -50,13 +52,21 @@ export class ReportDto extends IntersectionType(UserIdDto) {
   public status?: ReportStatusEnum;
 }
 
+export class ReportTimestampDto extends IntersectionType(
+  ReportDto,
+  TimestampDto,
+) {}
+
 export class ReportRepositoryDto extends IntersectionType(
   PriceRepositoryIdDto,
   UserIdRepositoryDto,
   PickType(ReportDto, [ "id", "reason", "resolved" ] as const),
 ) {}
 
-export class ReportReadDto extends PickType(ReportDto, [ "resolved" ] as const) { }
+export class ReportReadDto extends IntersectionType(
+  PaginationReadDto,
+  PartialType(PickType(ReportDto, [ "resolved" ] as const))
+) { }
 
 export class ReportCreateDto extends IntersectionType(
   PriceIdDto,
@@ -65,10 +75,13 @@ export class ReportCreateDto extends IntersectionType(
 
 export class ReportUpdateDto extends PickType(ReportDto, [ "status", "resolved" ] as const) {}
 
-export class ReportsDto {
+export class ReportsDto extends PaginationResponseDto<ReportDto> {}
 
-  @IsObject({ each: true })
-  public reports: ReportDto[];
+export class ReportsTimestampDto extends PickType(PaginationResponseDto, [ 'total' ] as const) {
+
+  @IsArray()
+  @ApiProperty({ description: 'List of records returned', isArray: true })
+  public records: ReportTimestampDto[];
 
 }
 

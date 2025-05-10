@@ -16,9 +16,17 @@ export class ProductService {
   }
 
   public async readProducts(params: ProductReadDto): Promise<ProductsDto> {
-    const products = await this.productRepository.readProducts(params);
+    const { records, total } = await this.productRepository.readProducts(params);
 
-    return { products: DtoMapper.mapMany(products, this.toDto) };
+    const offset = params.offset ?? 0;
+    const limit = params.limit ?? 20;
+
+    return {
+      records: DtoMapper.mapMany(records, this.toDto),
+      count: records.length,
+      total,
+      nextOffset: (offset + limit) < total ? offset + limit : null,
+    };
   }
 
   public async readProductById(productId: string): Promise<ProductDto> {
