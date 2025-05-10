@@ -1,22 +1,60 @@
-import { Injectable } from '@nestjs/common';
+import { NotificationService } from '@modules/notification/notification.service';
+import { PriceComparatorService } from '@modules/price/price-comparator/price-comparator.service';
+import { PriceTimestampDto } from '@modules/price/price.dto';
+import { PriceService } from '@modules/price/price.service';
+import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 
-import { EventEnum } from '../../shared/events/event.enum';
-import { PriceService } from './price.service';
-
+import { EventEnum } from '@shared/events/event.enum';
+import { MainTag } from 'main.enum';
 @Injectable()
 export class PriceListener {
 
-  public constructor(private readonly priceService: PriceService) {}
+  private readonly logger = new Logger(MainTag.PRICE_LISTENER);
+
+  public constructor(
+    private readonly priceService: PriceService,
+    private readonly priceComparatorService: PriceComparatorService,
+    private readonly notificationService: NotificationService
+  ) { }
 
   @OnEvent(EventEnum.REPORT_CREATED)
   public async handleReportCreated(priceId: string): Promise<void> {
+    this.logger.verbose(`Processing REPORT_CREATED event for priceId: ${priceId}`);
+
     await this.priceService.updateModeratedFlag(priceId, false);
   }
 
   @OnEvent(EventEnum.REPORT_RESOLVED)
   public async handleReportResolved(priceId: string): Promise<void> {
+    this.logger.verbose(`Processing REPORT_RESOLVED event for priceId: ${priceId}`);
+
     await this.priceService.updateModeratedFlag(priceId, true);
+  }
+
+  @OnEvent(EventEnum.PRICE_CREATED)
+  public async handlePriceCreated(price: PriceTimestampDto): Promise<void> {
+    const { id: priceId, product: { id: productId } } = price;
+
+    try {
+      this.logger.verbose(`Processing PRICE_CREATED event for priceId: ${priceId}`);
+
+      const result = await this.priceComparatorService.analyzeNewPrice(priceId);
+
+      if (!result.shouldNotify) return;
+
+      await this.notificationService.sendNotifications({
+        usersToNotify: result.usersToNotify,
+        title: 'Novo desconto!',
+        body: `O produto ${result.productName} está custando R$${result.newPrice.toFixed(2)}. Aproveite!`,
+        data: {
+          screen: 'product-details',
+          productId,
+        },
+      });
+    } catch (error) {
+      this.logger.error(`Failed to process PRICE_CREATED for priceId ${priceId}`, error.stack);
+    }
   }
 
 }

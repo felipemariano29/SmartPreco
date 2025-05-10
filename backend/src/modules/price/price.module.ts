@@ -1,13 +1,21 @@
+import { FavoriteModule } from '@modules/favorite/favorite.module';
+import { NotificationModule } from '@modules/notification/notification.module';
+import { PriceComparatorService } from '@modules/price/price-comparator/price-comparator.service';
+import { PriceController } from '@modules/price/price.controller';
+import { PriceListener } from '@modules/price/price.listener';
+import { PriceRepository } from '@modules/price/price.repository';
+import { PriceService } from '@modules/price/price.service';
 import { Module } from '@nestjs/common';
-
-import { PriceController } from './price.controller';
-import { PriceListener } from './price.listener';
-import { PriceRepository } from './price.repository';
-import { PriceService } from './price.service';
+import { ClerkModule } from '@shared/clerk/clerk.module';
 
 @Module({
+  imports: [
+    FavoriteModule,
+    ClerkModule,
+    NotificationModule
+   ],
   controllers: [ PriceController ],
-  providers: [ PriceService, PriceRepository, PriceListener ],
-  exports: [ PriceService, PriceRepository ],
+  providers: [ PriceService, PriceRepository, PriceListener, PriceComparatorService ],
+  exports: [ PriceService, PriceRepository, PriceComparatorService ],
 })
 export class PriceModule {}

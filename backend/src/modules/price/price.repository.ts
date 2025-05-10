@@ -1,11 +1,11 @@
+import { MarketDto } from "@modules/market/market.dto";
+import { PriceCreateRepositoryDto, PriceReadDto, PricesTimestampDto, PriceTimestampDto, PriceUpdateDto } from "@modules/price/price.dto";
+import { ProductDto } from "@modules/product/product.dto";
 import { Injectable } from "@nestjs/common";
+import { AppException, EntityEnum, ErrorEnum } from "@shared/errors";
+import { getSafeSearch } from "@shared/utils/get-safe-search";
 import { SupabaseClient } from "@supabase/supabase-js";
 
-import { AppException, EntityEnum, ErrorEnum } from "../../shared/errors";
-import { getSafeSearch } from "../../shared/utils/get-safe-search";
-import { MarketDto } from "../market/market.dto";
-import { ProductDto } from "../product/product.dto";
-import { PriceCreateRepositoryDto, PriceReadDto, PricesTimestampDto, PriceTimestampDto, PriceUpdateDto } from "./price.dto";
 
 @Injectable()
 export class PriceRepository {
@@ -85,6 +85,24 @@ export class PriceRepository {
     };
   }
 
+  public async readPriceById(priceId: string): Promise<PriceTimestampDto> {
+    const { data, error } = await this.supabase
+      .from('prices')
+      .select(`
+        *,
+        market:market_id (id, name, address, city, state),
+        product:product_id (id, name, category, description)
+      `)
+      .eq('id', priceId)
+      .single();
+
+    if (error) {
+      throw new AppException(ErrorEnum.NOT_FOUND, error.message, this.tableName);
+    }
+
+    return data;
+  }
+
   public async updatePriceById(priceId: string, params: PriceUpdateDto): Promise<void> {
     const { error } = await this.supabase
       .from(this.tableName)
@@ -94,6 +112,20 @@ export class PriceRepository {
     if (error) {
       throw new AppException(ErrorEnum.UPDATE, error.message, this.tableName);
     }
+  }
+
+  public async findModeratedPricesByProductId(productId: string): Promise<number[]> {
+    const { data, error } = await this.supabase
+      .from('prices')
+      .select('price')
+      .eq('moderated', true)
+      .eq('product_id', productId);
+
+    if (error) {
+      throw new AppException(ErrorEnum.NOT_FOUND, error.message, this.tableName);
+    }
+
+    return (data ?? []).map((item) => item.price);
   }
 
 }

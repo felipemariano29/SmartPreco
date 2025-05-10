@@ -1,0 +1,1 @@
+export const CHEAPER_THRESHOLD = 0.7;
