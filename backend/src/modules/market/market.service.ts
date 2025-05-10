@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { DtoMapper } from '../../shared/utils/dto-mapper';
 import { MarketCreateDto, MarketDto, MarketReadDto, MarketsDto, MarketTimestampDto, MarketUpdateDto } from './market.dto';
 import { MarketRepository } from './market.repository';
 
@@ -11,35 +12,34 @@ export class MarketService {
   public async createMarket(params: MarketCreateDto): Promise<MarketDto> {
     const market = await this.marketRepository.createMarket(params);
 
-    return this.toMarketDto(market);
+    return DtoMapper.mapOne(market, this.toDto);
   }
 
   public async readMarkets(params: MarketReadDto): Promise<MarketsDto> {
     const markets = await this.marketRepository.readMarkets(params);
 
-    return {
-      markets: markets.map(this.toMarketDto),
-    };
+    return { markets: DtoMapper.mapMany(markets, this.toDto) };
   }
 
   public async readMarketById(marketId: string): Promise<MarketDto> {
     const market = await this.marketRepository.readMarketById(marketId);
 
-    return this.toMarketDto(market);
+    return DtoMapper.mapOne(market, this.toDto);
   }
 
   public async updateMarketById(marketId: string, dto: MarketUpdateDto): Promise<MarketDto> {
     const market = await this.marketRepository.updateMarketById(marketId, dto);
 
-    return this.toMarketDto(market);
+    return DtoMapper.mapOne(market, this.toDto);
   }
 
   public async deleteMarketById(marketId: string): Promise<void> {
     await this.marketRepository.deleteMarketById(marketId);
   }
 
-  private toMarketDto(market: MarketTimestampDto): MarketDto {
+  private toDto(market: MarketTimestampDto): MarketDto {
     const { id, name, address, city, state } = market;
     return { id, name, address, city, state };
   }
+
 }

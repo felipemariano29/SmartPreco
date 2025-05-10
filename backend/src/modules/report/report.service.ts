@@ -5,6 +5,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ContextEnum } from '../../shared/context/context.enum';
 import { ContextService } from '../../shared/context/context.service';
 import { EventEnum } from '../../shared/events/event.enum';
+import { DtoMapper } from '../../shared/utils/dto-mapper';
 import { ReportCreateDto, ReportDto, ReportsDto, ReportUpdateDto } from './report.dto';
 import { ReportStatusEnum } from './report.enum';
 import { ReportRepository } from './report.repository';
@@ -31,13 +32,13 @@ export class ReportService {
 
     this.eventEmitter.emit(EventEnum.REPORT_CREATED, priceId);
 
-    return this.toReportDto(report);
+    return DtoMapper.mapOne(report, this.toDto);
   }
 
   public async readReports(): Promise<ReportsDto> {
     const reports = await this.reportRepository.readReports();
 
-    return { reports: reports.map(this.toReportDto) };
+    return { reports: DtoMapper.mapMany(reports, this.toDto) };
   }
 
   public async updateReportById(reportId: string, params: ReportUpdateDto): Promise<ReportDto> {
@@ -49,10 +50,10 @@ export class ReportService {
       this.eventEmitter.emit(EventEnum.REPORT_RESOLVED, updatedReport.price_id);
     }
 
-    return this.toReportDto(updatedReport);
+    return DtoMapper.mapOne(updatedReport, this.toDto);
   }
 
-  private toReportDto(report: any): ReportDto {
+  private toDto(report: any): ReportDto {
     const price = report.prices;
 
     return {
