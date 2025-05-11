@@ -1,3 +1,4 @@
+import { appColors } from "@/constants/theme";
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
@@ -54,7 +55,7 @@ export const styles = StyleSheet.create({
   productPrice: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#007AFF",
+    color: appColors.primary,
     marginBottom: 16,
   },
   section: {
@@ -99,7 +100,7 @@ export const styles = StyleSheet.create({
   marketPrice: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#007AFF",
+    color: appColors.primary,
     marginRight: 8,
   },
   marketArrow: {
@@ -111,7 +112,7 @@ export const styles = StyleSheet.create({
     borderTopColor: "#eee",
   },
   compareButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: appColors.primary,
     padding: 16,
     borderRadius: 8,
     alignItems: "center",

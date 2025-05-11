@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { Searchbar } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import { Header } from "@/components/Header";
 import { SearchResults } from "@/components/home/SearchResults";
 import { styles } from "@/styles/home";
@@ -49,12 +50,38 @@ export default function HomeScreen() {
   const [localProducts, setLocalProducts] = useState<ItemType[]>([]);
   const [localMarkets, setLocalMarkets] = useState<ItemType[]>([]);
 
-  const { data: productsData, isLoading: isLoadingProducts } =
-    useReadProducts();
-  const { data: marketsData, isLoading: isLoadingMarkets } = useReadMarkets();
-  const { data: favoriteProductsData } = useGetFavoriteProducts();
-  const { data: favoriteMarketsData } = useGetFavoriteMarkets();
   const queryClient = useQueryClient();
+
+  const {
+    data: productsData,
+    isLoading: isLoadingProducts,
+    refetch: refetchProducts,
+  } = useReadProducts();
+  const {
+    data: marketsData,
+    isLoading: isLoadingMarkets,
+    refetch: refetchMarkets,
+  } = useReadMarkets();
+  const { data: favoriteProductsData, refetch: refetchFavoriteProducts } =
+    useGetFavoriteProducts();
+  const { data: favoriteMarketsData, refetch: refetchFavoriteMarkets } =
+    useGetFavoriteMarkets();
+
+  // Força uma nova busca quando a tela recebe foco
+  useFocusEffect(
+    useCallback(() => {
+      console.log("Tela recebeu foco, buscando dados atualizados...");
+      refetchProducts();
+      refetchMarkets();
+      refetchFavoriteProducts();
+      refetchFavoriteMarkets();
+    }, [
+      refetchProducts,
+      refetchMarkets,
+      refetchFavoriteProducts,
+      refetchFavoriteMarkets,
+    ])
+  );
 
   const { mutate: favoriteMarket } = useFavoriteMarket({
     mutation: {

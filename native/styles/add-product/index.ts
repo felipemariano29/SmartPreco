@@ -1,3 +1,4 @@
+import { appColors } from "@/constants/theme";
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
@@ -9,74 +10,26 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 20,
+    padding: 16,
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: 16,
     color: "#333",
-  },
-  imageSection: {
-    marginBottom: 20,
-  },
-  imageLabel: {
-    fontSize: 16,
-    fontWeight: "500",
-    marginBottom: 10,
-    color: "#333",
-  },
-  imageContainer: {
-    position: "relative",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  productImage: {
-    width: 200,
-    height: 200,
-    borderRadius: 10,
-  },
-  imagePlaceholder: {
-    width: 200,
-    height: 200,
-    borderRadius: 10,
-    backgroundColor: "#f0f0f0",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderStyle: "dashed",
-  },
-  editButton: {
-    position: "absolute",
-    bottom: 10,
-    right: 10,
-    backgroundColor: "#2e8b57",
-    borderRadius: 20,
-    width: 36,
-    height: 36,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  editIcon: {
-    margin: 0,
-  },
-  formSection: {
-    marginBottom: 20,
   },
   inputLabel: {
     fontSize: 16,
-    fontWeight: "500",
-    marginBottom: 5,
+    marginBottom: 8,
     color: "#333",
   },
   input: {
     borderWidth: 1,
     borderColor: "#ddd",
-    borderRadius: 5,
-    padding: 10,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
     fontSize: 16,
-    marginBottom: 15,
   },
   inputError: {
     borderColor: "#ff3b30",
@@ -84,43 +37,77 @@ export const styles = StyleSheet.create({
   errorText: {
     color: "#ff3b30",
     fontSize: 14,
-    marginTop: -10,
-    marginBottom: 15,
+    marginTop: -12,
+    marginBottom: 16,
+  },
+  imageContainer: {
+    width: "100%",
+    height: 200,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+    marginBottom: 16,
+    overflow: "hidden",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+  imagePlaceholder: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  placeholderText: {
+    color: "#666",
+    fontSize: 16,
+  },
+  imageInfo: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 8,
+    textAlign: "center",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  button: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f5f5f5",
+    padding: 12,
+    borderRadius: 8,
+    marginHorizontal: 4,
+  },
+  buttonText: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: "#333",
   },
   saveButton: {
-    backgroundColor: "#2e8b57",
-    padding: 15,
-    borderRadius: 5,
+    backgroundColor: appColors.primary,
+    padding: 16,
+    borderRadius: 8,
     alignItems: "center",
+    marginTop: 16,
   },
   saveButtonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
   },
-  barcodeSection: {
-    marginBottom: 15,
-  },
-  barcodeContainer: {
+  scanButton: {
+    backgroundColor: "#f5f5f5",
+    padding: 12,
+    borderRadius: 8,
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 5,
-  },
-  barcodeInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 5,
-    padding: 10,
-    fontSize: 16,
-    marginRight: 10,
-  },
-  scanButton: {
-    backgroundColor: "#2e8b57",
-    borderRadius: 5,
-    width: 50,
-    height: 50,
-    alignItems: "center",
     justifyContent: "center",
+    marginBottom: 16,
   },
-});
+}); 

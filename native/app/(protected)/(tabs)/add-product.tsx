@@ -7,6 +7,7 @@ import {
   TextInput,
   ScrollView,
   Alert,
+  ToastAndroid,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { IconButton } from "react-native-paper";
@@ -15,36 +16,24 @@ import { z } from "zod";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Header } from "@/components/Header";
 import { styles } from "@/styles/add-product";
-
-const productSchema = z.object({
-  name: z.string().min(1, "Nome do produto é obrigatório"),
-  price: z
-    .string()
-    .min(1, "Preço é obrigatório")
-    .refine(
-      (val) => {
-        return /^\d+([.,]\d+)?$/.test(val);
-      },
-      {
-        message: "Preço deve ser um valor numérico válido",
-      }
-    ),
-  market: z.string().min(1, "Nome do mercado é obrigatório"),
-  imageUri: z.string().nullable().optional(),
-  barcode: z.string().optional(),
-});
-
-type ProductData = z.infer<typeof productSchema>;
+import { useCreateProduct } from "@/api/product/product";
+import { useQueryClient } from "@tanstack/react-query";
+import { ProductCreateDto } from "@/api/model";
+import { productSchema } from "@/utils/validation";
 
 export default function AddProductScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const queryClient = useQueryClient();
 
   const [productName, setProductName] = useState("");
-  const [price, setPrice] = useState("");
+  const [price, setPrice] = useState<number>(0);
   const [market, setMarket] = useState("");
   const [image, setImage] = useState<string | null>(null);
   const [barcode, setBarcode] = useState((params.barcode as string) || "");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
+  const [imageBlob, setImageBlob] = useState<Blob | null>(null);
 
   const [errors, setErrors] = useState<{
     name?: string;
@@ -52,17 +41,58 @@ export default function AddProductScreen() {
     market?: string;
     imageUri?: string;
     barcode?: string;
+    description?: string;
+    category?: string;
   }>({});
+
+  const { mutate: createProduct, isPending: isCreatingProduct } =
+    useCreateProduct({
+      mutation: {
+        onSuccess: () => {
+          ToastAndroid.show(
+            "Produto cadastrado com sucesso!",
+            ToastAndroid.SHORT
+          );
+          queryClient.invalidateQueries({ queryKey: ["products"] });
+          queryClient.invalidateQueries({ queryKey: ["favoriteProducts"] });
+          queryClient.invalidateQueries({ queryKey: ["readProducts"] });
+          queryClient.invalidateQueries({ queryKey: ["getFavoriteProducts"] });
+          resetForm();
+          router.back();
+        },
+        onError: (error) => {
+          console.error("Erro ao cadastrar produto:", error);
+          ToastAndroid.show(
+            "Erro ao cadastrar produto. Tente novamente.",
+            ToastAndroid.SHORT
+          );
+        },
+      },
+    });
+
+  const resetForm = () => {
+    setProductName("");
+    setPrice(0);
+    setMarket("");
+    setImage(null);
+    setImageBlob(null);
+    setBarcode("");
+    setDescription("");
+    setCategory("");
+    setErrors({});
+  };
 
   useEffect(() => {
     if (!barcode) return;
 
     async function fetchProduct() {
       try {
+        console.log("Buscando produto com código:", barcode);
         const res = await fetch(
           `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`
         );
         const json = await res.json();
+        console.log("Resposta da API:", json.status);
         if (json.status === 1) {
           const p = json.product;
           setProductName(p.product_name || "");
@@ -71,7 +101,7 @@ export default function AddProductScreen() {
           Alert.alert("Produto não encontrado na base pública");
         }
       } catch (err) {
-        console.error(err);
+        console.error("Erro ao buscar dados:", err);
         Alert.alert("Erro ao buscar dados do produto");
       }
     }
@@ -94,13 +124,15 @@ export default function AddProductScreen() {
 
   const validateForm = (): boolean => {
     try {
-      productSchema.parse({
+      const formData = {
         name: productName,
-        price,
-        market,
-        imageUri: image,
-        barcode,
-      });
+        description,
+        category,
+      };
+
+      console.log("Validando formulário:", formData);
+      productSchema.parse(formData);
+      console.log("Validação bem-sucedida");
 
       setErrors({});
       return true;
@@ -112,62 +144,88 @@ export default function AddProductScreen() {
           formattedErrors[path] = err.message;
         });
 
+        console.log("Erros de validação:", formattedErrors);
         setErrors(formattedErrors);
 
         const firstError = error.errors[0];
         Alert.alert("Erro de Validação", firstError.message);
       } else {
+        console.error("Erro desconhecido:", error);
         Alert.alert("Erro", "Ocorreu um erro ao validar os dados");
       }
       return false;
     }
   };
 
-  const handleSave = () => {
+  const handlePriceChange = (text: string) => {
+    const numbers = text.replace(/\D/g, "");
+
+    if (!numbers) {
+      setPrice(0);
+      return;
+    }
+
+    setPrice(Number(numbers));
+
+    if (errors.price) {
+      setErrors((prev) => ({ ...prev, price: undefined }));
+    }
+  };
+
+  const handleSave = async () => {
     if (!validateForm()) {
       return;
     }
 
-    const productData: ProductData = {
-      name: productName,
-      price,
-      market,
-      imageUri: image,
-      barcode,
-    };
+    try {
+      const productData: ProductCreateDto = {
+        name: productName,
+        description,
+        category,
+      };
 
-    console.log("Dados validados:", productData);
-    Alert.alert("Sucesso", "Produto cadastrado com sucesso!");
-
-    setProductName("");
-    setPrice("");
-    setMarket("");
-    setImage(null);
-    setBarcode("");
+      console.log("Enviando dados do produto:", productData);
+      createProduct({ data: productData });
+    } catch (error) {
+      console.error("Erro ao preparar dados:", error);
+      ToastAndroid.show(
+        "Erro ao preparar dados do produto. Tente novamente.",
+        ToastAndroid.SHORT
+      );
+    }
   };
 
   const handleSelectImage = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (!permissionResult.granted) {
-      Alert.alert(
-        "Permissão Negada",
-        "Precisamos de permissão para acessar sua galeria"
-      );
-      return;
-    }
-
     try {
-      let result = await ImagePicker.launchImageLibraryAsync({
+      const permissionResult =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (!permissionResult.granted) {
+        Alert.alert(
+          "Permissão Negada",
+          "Precisamos de permissão para acessar sua galeria"
+        );
+        return;
+      }
+
+      const options: ImagePicker.ImagePickerOptions = {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-      });
+        aspect: [4, 3] as [number, number],
+        quality: 0.8,
+      };
 
-      if (!result.canceled) {
-        setImage(result.assets[0].uri);
+      const result = await ImagePicker.launchImageLibraryAsync(options);
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const selectedUri = result.assets[0].uri;
+        setImage(selectedUri);
+
+        // Convert image to blob
+        const response = await fetch(selectedUri);
+        const blob = await response.blob();
+        setImageBlob(blob);
+
         setErrors((prev) => ({ ...prev, imageUri: undefined }));
       }
     } catch (error) {
@@ -177,25 +235,35 @@ export default function AddProductScreen() {
   };
 
   const handleTakePhoto = async () => {
-    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
-
-    if (!permissionResult.granted) {
-      Alert.alert(
-        "Permissão Negada",
-        "Precisamos de permissão para acessar sua câmera"
-      );
-      return;
-    }
-
     try {
-      const result = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.8,
-      });
+      const permissionResult =
+        await ImagePicker.requestCameraPermissionsAsync();
 
-      if (!result.canceled) {
-        setImage(result.assets[0].uri);
+      if (!permissionResult.granted) {
+        Alert.alert(
+          "Permissão Negada",
+          "Precisamos de permissão para acessar sua câmera"
+        );
+        return;
+      }
+
+      const options: ImagePicker.ImagePickerOptions = {
+        allowsEditing: true,
+        aspect: [4, 3] as [number, number],
+        quality: 0.8,
+      };
+
+      const result = await ImagePicker.launchCameraAsync(options);
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const photoUri = result.assets[0].uri;
+        setImage(photoUri);
+
+        // Convert image to blob
+        const response = await fetch(photoUri);
+        const blob = await response.blob();
+        setImageBlob(blob);
+
         setErrors((prev) => ({ ...prev, imageUri: undefined }));
       }
     } catch (error) {
@@ -238,112 +306,107 @@ export default function AddProductScreen() {
         <View style={styles.content}>
           <Text style={styles.sectionTitle}>Adicionar Produto</Text>
 
-          <View style={styles.imageSection}>
-            <Text style={styles.imageLabel}>Imagem de comprovação</Text>
-            <TouchableOpacity
-              style={styles.imageContainer}
-              onPress={showImageOptions}
-            >
-              {image ? (
-                <Image source={{ uri: image }} style={styles.productImage} />
-              ) : (
-                <View style={styles.imagePlaceholder}>
-                  <IconButton icon="image-off" size={30} />
-                </View>
-              )}
-              <TouchableOpacity
-                style={styles.editButton}
-                onPress={showImageOptions}
-              >
-                <IconButton icon="pencil" size={18} style={styles.editIcon} />
-              </TouchableOpacity>
-            </TouchableOpacity>
-            {errors.imageUri && (
-              <Text style={styles.errorText}>{errors.imageUri}</Text>
+          <Text style={styles.inputLabel}>Nome do Produto</Text>
+          <TextInput
+            style={[styles.input, errors.name && styles.inputError]}
+            value={productName}
+            onChangeText={setProductName}
+            placeholder="Digite o nome do produto"
+          />
+          {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
+
+          <Text style={styles.inputLabel}>Preço</Text>
+          <TextInput
+            style={[styles.input, errors.price && styles.inputError]}
+            value={price.toString()}
+            onChangeText={handlePriceChange}
+            placeholder="0"
+            keyboardType="numeric"
+          />
+          {errors.price && <Text style={styles.errorText}>{errors.price}</Text>}
+
+          <Text style={styles.inputLabel}>Mercado</Text>
+          <TextInput
+            style={[styles.input, errors.market && styles.inputError]}
+            value={market}
+            onChangeText={setMarket}
+            placeholder="Digite o nome do mercado"
+          />
+          {errors.market && (
+            <Text style={styles.errorText}>{errors.market}</Text>
+          )}
+
+          <Text style={styles.inputLabel}>Imagem do Produto</Text>
+          <TouchableOpacity
+            style={styles.imageContainer}
+            onPress={showImageOptions}
+          >
+            {image ? (
+              <Image source={{ uri: image }} style={styles.image} />
+            ) : (
+              <View style={styles.imagePlaceholder}>
+                <Text style={styles.placeholderText}>
+                  Toque para adicionar uma imagem
+                </Text>
+              </View>
             )}
-          </View>
+          </TouchableOpacity>
+          {image && (
+            <Text style={styles.imageInfo}>
+              Imagem selecionada. Toque para alterar.
+            </Text>
+          )}
 
-          <View style={styles.formSection}>
-            <Text style={styles.inputLabel}>Nome do produto</Text>
+          <Text style={styles.inputLabel}>Código de Barras</Text>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={openBarcodeScanner}
+            >
+              <IconButton icon="barcode-scan" size={24} />
+              <Text style={styles.buttonText}>Escanear</Text>
+            </TouchableOpacity>
             <TextInput
-              style={[styles.input, errors.name && styles.inputError]}
-              value={productName}
-              onChangeText={(text) => {
-                setProductName(text);
-                if (text.trim() && errors.name) {
-                  setErrors((prev) => ({ ...prev, name: undefined }));
-                }
-              }}
-              placeholder="Ex: Arroz Integral 1kg"
-            />
-            {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
-
-            <Text style={styles.inputLabel}>Preço</Text>
-            <TextInput
-              style={[styles.input, errors.price && styles.inputError]}
-              value={price}
-              onChangeText={(text) => {
-                setPrice(text);
-                if (text.trim() && errors.price) {
-                  setErrors((prev) => ({ ...prev, price: undefined }));
-                }
-              }}
-              placeholder="Ex: 10,90"
+              style={[styles.input, { flex: 1, marginLeft: 8 }]}
+              value={barcode}
+              onChangeText={setBarcode}
+              placeholder="Digite o código de barras"
               keyboardType="numeric"
             />
-            {errors.price && (
-              <Text style={styles.errorText}>{errors.price}</Text>
-            )}
-
-            <Text style={styles.inputLabel}>Mercado</Text>
-            <TextInput
-              style={[styles.input, errors.market && styles.inputError]}
-              value={market}
-              onChangeText={(text) => {
-                setMarket(text);
-                if (text.trim() && errors.market) {
-                  setErrors((prev) => ({ ...prev, market: undefined }));
-                }
-              }}
-              placeholder="Ex: Supermercado ABC"
-            />
-            {errors.market && (
-              <Text style={styles.errorText}>{errors.market}</Text>
-            )}
-
-            <View style={styles.barcodeSection}>
-              <Text style={styles.inputLabel}>Código de Barras</Text>
-              <View style={styles.barcodeContainer}>
-                <TextInput
-                  style={[
-                    styles.barcodeInput,
-                    errors.barcode && styles.inputError,
-                  ]}
-                  value={barcode}
-                  onChangeText={(text) => {
-                    setBarcode(text);
-                    if (errors.barcode) {
-                      setErrors((prev) => ({ ...prev, barcode: undefined }));
-                    }
-                  }}
-                  placeholder="Escaneie ou digite o código de barras"
-                  keyboardType="number-pad"
-                />
-                <TouchableOpacity
-                  style={styles.scanButton}
-                  onPress={openBarcodeScanner}
-                >
-                  <IconButton icon="barcode-scan" size={24} />
-                </TouchableOpacity>
-              </View>
-              {errors.barcode && (
-                <Text style={styles.errorText}>{errors.barcode}</Text>
-              )}
-            </View>
           </View>
 
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.saveButtonText}>Salvar</Text>
+          <Text style={styles.inputLabel}>Descrição</Text>
+          <TextInput
+            style={[styles.input, errors.description && styles.inputError]}
+            value={description}
+            onChangeText={setDescription}
+            placeholder="Digite a descrição do produto"
+            multiline
+            numberOfLines={3}
+          />
+          {errors.description && (
+            <Text style={styles.errorText}>{errors.description}</Text>
+          )}
+
+          <Text style={styles.inputLabel}>Categoria</Text>
+          <TextInput
+            style={[styles.input, errors.category && styles.inputError]}
+            value={category}
+            onChangeText={setCategory}
+            placeholder="Digite a categoria do produto"
+          />
+          {errors.category && (
+            <Text style={styles.errorText}>{errors.category}</Text>
+          )}
+
+          <TouchableOpacity
+            style={[styles.saveButton, isCreatingProduct && { opacity: 0.7 }]}
+            onPress={handleSave}
+            disabled={isCreatingProduct}
+          >
+            <Text style={styles.saveButtonText}>
+              {isCreatingProduct ? "Salvando..." : "Salvar"}
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

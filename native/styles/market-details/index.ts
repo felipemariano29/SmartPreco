@@ -1,3 +1,4 @@
+import { appColors } from "@/constants/theme";
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
@@ -78,7 +79,7 @@ export const styles = StyleSheet.create({
     marginRight: 8,
   },
   activeCategoryChip: {
-    backgroundColor: "#007AFF",
+    backgroundColor: appColors.primary,
   },
   productsGrid: {
     paddingBottom: 16,
@@ -125,6 +126,6 @@ export const styles = StyleSheet.create({
   productPrice: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#007AFF",
+    color: appColors.primary,
   },
 }); 
