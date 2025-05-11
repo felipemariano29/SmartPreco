@@ -1,17 +1,18 @@
 /* eslint-disable camelcase */
+import { PriceCreateDto, PriceDto, PriceReadDto, PricesDto, PriceTimestampDto } from '@modules/price/price.dto';
+import { PriceRepository } from '@modules/price/price.repository';
 import { Injectable } from '@nestjs/common';
-
-import { ContextEnum } from '../../shared/context/context.enum';
-import { ContextService } from '../../shared/context/context.service';
-import { DtoMapper } from '../../shared/utils/dto-mapper';
-import { PriceCreateDto, PriceDto, PriceReadDto, PricesDto, PriceTimestampDto } from './price.dto';
-import { PriceRepository } from './price.repository';
-
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ContextEnum } from '@shared/context/context.enum';
+import { ContextService } from '@shared/context/context.service';
+import { EventEnum } from '@shared/events/event.enum';
+import { DtoMapper } from '@shared/utils/dto-mapper';
 @Injectable()
 export class PriceService {
   public constructor(
     private readonly priceRepository: PriceRepository,
     private readonly contextService: ContextService,
+    private readonly eventEmitter: EventEmitter2
   ) {}
 
   public async createPrice(params: PriceCreateDto): Promise<PriceDto> {
@@ -28,6 +29,8 @@ export class PriceService {
       moderated: true
     });
 
+    this.eventEmitter.emit(EventEnum.PRICE_CREATED, createdPrice);
+
     return DtoMapper.mapOne(createdPrice, this.toDto);
   }
 
@@ -43,6 +46,25 @@ export class PriceService {
       total,
       nextOffset: (offset + limit) < total ? offset + limit : null,
     };
+  }
+
+  public async readPriceById(priceId: string): Promise<PriceDto> {
+    const price = await this.priceRepository.readPriceById(priceId);
+
+    return DtoMapper.mapOne(price, this.toDto);
+  }
+
+  public async calculateAverageModeratedPriceByProductId(productId: string): Promise<number> {
+    const prices = await this.priceRepository.findModeratedPricesByProductId(productId);
+
+    if (prices.length === 0) {
+      return 0;
+    }
+
+    const total = prices.reduce((sum, price) => sum + price, 0);
+    const average = total / prices.length;
+
+    return average;
   }
 
   private toDto(params: PriceTimestampDto): PriceDto {

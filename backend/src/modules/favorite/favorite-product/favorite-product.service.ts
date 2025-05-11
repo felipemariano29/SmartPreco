@@ -1,10 +1,9 @@
+import { FavoriteProductRepository } from '@modules/favorite/favorite-product/favorite-product.repository';
+import { FavoriteBaseService } from '@modules/favorite/favorite.base.service';
+import { ProductDto } from '@modules/product/product.dto';
+import { ProductService } from '@modules/product/product.service';
 import { Injectable } from '@nestjs/common';
-
-import { ContextService } from '../../../shared/context/context.service';
-import { ProductDto } from '../../product/product.dto';
-import { ProductService } from '../../product/product.service';
-import { FavoriteBaseService } from '../favorite.base.service';
-import { FavoriteProductRepository } from './favorite-product.repository';
+import { ContextService } from '@shared/context/context.service';
 
 @Injectable()
 export class FavoriteProductService extends FavoriteBaseService<ProductDto> {
@@ -35,6 +34,12 @@ export class FavoriteProductService extends FavoriteBaseService<ProductDto> {
 
   protected delete(userId: string, id: string): Promise<void> {
     return this.favoriteProductRepository.delete(userId, id);
+  }
+
+  public async findUserIdsByProductId(productId: string): Promise<string[]> {
+    const favorites = await this.favoriteProductRepository.findFavoritesByProductId(productId);
+
+    return favorites.map((fav) => fav.user_id);
   }
 
 }
