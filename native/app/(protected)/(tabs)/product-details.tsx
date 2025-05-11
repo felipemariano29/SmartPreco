@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
-  Image,
   TouchableOpacity,
   ScrollView,
   Alert,
@@ -19,7 +18,7 @@ import {
 import { styles } from "@/styles/product-details";
 import ReportModal from "@/components/ReportModal";
 import { AxiosError } from "axios";
-import { createReport, useCreateReport } from "@/api/report/report";
+import { useCreateReport } from "@/api/report/report";
 import {
   useFavoriteProduct,
   useGetFavoriteProducts,
@@ -53,6 +52,11 @@ type RootStackParamList = {
     rating: number;
     distance: string;
   };
+  "price-comparison": {
+    productId: number;
+    productName: string;
+    prices: PriceDto[];
+  };
 };
 
 type ReportReason =
@@ -67,12 +71,10 @@ export default function ProductDetailScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const route = useRoute();
   const params = route.params as ProductDetailParams;
-  const [isFavorite, setIsFavorite] = useState(false);
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [reportSubmitted, setReportSubmitted] = useState(false);
   const queryClient = useQueryClient();
 
-  // Get product prices filtered by productId
   const { data: pricesData, isLoading: isLoadingPrices } = useReadPrices(
     { productId: params.id.toString() },
     {
@@ -82,169 +84,188 @@ export default function ProductDetailScreen() {
     }
   );
 
-  // Extract price information
   const [productPrices, setProductPrices] = useState<PriceDto[]>([]);
   const [marketPrice, setMarketPrice] = useState<PriceDto | null>(null);
 
   useEffect(() => {
-    if (pricesData?.prices) {
-      // Sort prices by price amount (ascending)
-      const sortedPrices = [...pricesData.prices].sort(
-        (a, b) => a.price - b.price
+    if (!pricesData?.prices?.length) return;
+
+    const sortedPrices = [...pricesData.prices].sort(
+      (a, b) => a.price - b.price
+    );
+    setProductPrices(sortedPrices);
+  }, [pricesData]);
+
+  useEffect(() => {
+    if (!productPrices.length) return;
+
+    if (params.priceId) {
+      const specificPrice = productPrices.find(
+        (price) => price.id === params.priceId
       );
-      setProductPrices(sortedPrices);
-
-      // If we have a specific priceId, use that price
-      if (params.priceId) {
-        const specificPrice = sortedPrices.find(
-          (price) => price.id === params.priceId
-        );
-        if (specificPrice) {
-          setMarketPrice(specificPrice);
-          return;
-        }
-      }
-
-      // If we have a specific marketId, find that price
-      if (params.marketId) {
-        const specificMarketPrice = sortedPrices.find(
-          (price) => price.market.id === params.marketId?.toString()
-        );
-        if (specificMarketPrice) {
-          setMarketPrice(specificMarketPrice);
-          return;
-        }
-      }
-
-      // Otherwise use the first (lowest) price
-      if (sortedPrices.length > 0) {
-        setMarketPrice(sortedPrices[0]);
+      if (specificPrice) {
+        setMarketPrice(specificPrice);
+        return;
       }
     }
-  }, [pricesData, params.marketId, params.priceId]);
+
+    if (params.marketId) {
+      const specificMarketPrice = productPrices.find(
+        (price) => price.market?.id === params.marketId?.toString()
+      );
+      if (specificMarketPrice) {
+        setMarketPrice(specificMarketPrice);
+        return;
+      }
+    }
+
+    setMarketPrice(productPrices[0]);
+  }, [productPrices, params.marketId, params.priceId]);
 
   const { data: favoriteProducts, refetch: refetchFavorites } =
     useGetFavoriteProducts();
 
-  useEffect(() => {
-    if (favoriteProducts) {
-      const isProductFavorite = favoriteProducts.some(
-        (product) => product.id === params.id.toString()
-      );
-      setIsFavorite(isProductFavorite);
-    }
-  }, [favoriteProducts, params.id]);
+  const isFavorite =
+    favoriteProducts?.some((product) => product.id === params.id.toString()) ??
+    false;
 
   const { mutate: favoriteProduct } = useFavoriteProduct({
     mutation: {
       onSuccess: () => {
-        setIsFavorite(true);
         refetchFavorites();
-        queryClient.invalidateQueries({ queryKey: ["favoriteProducts"] });
-        queryClient.invalidateQueries({ queryKey: ["products"] });
+        invalidateRelatedQueries();
         ToastAndroid.show(
           "Produto favoritado com sucesso!",
           ToastAndroid.SHORT
         );
       },
+      onError: handleApiError("favoritar"),
     },
   });
 
   const { mutate: unfavoriteProduct } = useUnfavoriteProduct({
     mutation: {
       onSuccess: () => {
-        setIsFavorite(false);
         refetchFavorites();
-        queryClient.invalidateQueries({ queryKey: ["favoriteProducts"] });
-        queryClient.invalidateQueries({ queryKey: ["products"] });
+        invalidateRelatedQueries();
         ToastAndroid.show(
           "Produto removido dos favoritos!",
           ToastAndroid.SHORT
         );
       },
+      onError: handleApiError("remover dos favoritos"),
     },
   });
 
-  // Function to format price
-  const formatPrice = (price: number) => {
+  const formatPrice = useCallback((price: number) => {
     return `R$ ${price.toFixed(2).replace(".", ",")}`;
-  };
+  }, []);
 
-  const handleToggleFavorite = () => {
+  function handleApiError(action: string) {
+    return (error: unknown) => {
+      console.error(`Erro ao ${action}:`, error);
+      const errorMessage =
+        error instanceof AxiosError && error.response?.data?.message
+          ? error.response.data.message
+          : `Não foi possível ${action} o produto. Tente novamente.`;
+
+      Alert.alert("Erro", errorMessage);
+    };
+  }
+
+  const invalidateRelatedQueries = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["favoriteProducts"] });
+    queryClient.invalidateQueries({ queryKey: ["products"] });
+  }, [queryClient]);
+
+  const handleToggleFavorite = useCallback(() => {
     if (isFavorite) {
       unfavoriteProduct({ productId: params.id.toString() });
     } else {
       favoriteProduct({ productId: params.id.toString() });
     }
-  };
+  }, [isFavorite, favoriteProduct, unfavoriteProduct, params.id]);
 
-  const navigateToMarketDetail = (marketId: string, marketName: string) => {
-    navigation.navigate("market-details", {
-      id: parseInt(marketId),
-      name: marketName,
-      rating: 4.5, // Default rating if not available from API
-      distance: "2.5 km", // Default distance if not available from API
-    });
-  };
+  const navigateToMarketDetail = useCallback(
+    (marketId: string, marketName: string) => {
+      if (!marketId) return;
 
-  const createReportMutation = useCreateReport();
+      navigation.navigate("market-details", {
+        id: parseInt(marketId),
+        name: marketName,
+        rating: 0,
+        distance: "",
+      });
+    },
+    [navigation]
+  );
 
-  const handleReport = async (reason: ReportReason, details: string) => {
-    if (!marketPrice?.id) {
-      Alert.alert("Erro", "Não foi possível identificar o preço para denúncia");
+  const navigateToPriceComparison = useCallback(() => {
+    if (productPrices.length <= 1) {
+      ToastAndroid.show(
+        "Não há outros preços para comparar",
+        ToastAndroid.SHORT
+      );
       return;
     }
 
-    const reportData = {
-      priceId: marketPrice.id,
-      reason: reason,
-    };
+    navigation.navigate("price-comparison", {
+      productId: params.id,
+      productName: params.name,
+      prices: productPrices,
+    });
+  }, [navigation, params.id, params.name, productPrices]);
 
-    try {
-      await createReportMutation.mutateAsync({
-        data: reportData,
-      });
+  const createReportMutation = useCreateReport();
 
-      setReportSubmitted(true);
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      console.error("Erro na chamada da API:", axiosError);
-      Alert.alert(
-        "Erro",
-        "Não foi possível enviar a denúncia. Tente novamente mais tarde.",
-        [{ text: "OK" }]
-      );
-    }
-  };
+  const handleReport = useCallback(
+    async (reason: ReportReason, details: string) => {
+      if (!marketPrice?.id) {
+        Alert.alert(
+          "Erro",
+          "Não foi possível identificar o preço para denúncia"
+        );
+        return;
+      }
 
-  const handleReportModalDismiss = () => {
+      const reportData = {
+        priceId: marketPrice.id,
+        reason: reason,
+        details: details || undefined,
+      };
+
+      try {
+        await createReportMutation.mutateAsync({
+          data: reportData,
+        });
+        setReportSubmitted(true);
+        ToastAndroid.show("Denúncia enviada com sucesso", ToastAndroid.SHORT);
+      } catch (error) {
+        handleApiError("denunciar")(error);
+      }
+    },
+    [marketPrice?.id, createReportMutation, handleApiError]
+  );
+
+  const handleReportModalDismiss = useCallback(() => {
     setReportModalVisible(false);
     if (reportSubmitted) {
       setReportSubmitted(false);
     }
-  };
+  }, [reportSubmitted]);
 
-  // Get product description - either from params or from the first price's product
-  const getDescription = () => {
-    if (params.description) {
-      return params.description;
-    } else if (marketPrice?.product?.description) {
-      return marketPrice.product.description;
-    }
-    return "Informações do produto não disponíveis.";
-  };
+  const getDescription = useCallback(() => {
+    return (
+      params.description ||
+      marketPrice?.product?.description ||
+      "Informações do produto não disponíveis."
+    );
+  }, [params.description, marketPrice?.product?.description]);
 
-  // Get product category - either from params or from the first price's product
-  const getCategory = () => {
-    if (params.category) {
-      return params.category;
-    } else if (marketPrice?.product?.category) {
-      return marketPrice.product.category;
-    }
-    return "";
-  };
+  const getCategory = useCallback(() => {
+    return params.category || marketPrice?.product?.category || "";
+  }, [params.category, marketPrice?.product?.category]);
 
-  // Render loading state or content
   const renderContent = () => {
     if (isLoadingPrices) {
       return (
@@ -275,17 +296,22 @@ export default function ProductDetailScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Disponível em</Text>
-          <MarketList
-            productPrices={productPrices}
-            formatPrice={formatPrice}
-            navigateToMarketDetail={navigateToMarketDetail}
-          />
+          {productPrices.length > 0 ? (
+            <MarketList
+              productPrices={productPrices}
+              formatPrice={formatPrice}
+              navigateToMarketDetail={navigateToMarketDetail}
+            />
+          ) : (
+            <Text style={styles.noDataText}>Nenhum mercado disponível</Text>
+          )}
         </View>
 
         <View style={styles.compareSection}>
           <TouchableOpacity
-            style={styles.compareButton}
-            onPress={() => console.log("Comparar preços")}
+            style={[styles.compareButton]}
+            onPress={navigateToPriceComparison}
+            disabled={productPrices.length <= 1}
           >
             <Text style={styles.compareButtonText}>Comparar Preços</Text>
           </TouchableOpacity>
@@ -295,6 +321,7 @@ export default function ProductDetailScreen() {
           <TouchableOpacity
             style={styles.reportButton}
             onPress={() => setReportModalVisible(true)}
+            disabled={reportSubmitted}
           >
             <Text style={styles.reportButtonText}>
               {reportSubmitted ? "Denúncia enviada" : "Denunciar Produto"}
