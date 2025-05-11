@@ -1,7 +1,7 @@
+import { MarketCreateDto, MarketDto, MarketReadDto, MarketsDto, MarketTimestampDto, MarketUpdateDto } from '@modules/market/market.dto';
+import { MarketRepository } from '@modules/market/market.repository';
 import { Injectable } from '@nestjs/common';
-
-import { MarketCreateDto, MarketDto, MarketReadDto, MarketsDto, MarketTimestampDto, MarketUpdateDto } from './market.dto';
-import { MarketRepository } from './market.repository';
+import { DtoMapper } from '@shared/utils/dto-mapper';
 
 @Injectable()
 export class MarketService {
@@ -11,35 +11,42 @@ export class MarketService {
   public async createMarket(params: MarketCreateDto): Promise<MarketDto> {
     const market = await this.marketRepository.createMarket(params);
 
-    return this.toMarketDto(market);
+    return DtoMapper.mapOne(market, this.toDto);
   }
 
   public async readMarkets(params: MarketReadDto): Promise<MarketsDto> {
-    const markets = await this.marketRepository.readMarkets(params);
+    const { records, total } = await this.marketRepository.readMarkets(params);
+
+    const offset = params.offset ?? 0;
+    const limit = params.limit ?? 20;
 
     return {
-      markets: markets.map(this.toMarketDto),
+      records: DtoMapper.mapMany(records, this.toDto),
+      count: records.length,
+      total,
+      nextOffset: (offset + limit) < total ? offset + limit : null,
     };
   }
 
   public async readMarketById(marketId: string): Promise<MarketDto> {
     const market = await this.marketRepository.readMarketById(marketId);
 
-    return this.toMarketDto(market);
+    return DtoMapper.mapOne(market, this.toDto);
   }
 
   public async updateMarketById(marketId: string, dto: MarketUpdateDto): Promise<MarketDto> {
     const market = await this.marketRepository.updateMarketById(marketId, dto);
 
-    return this.toMarketDto(market);
+    return DtoMapper.mapOne(market, this.toDto);
   }
 
   public async deleteMarketById(marketId: string): Promise<void> {
     await this.marketRepository.deleteMarketById(marketId);
   }
 
-  private toMarketDto(market: MarketTimestampDto): MarketDto {
+  private toDto(market: MarketTimestampDto): MarketDto {
     const { id, name, address, city, state } = market;
     return { id, name, address, city, state };
   }
+
 }

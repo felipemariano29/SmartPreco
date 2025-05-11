@@ -1,12 +1,17 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { SupabaseClient } from "@supabase/supabase-js";
 
+import { AppException, EntityEnum, ErrorEnum } from "../../shared/errors";
+import { getSafeSearch } from "../../shared/utils/get-safe-search";
 import { MarketDto } from "../market/market.dto";
 import { ProductDto } from "../product/product.dto";
-import { PriceCreateRepositoryDto, PriceReadRepositoryDto, PriceTimestampDto, PriceUpdateDto } from "./price.dto";
+import { PriceCreateRepositoryDto, PriceReadDto, PricesTimestampDto, PriceTimestampDto, PriceUpdateDto } from "./price.dto";
 
 @Injectable()
 export class PriceRepository {
+
+  private readonly tableName = EntityEnum.PRICES;
+
   private readonly selectFields = `
     id,
     price,
@@ -23,12 +28,12 @@ export class PriceRepository {
 
   public async createPrice(params: PriceCreateRepositoryDto): Promise<PriceTimestampDto> {
     const { data, error } = await this.supabase
-      .from('prices')
+      .from(this.tableName)
       .insert(params)
       .select(this.selectFields)
       .single();
 
-    if (error) throw new BadRequestException(error.message);
+    if (error) throw new AppException(ErrorEnum.INSERT, error.message, this.tableName);
 
     return {
       ...data,
@@ -42,43 +47,53 @@ export class PriceRepository {
     };
   }
 
-  public async readPrices(params: PriceReadRepositoryDto): Promise<PriceTimestampDto[]> {
-    const { moderated, marketId, productId } = params;
+   public async readPrices(params: PriceReadDto): Promise<PricesTimestampDto> {
+    const { search, limit = 20, offset = 0, orderBy, productId, marketId } = params;
 
-    let query = this.supabase.from('prices').select(this.selectFields).eq('moderated', moderated);
+    let query = this.supabase
+      .from(this.tableName)
+      .select(`
+        *,
+        market:market_id (id, name, address, city, state),
+        product:product_id (id, name, category, description)
+      `, { count: 'exact' })
+      .eq('moderated', true);
 
     if (marketId) query = query.eq('market_id', marketId);
+
     if (productId) query = query.eq('product_id', productId);
 
-    const { data, error } = await query;
+    if (search) {
+      const safeSearch = getSafeSearch(search);
 
-    if (error) throw new BadRequestException(error.message);
-
-    return data.map((item) => ({
-      ...item,
-      market: item.market as unknown as MarketDto,
-      product: item.product as unknown as ProductDto,
-      imageUrl: item.image_url,
-      userId: item.user_id,
-      createdAt: item.created_at,
-      updatedAt: item.updated_at,
-      moderated: item.moderated
-    }));
-  }
-
-  public async updatePriceById(priceId: string, params: PriceUpdateDto): Promise<PriceTimestampDto> {
-    const { data, error } = await this.supabase
-      .from('prices')
-      .update(params)
-      .eq('id', priceId)
-      .select()
-      .single();
-
-    if (error) {
-      throw new BadRequestException(error.message);
+      query = query.ilike('product.name', `%${safeSearch}%`).or(`market.name.ilike.%${safeSearch}%`);
     }
 
-    return data;
+    if (orderBy) {
+      query = query.order(orderBy, { ascending: true });
+    }
+
+    query = query.range(offset, offset + limit - 1);
+
+    const { data, error, count: total } = await query;
+
+    if (error) throw new AppException(ErrorEnum.NOT_FOUND, error.message, this.tableName);
+
+    return {
+      records: data,
+      total: total ?? 0,
+    };
+  }
+
+  public async updatePriceById(priceId: string, params: PriceUpdateDto): Promise<void> {
+    const { error } = await this.supabase
+      .from(this.tableName)
+      .update(params)
+      .eq('id', priceId);
+
+    if (error) {
+      throw new AppException(ErrorEnum.UPDATE, error.message, this.tableName);
+    }
   }
 
 }

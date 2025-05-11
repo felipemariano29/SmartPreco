@@ -1,7 +1,7 @@
+import { ProductCreateDto, ProductDto, ProductReadDto, ProductsDto, ProductTimestampDto, ProductUpdateDto } from '@modules/product/product.dto';
+import { ProductRepository } from '@modules/product/product.repository';
 import { Injectable } from '@nestjs/common';
-
-import { ProductCreateDto, ProductDto, ProductReadDto, ProductsDto, ProductTimestampDto, ProductUpdateDto } from './product.dto';
-import { ProductRepository } from './product.repository';
+import { DtoMapper } from '@shared/utils/dto-mapper';
 
 @Injectable()
 export class ProductService {
@@ -11,21 +11,27 @@ export class ProductService {
   public async createProduct(params: ProductCreateDto): Promise<ProductDto> {
     const product = await this.productRepository.createProduct(params);
 
-    return this.toProductDto(product);
+    return DtoMapper.mapOne(product, this.toDto);
   }
 
   public async readProducts(params: ProductReadDto): Promise<ProductsDto> {
-    const products = await this.productRepository.readProducts(params);
+    const { records, total } = await this.productRepository.readProducts(params);
+
+    const offset = params.offset ?? 0;
+    const limit = params.limit ?? 20;
 
     return {
-      products: products.map(this.toProductDto),
+      records: DtoMapper.mapMany(records, this.toDto),
+      count: records.length,
+      total,
+      nextOffset: (offset + limit) < total ? offset + limit : null,
     };
   }
 
   public async readProductById(productId: string): Promise<ProductDto> {
     const product = await this.productRepository.readProductById(productId);
 
-    return this.toProductDto(product);
+    return DtoMapper.mapOne(product, this.toDto);
   }
 
   public async updateProductById(
@@ -34,14 +40,14 @@ export class ProductService {
   ): Promise<ProductDto> {
     const product = await this.productRepository.updateProductById(productId, updateProductDto);
 
-    return this.toProductDto(product);
+    return DtoMapper.mapOne(product, this.toDto);
   }
 
   public async deleteProductById(productId: string): Promise<void> {
     await this.productRepository.deleteProductById(productId);
   }
 
-  private toProductDto(product: ProductTimestampDto): ProductDto {
+  private toDto(product: ProductTimestampDto): ProductDto {
     const { id, name, description, category } = product;
     return { id, name, description, category };
   }

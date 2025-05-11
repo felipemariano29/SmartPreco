@@ -1,20 +1,21 @@
 /* eslint-disable camelcase */
+import { ReportCreateDto, ReportDto, ReportReadDto, ReportsDto, ReportUpdateDto } from '@modules/report/report.dto';
+import { ReportStatusEnum } from '@modules/report/report.enum';
+import { ReportRepository } from '@modules/report/report.repository';
 import { Injectable } from '@nestjs/common';
-
-import { ContextEnum } from '../../shared/context/context.enum';
-import { ContextService } from '../../shared/context/context.service';
-import { PriceService } from '../price/price.service';
-import { ReportCreateDto, ReportDto, ReportsDto, ReportUpdateDto } from './report.dto';
-import { ReportStatusEnum } from './report.enum';
-import { ReportRepository } from './report.repository';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ContextEnum } from '@shared/context/context.enum';
+import { ContextService } from '@shared/context/context.service';
+import { EventEnum } from '@shared/events/event.enum';
+import { DtoMapper } from '@shared/utils/dto-mapper';
 
 @Injectable()
 export class ReportService {
 
   public constructor(
     private readonly reportRepository: ReportRepository,
-    private readonly priceService: PriceService,
-    private readonly contextService: ContextService
+    private readonly contextService: ContextService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   public async createReport(params: ReportCreateDto): Promise<ReportDto> {
@@ -28,15 +29,23 @@ export class ReportService {
       reason
     });
 
-    await this.priceService.updateModeratedFlag(priceId, false);
+    this.eventEmitter.emit(EventEnum.REPORT_CREATED, priceId);
 
-    return this.toReportDto(report);
+    return DtoMapper.mapOne(report, this.toDto);
   }
 
-  public async readReports(): Promise<ReportsDto> {
-    const reports = await this.reportRepository.readReports();
+  public async readReports(params: ReportReadDto): Promise<ReportsDto> {
+    const { records, total } = await this.reportRepository.readReports(params);
 
-    return { reports: reports.map(this.toReportDto) };
+    const offset = params.offset ?? 0;
+    const limit = params.limit ?? 20;
+
+    return {
+      records: DtoMapper.mapMany(records, this.toDto),
+      count: records.length,
+      total,
+      nextOffset: (offset + limit) < total ? offset + limit : null,
+    };
   }
 
   public async updateReportById(reportId: string, params: ReportUpdateDto): Promise<ReportDto> {
@@ -44,46 +53,43 @@ export class ReportService {
 
     const updatedReport = await this.reportRepository.updateReportById(reportId, params);
 
-
     if (status === ReportStatusEnum.APPROVED) {
-      const { price_id } = await this.reportRepository.readReportById(reportId);
-
-      await this.priceService.updateModeratedFlag(price_id, true);
+      this.eventEmitter.emit(EventEnum.REPORT_RESOLVED, updatedReport.price_id);
     }
 
-    return this.toReportDto(updatedReport);
+    return DtoMapper.mapOne(updatedReport, this.toDto);
   }
 
-  private toReportDto(report: any): ReportDto {
-  const price = report.prices;
+  private toDto(report: any): ReportDto {
+    const price = report.prices;
 
-  return {
-    id: report.id,
-    reason: report.reason,
-    resolved: report.resolved,
-    userId: report.user_id,
-    status: report.status,
-    price: {
-      id: price.id,
-      price: price.price,
-      imageUrl: price.image_url,
-      moderated: price.moderated,
-      userId: price.user_id,
-      product: {
-        id: price.product.id,
-        name: price.product.name,
-        category: price.product.category,
-        description: price.product.description,
+    return {
+      id: report.id,
+      reason: report.reason,
+      resolved: report.resolved,
+      userId: report.user_id,
+      status: report.status,
+      price: {
+        id: price.id,
+        price: price.price,
+        imageUrl: price.image_url,
+        moderated: price.moderated,
+        userId: price.user_id,
+        product: {
+          id: price.product.id,
+          name: price.product.name,
+          category: price.product.category,
+          description: price.product.description,
+        },
+        market: {
+          id: price.market.id,
+          name: price.market.name,
+          city: price.market.city,
+          state: price.market.state,
+          address: price.market.address,
+        },
       },
-      market: {
-        id: price.market.id,
-        name: price.market.name,
-        city: price.market.city,
-        state: price.market.state,
-        address: price.market.address,
-      },
-    },
-  };
-}
+    };
+  }
 
 }

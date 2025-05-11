@@ -1,10 +1,8 @@
+import { ProductCreateDto, ProductDto, ProductIdDto, ProductReadDto, ProductsDto, ProductUpdateDto } from '@modules/product/product.dto';
+import { ProductService } from '@modules/product/product.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-
-import { UseUser } from '../../shared/guards/use-user.decorator';
-import { ProductCreateDto, ProductDto, ProductIdDto, ProductReadDto, ProductsDto, ProductUpdateDto } from './product.dto';
-import { ProductService } from './product.service';
-
+import { UseUser } from '@shared/guards/use-user.decorator';
 @Controller('products')
 @ApiTags('Product')
 @UseUser()
@@ -72,7 +70,5 @@ export class ProductController {
 
     return this.productService.deleteProductById(productId);
   }
-
-  // TODO: Adicionar rota para listar preços do produto quando criar domínio de preços
 
 }

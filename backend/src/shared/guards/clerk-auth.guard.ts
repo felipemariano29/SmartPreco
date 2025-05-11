@@ -1,12 +1,13 @@
 import { clerkClient } from "@clerk/clerk-sdk-node";
 import { CanActivate, ExecutionContext, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
-
-import { ContextEnum } from "../context/context.enum";
-import { ContextService } from "../context/context.service";
+import { ContextEnum } from "@shared/context/context.enum";
+import { ContextService } from "@shared/context/context.service";
+import { MainTag } from "main.enum";
 
 @Injectable()
 export class ClerkAuthGuard implements CanActivate {
-  private readonly logger = new Logger();
+
+  private readonly logger = new Logger(MainTag.CLERK);
 
   public constructor(private readonly contextService: ContextService) {}
 
@@ -15,7 +16,8 @@ export class ClerkAuthGuard implements CanActivate {
     const token = this.extractTokenFromRequest(request);
 
     if (!token) {
-      throw new UnauthorizedException("No token found");
+      this.logger.warn("No token found in Authorization header");
+      throw new UnauthorizedException("No token provided");
     }
 
     try {
@@ -35,15 +37,16 @@ export class ClerkAuthGuard implements CanActivate {
 
       return true;
     } catch (error) {
-      throw new UnauthorizedException("Invalid token: " + error);
+      this.logger.warn(`Token verification failed: ${error?.message ?? error}`);
+      throw new UnauthorizedException("Invalid or expired token");
     }
   }
 
   private extractTokenFromRequest(request: any): string | undefined {
     const authorizationHeader = request.headers["authorization"];
-
-    if (authorizationHeader && authorizationHeader.startsWith("Bearer ")) {
+    if (authorizationHeader?.startsWith("Bearer ")) {
       return authorizationHeader.split(" ")[1];
     }
   }
+
 }

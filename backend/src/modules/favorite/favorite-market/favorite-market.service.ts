@@ -1,50 +1,39 @@
+import { FavoriteMarketRepository } from '@modules/favorite/favorite-market/favorite-market.repository';
+import { FavoriteBaseService } from '@modules/favorite/favorite.base.service';
+import { MarketDto } from '@modules/market/market.dto';
+import { MarketService } from '@modules/market/market.service';
 import { Injectable } from '@nestjs/common';
-
-import { ContextEnum } from '../../../shared/context/context.enum';
-import { ContextService } from '../../../shared/context/context.service';
-import { MarketDto } from '../../market/market.dto';
-import { MarketService } from '../../market/market.service';
-import { FavoriteStrategy } from '../favorite.strategy';
-import { FavoriteMarketRepository } from './favorite-market.repository';
+import { ContextService } from '@shared/context/context.service';
 
 @Injectable()
-export class FavoriteMarketService implements FavoriteStrategy<MarketDto> {
+export class FavoriteMarketService extends FavoriteBaseService<MarketDto> {
+
   public constructor(
-    private readonly contextService: ContextService,
+    contextService: ContextService,
     private readonly marketService: MarketService,
     private readonly favoriteMarketRepository: FavoriteMarketRepository,
-  ) {}
-
-  public async getFavorites(): Promise<MarketDto[]> {
-    const userId = this.getUserId();
-
-    const marketIds = await this.favoriteMarketRepository.findMarketIdsByUser(userId);
-
-    const markets = await Promise.all(
-      marketIds.map((id) => this.marketService.readMarketById(id)),
-    );
-
-    return markets;
+  ) {
+    super(contextService);
   }
 
-  public async favorite(marketId: string): Promise<void> {
-    const userId = this.getUserId();
-
-    await this.marketService.readMarketById(marketId);
-
-    const alreadyFavorited = await this.favoriteMarketRepository.exists(userId, marketId);
-    if (!alreadyFavorited) {
-      await this.favoriteMarketRepository.insert(userId, marketId);
-    }
+  protected findIdsByUser(userId: string): Promise<string[]> {
+    return this.favoriteMarketRepository.findIdsByUser(userId);
   }
 
-  public async unfavorite(marketId: string): Promise<void> {
-    const userId = this.getUserId();
-
-    await this.favoriteMarketRepository.delete(userId, marketId);
+  protected findManyByIds(ids: string[]): Promise<MarketDto[]> {
+    return Promise.all(ids.map((id) => this.marketService.readMarketById(id)));
   }
 
-  private getUserId(): string {
-    return this.contextService.get(ContextEnum.USER).id;
+  protected exists(userId: string, id: string): Promise<boolean> {
+    return this.favoriteMarketRepository.exists(userId, id);
   }
+
+  protected insert(userId: string, id: string): Promise<void> {
+    return this.favoriteMarketRepository.insert(userId, id);
+  }
+
+  protected delete(userId: string, id: string): Promise<void> {
+    return this.favoriteMarketRepository.delete(userId, id);
+  }
+
 }

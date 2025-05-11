@@ -1,10 +1,11 @@
+import { PriceDto, PriceIdDto, PriceRepositoryIdDto } from "@modules/price/price.dto";
+import { ReportStatusEnum } from "@modules/report/report.enum";
 import { IsBoolean } from "@nestjs/class-validator";
-import { ApiProperty, IntersectionType, PickType } from "@nestjs/swagger";
-import { IsEnum, IsObject, IsString, IsUUID } from "class-validator";
-
-import { UserIdDto, UserIdRepositoryDto } from "../../shared/user/user.dto";
-import { PriceDto, PriceIdDto, PriceRepositoryIdDto } from "../price/price.dto";
-import { ReportStatusEnum } from "./report.enum";
+import { ApiProperty, IntersectionType, PartialType, PickType } from "@nestjs/swagger";
+import { UserIdDto, UserIdRepositoryDto } from "@shared/user/user.dto";
+import { PaginationReadDto, PaginationResponseDto } from "@shared/utils/pagination.dto";
+import { TimestampDto } from "@shared/utils/timestamp.dto";
+import { IsArray, IsEnum, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class ReportIdDto {
 
@@ -44,10 +45,16 @@ export class ReportDto extends IntersectionType(UserIdDto) {
   @ApiProperty({ type: () => PriceDto })
   public price: PriceDto;
 
+  @IsOptional()
   @IsEnum(ReportStatusEnum)
   @ApiProperty({ enum: ReportStatusEnum })
-  public status: ReportStatusEnum;
+  public status?: ReportStatusEnum;
 }
+
+export class ReportTimestampDto extends IntersectionType(
+  ReportDto,
+  TimestampDto,
+) {}
 
 export class ReportRepositoryDto extends IntersectionType(
   PriceRepositoryIdDto,
@@ -55,7 +62,10 @@ export class ReportRepositoryDto extends IntersectionType(
   PickType(ReportDto, [ "id", "reason", "resolved" ] as const),
 ) {}
 
-export class ReportReadDto extends PickType(ReportDto, [ "resolved" ] as const) { }
+export class ReportReadDto extends IntersectionType(
+  PaginationReadDto,
+  PartialType(PickType(ReportDto, [ "resolved" ] as const))
+) { }
 
 export class ReportCreateDto extends IntersectionType(
   PriceIdDto,
@@ -64,10 +74,21 @@ export class ReportCreateDto extends IntersectionType(
 
 export class ReportUpdateDto extends PickType(ReportDto, [ "status", "resolved" ] as const) {}
 
-export class ReportsDto {
+export class ReportsDto extends PaginationResponseDto<ReportDto> {
 
-  @IsObject({ each: true })
-  public reports: ReportDto[];
+   @ApiProperty({
+      description: 'List of Market records',
+      type: [ ReportDto ],
+    })
+    public records: ReportDto[];
+
+ }
+
+export class ReportsTimestampDto extends PickType(PaginationResponseDto, [ 'total' ] as const) {
+
+  @IsArray()
+  @ApiProperty({ description: 'List of records returned', isArray: true })
+  public records: ReportTimestampDto[];
 
 }
 

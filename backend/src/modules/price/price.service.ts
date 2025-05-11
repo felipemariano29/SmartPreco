@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 
 import { ContextEnum } from '../../shared/context/context.enum';
 import { ContextService } from '../../shared/context/context.service';
+import { DtoMapper } from '../../shared/utils/dto-mapper';
 import { PriceCreateDto, PriceDto, PriceReadDto, PricesDto, PriceTimestampDto } from './price.dto';
 import { PriceRepository } from './price.repository';
 
@@ -27,18 +28,24 @@ export class PriceService {
       moderated: true
     });
 
-    return this.toPriceDto(createdPrice);
+    return DtoMapper.mapOne(createdPrice, this.toDto);
   }
 
   public async readPrices(params: PriceReadDto): Promise<PricesDto> {
-    const prices = await this.priceRepository.readPrices({ ...params, moderated: true });
+    const { records, total } = await this.priceRepository.readPrices(params);
+
+    const offset = params.offset ?? 0;
+    const limit = params.limit ?? 20;
 
     return {
-      prices: prices.map(this.toPriceDto),
+      records: DtoMapper.mapMany(records, this.toDto),
+      count: records.length,
+      total,
+      nextOffset: (offset + limit) < total ? offset + limit : null,
     };
   }
 
-  private toPriceDto(params: PriceTimestampDto): PriceDto {
+  private toDto(params: PriceTimestampDto): PriceDto {
     const { id, market, product, price, imageUrl, userId, moderated } = params;
     return { id, market, product, price, imageUrl, userId, moderated };
   }

@@ -1,49 +1,43 @@
-import { Logger, ValidationPipe } from "@nestjs/common";
-import { HttpAdapterHost, NestFactory } from "@nestjs/core";
+import { Logger } from "@nestjs/common";
+import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
-import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { SwaggerModule } from "@nestjs/swagger";
+import { createSwaggerConfig } from "@shared/config/swagger.config";
+import { createGlobalValidationPipe } from "@shared/config/validation.config";
+import { AllExceptionFilter } from "@shared/filters/all-exception.filter";
+import { LoggerInterceptor } from "@shared/interceptors/logger.interceptor";
+import { AppModule } from "app.module";
 import * as cookieParser from "cookie-parser";
 import * as dotenv from "dotenv";
-
-import { AllExceptionsFilter } from "./all-exception.filter";
-import { AppModule } from "./app.module";
+import { MainTag } from "main.enum";
 
 dotenv.config();
 
 async function bootstrap() {
-  const logger = new Logger();
 
+  const logger = new Logger(MainTag.MAIN);
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     rawBody: true,
-    logger: [ "error", "warn", "debug" ],
+    logger: [ "error", "warn", "debug", "verbose" ],
   });
-
-  app.use(cookieParser());
 
   app.enableCors();
 
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-    transformOptions: { enableImplicitConversion: true },
-  }));
+  app.use(cookieParser());
+  app.useGlobalPipes(createGlobalValidationPipe());
 
-  const options = new DocumentBuilder()
-    .setTitle("SmartPreço API")
-    .setDescription("SmartPreço API é uma API RESTful que fornece informações sobre mercados, produtos e seus preços.")
-    .setVersion("1.0")
-    .addBearerAuth()
-    .build();
+  app.useGlobalInterceptors(new LoggerInterceptor());
 
-  const document = SwaggerModule.createDocument(app, options);
+  const document = SwaggerModule.createDocument(app, createSwaggerConfig());
   SwaggerModule.setup("api", app, document);
-  const { httpAdapter } = app.get(HttpAdapterHost);
-  app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
 
-  logger.debug("Starting application! 🚀");
-  await app.listen(process.env.PORT || 3000);
+  app.useGlobalFilters(new AllExceptionFilter());
+
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+  logger.debug(`Application is running on port ${port}! 🚀`);
+
 }
 
 bootstrap();

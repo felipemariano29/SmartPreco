@@ -1,21 +1,8 @@
-import {
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Post,
-  UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import {
-  ApiBody,
-  ApiConsumes,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
-
-import { UploadImageDto } from './upload.dto';
-import { UploadService } from './upload.service';
+import { UploadImageDto } from "@modules/upload/upload.dto";
+import { UploadService } from "@modules/upload/upload.service";
+import { Controller, HttpCode, HttpStatus, Post, UploadedFile, UseInterceptors } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 @Controller('upload')
 @ApiTags('Upload')
@@ -25,16 +12,7 @@ export class UploadController {
 
   @Post('image')
   @HttpCode(HttpStatus.CREATED)
-  @UseInterceptors(FileInterceptor('file', {
-    limits: { fileSize: 200 * 1024 }, // 200KB
-    fileFilter: (req, file, callback) => {
-      const allowedTypes = [ 'image/png', 'image/jpeg' ];
-      if (!allowedTypes.includes(file.mimetype)) {
-        return callback(new Error('Only PNG and JPEG images are allowed'), false);
-      }
-      callback(null, true);
-    },
-  }))
+  @UseInterceptors(FileInterceptor('file', {  limits: { fileSize: 50 * 1024 * 1024 }  }))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Uploads an image and returns the public URL' })
   @ApiBody({

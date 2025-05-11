@@ -1,10 +1,9 @@
+import { ReportCreateDto, ReportDto, ReportIdDto, ReportReadDto, ReportsDto, ReportUpdateDto } from '@modules/report/report.dto';
+import { ReportService } from '@modules/report/report.service';
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-
-import { UseAdmin } from '../../shared/guards/use-admin.decorator';
-import { UseUser } from '../../shared/guards/use-user.decorator';
-import { ReportCreateDto, ReportDto, ReportIdDto, ReportsDto, ReportUpdateDto } from './report.dto';
-import { ReportService } from './report.service';
+import { UseAdmin } from '@shared/guards/use-admin.decorator';
+import { UseUser } from '@shared/guards/use-user.decorator';
 
 @Controller('reports')
 @ApiTags('Report')
@@ -24,8 +23,8 @@ export class ReportController {
   @ApiOkResponse({ description: 'Reports retrieved successfully', type: ReportsDto })
   @ApiOperation({ operationId: 'Read Reports', summary: 'Admin list of reports' })
   @UseAdmin()
-  public async readReports(): Promise<ReportsDto> {
-    return this.reportService.readReports();
+  public async readReports(@Param()params: ReportReadDto): Promise<ReportsDto> {
+    return this.reportService.readReports(params);
   }
 
   @Patch(':reportId')

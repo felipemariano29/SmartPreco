@@ -1,10 +1,14 @@
-  import { BadRequestException, Injectable } from "@nestjs/common";
+import { ReportCreateRepositoryDto, ReportReadDto, ReportRepositoryDto, ReportsTimestampDto, ReportUpdateDto } from "@modules/report/report.dto";
+import { Injectable } from "@nestjs/common";
+import { AppException, EntityEnum, ErrorEnum } from "@shared/errors";
+import { getSafeSearch } from "@shared/utils/get-safe-search";
 import { SupabaseClient } from "@supabase/supabase-js";
-
-  import { ReportCreateRepositoryDto, ReportRepositoryDto, ReportUpdateDto } from "./report.dto";
 
   @Injectable()
   export class ReportRepository {
+
+    private readonly tableName = EntityEnum.REPORTS;
+
     private readonly selectFields = `
       *,
       prices (
@@ -17,56 +21,61 @@ import { SupabaseClient } from "@supabase/supabase-js";
     public constructor(private readonly supabase: SupabaseClient) {}
 
     public async createReport(params: ReportCreateRepositoryDto): Promise<ReportRepositoryDto> {
-      const { data: report, error: reportError } = await this.supabase
-        .from('reports')
+      const { data, error } = await this.supabase
+        .from(this.tableName)
         .insert({ ...params, resolved: false })
         .select(this.selectFields)
         .single();
 
-      if (reportError) throw new BadRequestException(reportError.message);
+      if (error) throw new AppException(ErrorEnum.INSERT, error.message, this.tableName);
 
-      return report;
-    }
-
-    public async readReports(): Promise<any[]> {
-      const { data, error } = await this.supabase
-        .from('reports')
-        .select(this.selectFields);
-
-      if (error) throw new BadRequestException(error.message);
       return data;
     }
 
-    public async readReportById(reportId: string): Promise<any> {
-      const { data, error } = await this.supabase
-        .from('reports')
-        .select(this.selectFields)
-        .eq('id', reportId)
-        .single();
+    public async readReports(params: ReportReadDto): Promise<ReportsTimestampDto> {
+      const { search, limit = 20, offset = 0, orderBy, resolved } = params;
 
-      if (error) {
-        throw new BadRequestException(`Failed to find report with ID ${reportId}: ${error.message}`);
+      let query = this.supabase
+        .from(this.tableName)
+        .select(this.selectFields, { count: 'exact' });
+
+      if (resolved !== undefined) {
+        query = query.eq('resolved', resolved);
       }
 
-      return data;
+      if (search) {
+        const safeSearch = getSafeSearch(search);
+
+        query = query.ilike('reason', `%${safeSearch}%`);
+      }
+
+      if (orderBy) {
+        query = query.order(orderBy, { ascending: true });
+      }
+
+      query = query.range(offset, offset + limit - 1);
+
+      const { data, error, count: total } = await query;
+
+      if (error) {
+        throw new AppException(ErrorEnum.NOT_FOUND, error.message, this.tableName);
+      }
+
+      return {
+        records: data,
+        total: total ?? 0,
+      };
     }
 
     public async updateReportById(reportId: string, dto: ReportUpdateDto): Promise<ReportRepositoryDto> {
       const { data, error } = await this.supabase
-        .from('reports')
+        .from(this.tableName)
         .update(dto)
         .eq('id', reportId)
         .select(this.selectFields)
         .single();
 
-      if (error) throw new BadRequestException(error.message);
-
-      if (dto.resolved) {
-        await this.supabase
-          .from('prices')
-          .update({ moderated: true })
-          .eq('id', data.price_id);
-      }
+      if (error) throw new AppException(ErrorEnum.UPDATE, error.message, this.tableName);
 
       return data;
     }

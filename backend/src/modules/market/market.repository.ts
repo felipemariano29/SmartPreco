@@ -1,74 +1,91 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { MarketCreateDto, MarketReadDto, MarketsTimestampDto, MarketTimestampDto, MarketUpdateDto } from "@modules/market/market.dto";
+import { HttpStatus, Injectable } from "@nestjs/common";
+import { AppException, EntityEnum, ErrorEnum } from "@shared/errors";
+import { getSafeSearch } from "@shared/utils/get-safe-search";
 import { SupabaseClient } from "@supabase/supabase-js";
 
-import { MarketCreateDto, MarketReadDto, MarketTimestampDto, MarketUpdateDto } from "./market.dto";
 
 @Injectable()
 export class MarketRepository {
+
+  private readonly tableName = EntityEnum.MARKETS;
 
   public constructor(private readonly supabase: SupabaseClient) {}
 
   public async createMarket(params: MarketCreateDto): Promise<MarketTimestampDto> {
     const { data, error } = await this.supabase
-      .from('markets')
+      .from(this.tableName)
       .insert(params)
       .select()
       .single();
 
-    if (error) throw new BadRequestException(error.message);
+    if (error) throw new AppException(ErrorEnum.INSERT, error.message, this.tableName);
 
     return data;
   }
 
-  public async readMarkets(params: MarketReadDto): Promise<MarketTimestampDto[]> {
-    let query = this.supabase.from('markets').select('*');
+  public async readMarkets(params: MarketReadDto): Promise<MarketsTimestampDto> {
+    const { search, limit = 20, offset = 0, orderBy } = params;
 
-    if (params.city) {
-      query = query.eq('city', params.city);
+    let query = this.supabase
+      .from(this.tableName)
+      .select('*', { count: 'exact' });
+
+    if (search) {
+      const safeSearch = getSafeSearch(search);
+
+      query = query.ilike('name', `%${safeSearch}%`).or(`address.ilike.%${safeSearch}%`);
     }
 
-    if (params.search) {
-      query = query.or(`name.ilike.%${params.search}%,address.ilike.%${params.search}%`);
+    if (orderBy) {
+      query = query.order(orderBy, { ascending: true });
     }
 
-    const { data, error } = await query;
+    query = query.range(offset, offset + limit - 1);
 
-    if (error) throw new BadRequestException(error.message);
+    const { data, error, count: total } = await query;
 
-    return data;
+    if (error) {
+      throw new AppException(ErrorEnum.NOT_FOUND, error.message, this.tableName);
+    }
+
+    return {
+      records: data,
+      total: total ?? 0,
+    };
   }
 
   public async readMarketById(marketId: string): Promise<MarketTimestampDto> {
     const { data, error } = await this.supabase
-      .from('markets')
+      .from(this.tableName)
       .select('*')
       .eq('id', marketId)
       .single();
 
-    if (error) throw new NotFoundException(`Market with ID ${marketId} not found`);
+    if (error) throw new AppException(ErrorEnum.NOT_FOUND, error.message, this.tableName, HttpStatus.NOT_FOUND);
 
     return data;
   }
 
   public async updateMarketById(marketId: string, dto: MarketUpdateDto): Promise<MarketTimestampDto> {
     const { data, error } = await this.supabase
-      .from('markets')
+      .from(this.tableName)
       .update(dto)
       .eq('id', marketId)
       .select()
       .single();
 
-    if (error) throw new BadRequestException(error.message);
+    if (error) throw new AppException(ErrorEnum.UPDATE, error.message, this.tableName);
 
     return data;
   }
 
   public async deleteMarketById(marketId: string): Promise<void> {
     const { error } = await this.supabase
-      .from('markets')
+      .from(this.tableName)
       .delete()
       .eq('id', marketId);
 
-    if (error) throw new BadRequestException(error.message);
+    if (error) throw new AppException(ErrorEnum.DELETE, error.message, this.tableName);
   }
 }

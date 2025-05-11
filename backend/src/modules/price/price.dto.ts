@@ -1,11 +1,12 @@
+import { MarketDto, MarketIdDto, MarketRepositoryIdDto } from "@modules/market/market.dto";
+import { ProductDto, ProductIdDto, ProductRepositoryIdDto } from "@modules/product/product.dto";
+import { UploadImageDto, UploadImageRepositoryDto } from "@modules/upload/upload.dto";
 import { ApiProperty, IntersectionType, PartialType, PickType } from "@nestjs/swagger";
-import { IsBoolean, IsNumber, IsObject, IsUUID } from "class-validator";
+import { UserIdDto, UserIdRepositoryDto } from "@shared/user/user.dto";
+import { PaginationReadDto, PaginationResponseDto } from "@shared/utils/pagination.dto";
+import { TimestampDto } from "@shared/utils/timestamp.dto";
+import { IsArray, IsBoolean, IsNumber, IsObject, IsUUID } from "class-validator";
 
-import { UserIdDto, UserIdRepositoryDto } from "../../shared/user/user.dto";
-import { TimestampDto } from "../../shared/utils/timestamp.dto";
-import { MarketDto, MarketIdDto, MarketRepositoryIdDto } from "../market/market.dto";
-import { ProductDto, ProductIdDto, ProductRepositoryIdDto } from "../product/product.dto";
-import { UploadImageDto, UploadImageRepositoryDto } from "../upload/upload.dto";
 
 export class PriceIdDto {
   @IsUUID()
@@ -67,11 +68,10 @@ export class PriceCreateRepositoryDto extends IntersectionType(
 
 export class PriceTimestampDto extends IntersectionType(PriceDto, TimestampDto) {}
 
-export class PriceReadDto extends PartialType(IntersectionType(ProductIdDto, MarketIdDto)) {}
-
-export class PriceReadRepositoryDto extends IntersectionType(
-  PriceReadDto,
-  PartialType(PickType(PriceDto, [ 'moderated' ] as const))
+export class PriceReadDto extends IntersectionType(
+  PaginationReadDto,
+  PartialType(ProductIdDto),
+  PartialType(MarketIdDto),
 ) {}
 
 export class PriceCreateDto extends IntersectionType(
@@ -86,7 +86,20 @@ export class PriceUpdateDto extends PartialType(IntersectionType(
   PickType(PriceDto, [ 'moderated' ] as const)
 )) {}
 
-export class PricesDto {
-  @IsObject({ each: true })
-  public prices: PriceDto[];
+export class PricesDto extends PaginationResponseDto<PriceDto> {
+
+   @ApiProperty({
+      description: 'List of Price records',
+      type: [ PriceDto ],
+    })
+    public records: PriceDto[];
+
+ }
+
+export class PricesTimestampDto extends PickType(PaginationResponseDto, [ 'total' ] as const) {
+
+  @IsArray()
+  @ApiProperty({ description: 'List of records returned', isArray: true })
+  public records: PriceTimestampDto[];
+
 }
