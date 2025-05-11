@@ -1,74 +1,197 @@
-import React, { useState, useEffect } from "react";
+import { useCreateMarket, useReadMarkets } from "@/api/market/market";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  TextInput,
-  ScrollView,
+  MarketCreateDto,
+  MarketDto,
+  ProductCreateDto,
+  ProductDto,
+} from "@/api/model";
+import {
+  useCreateProduct,
+  useReadProduct,
+  useReadProducts,
+} from "@/api/product/product";
+import { Header } from "@/components/Header";
+import Stepper from "@/components/Stepper";
+import MarketSelectionStep from "@/components/add-product/MarketSelectionStep";
+import PriceDetailsStep from "@/components/add-product/PriceDetailsStep";
+import ProductDetailsStep from "@/components/add-product/ProductDetailsStep";
+import ProductSelectionStep from "@/components/add-product/ProductSelectionStep";
+import { styles } from "@/styles/add-product";
+import { productSchema } from "@/utils/validation";
+import { useQueryClient } from "@tanstack/react-query";
+import * as ImagePicker from "expo-image-picker";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
+import {
   Alert,
-  ToastAndroid,
   Keyboard,
+  ScrollView,
+  Text,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import * as ImagePicker from "expo-image-picker";
 import { z } from "zod";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { Header } from "@/components/Header";
-import { styles } from "@/styles/add-product";
-import { useCreateProduct } from "@/api/product/product";
-import { useQueryClient } from "@tanstack/react-query";
-import { ProductCreateDto } from "@/api/model";
-import { productSchema } from "@/utils/validation";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { appColors } from "@/constants/theme";
+
+const STEPS = [
+  { id: "product-selection", title: "Produto" },
+  { id: "product-details", title: "Detalhes" },
+  { id: "market-selection", title: "Mercado" },
+  { id: "price-details", title: "Preço" },
+];
+
+interface ProductItemProps {
+  item: ProductDto;
+  onSelect: (product: ProductDto) => void;
+}
+
+const ProductItem = ({ item, onSelect }: ProductItemProps) => {
+  return (
+    <TouchableOpacity
+      style={styles.productItem}
+      onPress={() => onSelect(item)}
+      activeOpacity={0.7}
+    >
+      <Text style={styles.productItemName}>{item.name}</Text>
+      <Text style={styles.productItemCategory}>{item.category}</Text>
+    </TouchableOpacity>
+  );
+};
 
 export default function AddProductScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const queryClient = useQueryClient();
 
+  // Stepper state
+  const [currentStep, setCurrentStep] = useState(0);
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  // Step 1: Product selection state
+  const [productSearchQuery, setProductSearchQuery] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState<ProductDto | null>(
+    null
+  );
+  const [isCreatingNewProduct, setIsCreatingNewProduct] = useState(false);
+
+  // Step 2: Product details state
   const [productName, setProductName] = useState("");
-  const [price, setPrice] = useState<number>(0);
-  const [market, setMarket] = useState("");
   const [image, setImage] = useState<string | null>(null);
   const [barcode, setBarcode] = useState((params.barcode as string) || "");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
 
+  // Step 3: Market selection state
+  const [marketSearchQuery, setMarketSearchQuery] = useState("");
+  const [selectedMarket, setSelectedMarket] = useState<MarketDto | null>(null);
+  const [isCreatingMarket, setIsCreatingMarket] = useState(false);
+  const [marketName, setMarketName] = useState("");
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [price, setPrice] = useState<number>(0);
+
+  // Step 4: Price details state
+  const [receiptImage, setReceiptImage] = useState<string | null>(null);
+  const [receiptImageBlob, setReceiptImageBlob] = useState<Blob | null>(null);
+
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
   const [errors, setErrors] = useState<{
     name?: string;
-    price?: string;
-    market?: string;
-    imageUri?: string;
-    barcode?: string;
     description?: string;
     category?: string;
+    imageUri?: string;
+    marketName?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    price?: string;
+    receiptImage?: string;
   }>({});
 
+  // Product search
+  const { data: productSearchResults, isLoading: isSearchingProducts } =
+    useReadProducts(
+      productSearchQuery ? { search: productSearchQuery } : undefined,
+      {
+        query: {
+          enabled: productSearchQuery.length > 2,
+        },
+      }
+    );
+
+  // Market search
+  const { data: marketSearchResults, isLoading: isSearchingMarkets } =
+    useReadMarkets(
+      marketSearchQuery ? { search: marketSearchQuery } : undefined,
+      {
+        query: {
+          enabled: marketSearchQuery.length > 2,
+        },
+      }
+    );
+
+  // Fetch selected product details
+  const { data: productDetails, isLoading: isLoadingProduct } = useReadProduct(
+    selectedProduct?.id || "",
+    {
+      query: {
+        enabled: !!selectedProduct?.id,
+      },
+    }
+  );
+
+  // Watch for product data and update form fields
+  useEffect(() => {
+    if (productDetails) {
+      setProductName(productDetails.name || "");
+      setDescription(productDetails.description || "");
+      setCategory(productDetails.category || "");
+    }
+  }, [productDetails]);
+
+  // Create product mutation
   const { mutate: createProduct, isPending: isCreatingProduct } =
     useCreateProduct({
       mutation: {
-        onSuccess: () => {
+        onSuccess: (data) => {
+          setSelectedProduct(data);
           ToastAndroid.show(
             "Produto cadastrado com sucesso!",
             ToastAndroid.SHORT
           );
           queryClient.invalidateQueries({ queryKey: ["products"] });
-          queryClient.invalidateQueries({ queryKey: ["favoriteProducts"] });
-          queryClient.invalidateQueries({ queryKey: ["readProducts"] });
-          queryClient.invalidateQueries({ queryKey: ["getFavoriteProducts"] });
-          resetForm();
-          router.back();
+          nextStep();
         },
         onError: (error) => {
-          console.error("Erro ao cadastrar produto:", error);
           ToastAndroid.show(
             "Erro ao cadastrar produto. Tente novamente.",
+            ToastAndroid.SHORT
+          );
+        },
+      },
+    });
+
+  // Create market mutation
+  const { mutate: createMarket, isPending: isCreatingMarketMutation } =
+    useCreateMarket({
+      mutation: {
+        onSuccess: (data) => {
+          setSelectedMarket(data);
+          ToastAndroid.show(
+            "Mercado cadastrado com sucesso!",
+            ToastAndroid.SHORT
+          );
+          queryClient.invalidateQueries({ queryKey: ["markets"] });
+          nextStep();
+        },
+        onError: (error) => {
+          ToastAndroid.show(
+            "Erro ao cadastrar mercado. Tente novamente.",
             ToastAndroid.SHORT
           );
         },
@@ -96,14 +219,26 @@ export default function AddProductScreen() {
   }, []);
 
   const resetForm = () => {
+    setCurrentStep(0);
+    setSelectedProduct(null);
+    setIsCreatingNewProduct(false);
+    setProductSearchQuery("");
     setProductName("");
     setPrice(0);
-    setMarket("");
+    setMarketName("");
     setImage(null);
     setImageBlob(null);
     setBarcode("");
     setDescription("");
     setCategory("");
+    setMarketSearchQuery("");
+    setSelectedMarket(null);
+    setIsCreatingMarket(false);
+    setAddress("");
+    setCity("");
+    setState("");
+    setReceiptImage(null);
+    setReceiptImageBlob(null);
     setErrors({});
   };
 
@@ -112,12 +247,10 @@ export default function AddProductScreen() {
 
     async function fetchProduct() {
       try {
-        console.log("Buscando produto com código:", barcode);
         const res = await fetch(
           `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`
         );
         const json = await res.json();
-        console.log("Resposta da API:", json.status);
         if (json.status === 1) {
           const p = json.product;
           setProductName(p.product_name || "");
@@ -136,7 +269,6 @@ export default function AddProductScreen() {
           );
         }
       } catch (err) {
-        console.error("Erro ao buscar dados:", err);
         Alert.alert("Erro ao buscar dados do produto");
       }
     }
@@ -157,7 +289,7 @@ export default function AddProductScreen() {
     }
   }, [params]);
 
-  const validateForm = (): boolean => {
+  const validateProductForm = (): boolean => {
     try {
       const formData = {
         name: productName,
@@ -165,9 +297,7 @@ export default function AddProductScreen() {
         category,
       };
 
-      console.log("Validando formulário:", formData);
       productSchema.parse(formData);
-      console.log("Validação bem-sucedida");
 
       setErrors({});
       return true;
@@ -179,17 +309,56 @@ export default function AddProductScreen() {
           formattedErrors[path] = err.message;
         });
 
-        console.log("Erros de validação:", formattedErrors);
         setErrors(formattedErrors);
 
         const firstError = error.errors[0];
         Alert.alert("Erro de Validação", firstError.message);
       } else {
-        console.error("Erro desconhecido:", error);
         Alert.alert("Erro", "Ocorreu um erro ao validar os dados");
       }
       return false;
     }
+  };
+
+  const validateMarketForm = (): boolean => {
+    // Skip validation if using existing market
+    if (selectedMarket && !isCreatingMarket) {
+      return true;
+    }
+
+    let isValid = true;
+    const newErrors: { [key: string]: string } = {};
+
+    if (!marketName.trim()) {
+      newErrors.marketName = "Nome do mercado é obrigatório";
+      isValid = false;
+    }
+
+    if (!address.trim()) {
+      newErrors.address = "Endereço é obrigatório";
+      isValid = false;
+    }
+
+    if (!city.trim()) {
+      newErrors.city = "Cidade é obrigatória";
+      isValid = false;
+    }
+
+    if (!state.trim()) {
+      newErrors.state = "Estado é obrigatório";
+      isValid = false;
+    } else if (state.trim().length !== 2) {
+      newErrors.state = "Estado deve ter 2 caracteres";
+      isValid = false;
+    }
+
+    setErrors((prev) => ({ ...prev, ...newErrors }));
+
+    if (!isValid) {
+      Alert.alert("Erro de Validação", "Preencha todos os campos obrigatórios");
+    }
+
+    return isValid;
   };
 
   const handlePriceChange = (text: string) => {
@@ -220,30 +389,60 @@ export default function AddProductScreen() {
     return `${formattedReais},${centavos}`;
   };
 
-  const handleSave = async () => {
-    if (!validateForm()) {
+  const handleSaveProduct = () => {
+    if (!validateProductForm()) {
       return;
     }
 
-    try {
+    if (isCreatingNewProduct) {
       const productData: ProductCreateDto = {
         name: productName,
         description,
         category,
-        // price: price / 100,
-        // market: market,
-        // barcode: barcode,
       };
-
-      console.log("Enviando dados do produto:", productData);
       createProduct({ data: productData });
-    } catch (error) {
-      console.error("Erro ao preparar dados:", error);
-      ToastAndroid.show(
-        "Erro ao preparar dados do produto. Tente novamente.",
-        ToastAndroid.SHORT
-      );
+    } else {
+      nextStep();
     }
+  };
+
+  const handleSaveMarket = () => {
+    if (!validateMarketForm()) {
+      return;
+    }
+
+    if (isCreatingMarket) {
+      const marketData: MarketCreateDto = {
+        name: marketName,
+        address,
+        city,
+        state,
+      };
+      createMarket({
+        data: marketData,
+      });
+    } else {
+      nextStep();
+    }
+  };
+
+  const handleSelectProduct = (product: ProductDto) => {
+    setSelectedProduct(product);
+    setProductName(product.name);
+    setDescription(product.description);
+    setCategory(product.category);
+    setProductSearchQuery("");
+    setIsCreatingNewProduct(false);
+    nextStep();
+  };
+
+  const handleCreateNewProduct = () => {
+    setIsCreatingNewProduct(true);
+    setSelectedProduct(null);
+    setProductName("");
+    setDescription("");
+    setCategory("");
+    nextStep();
   };
 
   const handleSelectImage = async () => {
@@ -276,14 +475,11 @@ export default function AddProductScreen() {
           const response = await fetch(selectedUri);
           const blob = await response.blob();
           setImageBlob(blob);
-        } catch (blobError) {
-          console.error("Erro ao converter imagem:", blobError);
-        }
+        } catch (blobError) {}
 
         setErrors((prev) => ({ ...prev, imageUri: undefined }));
       }
     } catch (error) {
-      console.error("Erro ao selecionar imagem:", error);
       Alert.alert("Erro", "Houve um problema ao selecionar a imagem");
     }
   };
@@ -317,14 +513,11 @@ export default function AddProductScreen() {
           const response = await fetch(photoUri);
           const blob = await response.blob();
           setImageBlob(blob);
-        } catch (blobError) {
-          console.error("Erro ao converter imagem:", blobError);
-        }
+        } catch (blobError) {}
 
         setErrors((prev) => ({ ...prev, imageUri: undefined }));
       }
     } catch (error) {
-      console.error("Erro ao capturar foto:", error);
       Alert.alert("Erro", "Houve um problema ao capturar a foto");
     }
   };
@@ -355,185 +548,330 @@ export default function AddProductScreen() {
     router.push("/barcode-scanner");
   };
 
+  const nextStep = () => {
+    if (currentStep < STEPS.length - 1) {
+      setCurrentStep(currentStep + 1);
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true });
+      }
+    } else {
+      finishProcess();
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true });
+      }
+    }
+  };
+
+  const validatePriceForm = (): boolean => {
+    let isValid = true;
+    const newErrors: { [key: string]: string } = {};
+
+    if (price <= 0) {
+      newErrors.price = "Preço é obrigatório";
+      isValid = false;
+    }
+
+    setErrors((prev) => ({ ...prev, ...newErrors }));
+
+    if (!isValid) {
+      Alert.alert(
+        "Erro de Validação",
+        "Informe um preço válido para continuar"
+      );
+    }
+
+    return isValid;
+  };
+
+  const handleSelectReceiptImage = async () => {
+    try {
+      const permissionResult =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (!permissionResult.granted) {
+        Alert.alert(
+          "Permissão Negada",
+          "Precisamos de permissão para acessar sua galeria"
+        );
+        return;
+      }
+
+      const options: ImagePicker.ImagePickerOptions = {
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3] as [number, number],
+        quality: 0.8,
+      };
+
+      const result = await ImagePicker.launchImageLibraryAsync(options);
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const selectedUri = result.assets[0].uri;
+        setReceiptImage(selectedUri);
+
+        try {
+          const response = await fetch(selectedUri);
+          const blob = await response.blob();
+          setReceiptImageBlob(blob);
+        } catch (blobError) {}
+
+        setErrors((prev) => ({ ...prev, receiptImage: undefined }));
+      }
+    } catch (error) {
+      Alert.alert("Erro", "Houve um problema ao selecionar a imagem");
+    }
+  };
+
+  const handleTakeReceiptPhoto = async () => {
+    try {
+      const permissionResult =
+        await ImagePicker.requestCameraPermissionsAsync();
+
+      if (!permissionResult.granted) {
+        Alert.alert(
+          "Permissão Negada",
+          "Precisamos de permissão para acessar sua câmera"
+        );
+        return;
+      }
+
+      const options: ImagePicker.ImagePickerOptions = {
+        allowsEditing: true,
+        aspect: [4, 3] as [number, number],
+        quality: 0.8,
+      };
+
+      const result = await ImagePicker.launchCameraAsync(options);
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const photoUri = result.assets[0].uri;
+        setReceiptImage(photoUri);
+
+        try {
+          const response = await fetch(photoUri);
+          const blob = await response.blob();
+          setReceiptImageBlob(blob);
+        } catch (blobError) {}
+
+        setErrors((prev) => ({ ...prev, receiptImage: undefined }));
+      }
+    } catch (error) {
+      Alert.alert("Erro", "Houve um problema ao capturar a foto");
+    }
+  };
+
+  const showReceiptImageOptions = () => {
+    Alert.alert(
+      "Selecionar Comprovante",
+      "Escolha uma opção",
+      [
+        {
+          text: "Câmera",
+          onPress: handleTakeReceiptPhoto,
+        },
+        {
+          text: "Galeria",
+          onPress: handleSelectReceiptImage,
+        },
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const handleSavePriceDetails = () => {
+    if (!validatePriceForm()) {
+      return;
+    }
+
+    finishProcess();
+  };
+
+  const handleChangeProduct = () => {
+    // Go back to product selection step
+    setCurrentStep(0);
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true });
+    }
+  };
+
+  // Render the current step content
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <ProductSelectionStep
+            searchQuery={productSearchQuery}
+            setSearchQuery={setProductSearchQuery}
+            searchResults={productSearchResults}
+            isSearching={isSearchingProducts}
+            handleSelectProduct={handleSelectProduct}
+            handleCreateNewProduct={handleCreateNewProduct}
+            openBarcodeScanner={openBarcodeScanner}
+          />
+        );
+      case 1:
+        return (
+          <ProductDetailsStep
+            productName={productName}
+            setProductName={setProductName}
+            description={description}
+            setDescription={setDescription}
+            category={category}
+            setCategory={setCategory}
+            isCreatingNewProduct={isCreatingNewProduct}
+            image={image}
+            showImageOptions={showImageOptions}
+            errors={errors}
+            focusedField={focusedField}
+            setFocusedField={setFocusedField}
+          />
+        );
+      case 2:
+        return (
+          <MarketSelectionStep
+            searchQuery={marketSearchQuery}
+            setSearchQuery={setMarketSearchQuery}
+            searchResults={marketSearchResults}
+            isSearching={isSearchingMarkets}
+            handleSelectMarket={handleSelectMarket}
+            handleCreateNewMarket={handleCreateNewMarket}
+            isCreatingMarket={isCreatingMarket}
+            market={selectedMarket}
+            marketName={marketName}
+            address={address}
+            city={city}
+            state={state}
+            setMarketName={setMarketName}
+            setAddress={setAddress}
+            setCity={setCity}
+            setState={setState}
+            errors={errors}
+            focusedField={focusedField}
+            setFocusedField={setFocusedField}
+            selectedProduct={selectedProduct}
+            handleChangeProduct={handleChangeProduct}
+          />
+        );
+      case 3:
+        return (
+          <PriceDetailsStep
+            productInfo={selectedProduct}
+            marketInfo={selectedMarket}
+            price={price}
+            handlePriceChange={handlePriceChange}
+            formatPrice={formatPrice}
+            receiptImage={receiptImage}
+            showReceiptImageOptions={showReceiptImageOptions}
+            focusedField={focusedField}
+            setFocusedField={setFocusedField}
+            errors={errors}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  const getStepAction = () => {
+    switch (currentStep) {
+      case 0:
+        return selectedProduct ? nextStep : handleCreateNewProduct;
+      case 1:
+        return handleSaveProduct;
+      case 2:
+        return handleSaveMarket;
+      case 3:
+        return handleSavePriceDetails;
+      default:
+        return () => {};
+    }
+  };
+
+  const finishProcess = () => {
+    ToastAndroid.show(
+      "Produto e preço cadastrados com sucesso!",
+      ToastAndroid.SHORT
+    );
+    resetForm();
+    router.back();
+  };
+
+  const handleSelectMarket = (market: MarketDto | null) => {
+    setSelectedMarket(market);
+    if (market) {
+      setMarketName(market.name);
+      setAddress(market.address);
+      setCity(market.city);
+      setState(market.state);
+      setMarketSearchQuery("");
+      setIsCreatingMarket(false);
+    }
+  };
+
+  const handleCreateNewMarket = () => {
+    setIsCreatingMarket(true);
+    setSelectedMarket(null);
+    setMarketName("");
+    setAddress("");
+    setCity("");
+    setState("");
+  };
+
+  const isLoading =
+    isCreatingProduct ||
+    isCreatingMarketMutation ||
+    isSearchingProducts ||
+    isSearchingMarkets;
+
   return (
     <SafeAreaView style={styles.container}>
       <Header />
 
-      <ScrollView style={styles.scrollView} keyboardShouldPersistTaps="handled">
+      <Stepper steps={STEPS} currentStep={currentStep} />
+
+      <ScrollView
+        ref={scrollViewRef}
+        style={styles.scrollView}
+        keyboardShouldPersistTaps="handled"
+        nestedScrollEnabled={true}
+      >
         <View style={styles.content}>
-          <Text style={styles.sectionTitle}>Adicionar Produto</Text>
+          {renderStepContent()}
 
-          <View style={styles.imageSection}>
-            <Text style={styles.imageLabel}>Foto do Produto</Text>
-            <TouchableOpacity
-              style={styles.imageContainer}
-              onPress={showImageOptions}
-              activeOpacity={0.8}
-            >
-              {image ? (
-                <Image source={{ uri: image }} style={styles.image} />
-              ) : (
-                <View style={styles.imagePlaceholder}>
-                  <MaterialCommunityIcons
-                    name="camera-plus-outline"
-                    size={40}
-                    color="#9E9E9E"
-                    style={styles.placeholderIcon}
-                  />
-                  <Text style={styles.placeholderText}>
-                    Toque para adicionar uma foto do produto
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
-            {image && (
-              <Text style={styles.imageInfo}>
-                Toque na imagem para alterar a foto
-              </Text>
-            )}
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.formGroup}>
-            <Text style={styles.inputLabel}>Nome do Produto</Text>
-            <TextInput
-              style={[
-                styles.input,
-                focusedField === "name" && styles.inputFocused,
-                errors.name && styles.inputError,
-              ]}
-              value={productName}
-              onChangeText={setProductName}
-              placeholder="Ex: Arroz Integral Tipo 1"
-              onFocus={() => setFocusedField("name")}
-              onBlur={() => setFocusedField(null)}
-            />
-            {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.inputLabel}>Preço (R$)</Text>
-            <View style={styles.priceContainer}>
-              <Text style={styles.priceCurrency}>R$</Text>
-              <TextInput
-                style={styles.priceInput}
-                value={formatPrice(price)}
-                onChangeText={handlePriceChange}
-                placeholder="0,00"
-                keyboardType="numeric"
-                onFocus={() => setFocusedField("price")}
-                onBlur={() => setFocusedField(null)}
-              />
-            </View>
-            {errors.price && (
-              <Text style={styles.errorText}>{errors.price}</Text>
-            )}
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.inputLabel}>Mercado</Text>
-            <TextInput
-              style={[
-                styles.input,
-                focusedField === "market" && styles.inputFocused,
-                errors.market && styles.inputError,
-              ]}
-              value={market}
-              onChangeText={setMarket}
-              placeholder="Ex: Supermercado Bom Preço"
-              onFocus={() => setFocusedField("market")}
-              onBlur={() => setFocusedField(null)}
-            />
-            {errors.market && (
-              <Text style={styles.errorText}>{errors.market}</Text>
-            )}
-          </View>
-
-          <View style={styles.barcodeSection}>
-            <Text style={styles.inputLabel}>Código de Barras</Text>
-            <View style={styles.barcodeContainer}>
-              <TextInput
-                style={[
-                  styles.barcodeInput,
-                  focusedField === "barcode" && styles.inputFocused,
-                  errors.barcode && styles.inputError,
-                ]}
-                value={barcode}
-                onChangeText={setBarcode}
-                placeholder="Digite ou escaneie o código"
-                keyboardType="numeric"
-                onFocus={() => setFocusedField("barcode")}
-                onBlur={() => setFocusedField(null)}
-              />
+          <View style={styles.buttonsContainer}>
+            {currentStep > 0 && (
               <TouchableOpacity
-                style={styles.scanButton}
-                onPress={openBarcodeScanner}
+                style={styles.backButton}
+                onPress={prevStep}
                 activeOpacity={0.7}
+                disabled={isLoading}
               >
-                <MaterialCommunityIcons
-                  name="barcode-scan"
-                  size={24}
-                  color={appColors.primary}
-                />
+                <Text style={styles.backButtonText}>Voltar</Text>
               </TouchableOpacity>
-            </View>
-            {errors.barcode && (
-              <Text style={styles.errorText}>{errors.barcode}</Text>
             )}
-          </View>
 
-          <View style={styles.divider} />
-
-          <View style={styles.formGroup}>
-            <Text style={styles.inputLabel}>Descrição</Text>
-            <TextInput
-              style={[
-                styles.textArea,
-                focusedField === "description" && styles.inputFocused,
-                errors.description && styles.inputError,
-              ]}
-              value={description}
-              onChangeText={setDescription}
-              placeholder="Descreva detalhes como marca, tamanho, tipo, etc."
-              multiline
-              numberOfLines={4}
-              onFocus={() => setFocusedField("description")}
-              onBlur={() => setFocusedField(null)}
-            />
-            {errors.description && (
-              <Text style={styles.errorText}>{errors.description}</Text>
-            )}
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.inputLabel}>Categoria</Text>
-            <TextInput
-              style={[
-                styles.input,
-                focusedField === "category" && styles.inputFocused,
-                errors.category && styles.inputError,
-              ]}
-              value={category}
-              onChangeText={setCategory}
-              placeholder="Ex: Alimentos, Bebidas, Limpeza"
-              onFocus={() => setFocusedField("category")}
-              onBlur={() => setFocusedField(null)}
-            />
-            {errors.category && (
-              <Text style={styles.errorText}>{errors.category}</Text>
-            )}
-          </View>
-
-          <View style={styles.saveButtonContainer}>
             <TouchableOpacity
-              style={[styles.saveButton, isCreatingProduct && { opacity: 0.7 }]}
-              onPress={handleSave}
-              disabled={isCreatingProduct}
-              activeOpacity={0.8}
+              style={[styles.nextButton, isLoading && { opacity: 0.7 }]}
+              onPress={getStepAction()}
+              disabled={isLoading}
+              activeOpacity={0.7}
             >
-              <Text style={styles.saveButtonText}>
-                {isCreatingProduct ? "Salvando..." : "Cadastrar Produto"}
+              <Text style={styles.nextButtonText}>
+                {isLoading
+                  ? "Carregando..."
+                  : currentStep === STEPS.length - 1
+                  ? "Finalizar"
+                  : "Avançar"}
               </Text>
             </TouchableOpacity>
           </View>
