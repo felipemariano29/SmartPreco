@@ -28,6 +28,11 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useReadPrices } from "@/api/price/price";
 import { PriceDto } from "@/api/model";
+import {
+  ProductImage,
+  MarketList,
+  ProductInfoSection,
+} from "@/components/product-details";
 
 type ProductDetailParams = {
   id: number;
@@ -239,6 +244,67 @@ export default function ProductDetailScreen() {
     return "";
   };
 
+  // Render loading state or content
+  const renderContent = () => {
+    if (isLoadingPrices) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007BFF" />
+          <Text style={styles.loadingText}>Carregando informações...</Text>
+        </View>
+      );
+    }
+
+    return (
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.imageContainer}>
+          <ProductImage params={params} marketPrice={marketPrice} />
+        </View>
+
+        <ProductInfoSection
+          marketPrice={marketPrice}
+          params={params}
+          getCategory={getCategory}
+          formatPrice={formatPrice}
+        />
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Descrição</Text>
+          <Text style={styles.description}>{getDescription()}</Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Disponível em</Text>
+          <MarketList
+            productPrices={productPrices}
+            formatPrice={formatPrice}
+            navigateToMarketDetail={navigateToMarketDetail}
+          />
+        </View>
+
+        <View style={styles.compareSection}>
+          <TouchableOpacity
+            style={styles.compareButton}
+            onPress={() => console.log("Comparar preços")}
+          >
+            <Text style={styles.compareButtonText}>Comparar Preços</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.reportSection}>
+          <TouchableOpacity
+            style={styles.reportButton}
+            onPress={() => setReportModalVisible(true)}
+          >
+            <Text style={styles.reportButtonText}>
+              {reportSubmitted ? "Denúncia enviada" : "Denunciar Produto"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -260,100 +326,7 @@ export default function ProductDetailScreen() {
         />
       </View>
 
-      {isLoadingPrices ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#007BFF" />
-          <Text style={styles.loadingText}>Carregando informações...</Text>
-        </View>
-      ) : (
-        <ScrollView style={styles.scrollView}>
-          <View style={styles.imageContainer}>
-            {params.image ? (
-              <Image source={params.image} style={styles.productImage} />
-            ) : marketPrice?.imageUrl ? (
-              <Image
-                source={{ uri: marketPrice.imageUrl }}
-                style={styles.productImage}
-              />
-            ) : (
-              <View style={styles.placeholderImage} />
-            )}
-          </View>
-
-          <View style={styles.infoSection}>
-            <Text style={styles.productName}>
-              {marketPrice?.product?.name || params.name}
-            </Text>
-            <Text style={styles.productPrice}>
-              {marketPrice ? formatPrice(marketPrice.price) : params.price}
-            </Text>
-            {getCategory() && (
-              <Text style={styles.productCategory}>
-                Categoria: {getCategory()}
-              </Text>
-            )}
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Descrição</Text>
-            <Text style={styles.description}>{getDescription()}</Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Disponível em</Text>
-            {productPrices.length > 0 ? (
-              productPrices.map((price) => (
-                <TouchableOpacity
-                  key={price.id}
-                  style={styles.marketItem}
-                  onPress={() =>
-                    navigateToMarketDetail(price.market.id, price.market.name)
-                  }
-                >
-                  <View style={styles.marketInfo}>
-                    <Text style={styles.marketName}>{price.market.name}</Text>
-                    <Text style={styles.marketDetail}>~ 2.5 km • 4.5 ★</Text>
-                  </View>
-                  <View style={styles.marketPriceContainer}>
-                    <Text style={styles.marketPrice}>
-                      {formatPrice(price.price)}
-                    </Text>
-                    <IconButton
-                      icon="chevron-right"
-                      size={20}
-                      style={styles.marketArrow}
-                    />
-                  </View>
-                </TouchableOpacity>
-              ))
-            ) : (
-              <Text style={styles.noDataText}>
-                Nenhum mercado encontrado para este produto.
-              </Text>
-            )}
-          </View>
-
-          <View style={styles.compareSection}>
-            <TouchableOpacity
-              style={styles.compareButton}
-              onPress={() => console.log("Comparar preços")}
-            >
-              <Text style={styles.compareButtonText}>Comparar Preços</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.reportSection}>
-            <TouchableOpacity
-              style={styles.reportButton}
-              onPress={() => setReportModalVisible(true)}
-            >
-              <Text style={styles.reportButtonText}>
-                {reportSubmitted ? "Denúncia enviada" : "Denunciar Produto"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      )}
+      {renderContent()}
 
       <ReportModal
         visible={reportModalVisible}

@@ -206,18 +206,17 @@ export default function HomeScreen() {
   ].slice(0, 5);
 
   const handleToggleFavorite = (item: ItemType) => {
-    if (item.type === "market") {
-      if (item.isFavorite) {
-        unfavoriteMarket({ marketId: item.id });
-      } else {
-        favoriteMarket({ marketId: item.id });
-      }
+    const isMarket = item.type === "market";
+    const isFavorited = item.isFavorite;
+
+    if (isMarket && isFavorited) {
+      unfavoriteMarket({ marketId: item.id });
+    } else if (isMarket && !isFavorited) {
+      favoriteMarket({ marketId: item.id });
+    } else if (!isMarket && isFavorited) {
+      unfavoriteProduct({ productId: item.id });
     } else {
-      if (item.isFavorite) {
-        unfavoriteProduct({ productId: item.id });
-      } else {
-        favoriteProduct({ productId: item.id });
-      }
+      favoriteProduct({ productId: item.id });
     }
   };
 
