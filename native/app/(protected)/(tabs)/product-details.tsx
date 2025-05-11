@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { IconButton } from "react-native-paper";
 import {
@@ -9,6 +16,11 @@ import {
 } from "@react-navigation/native";
 import { styles } from "@/styles/product-details";
 import ReportModal from "@/components/ReportModal";
+import { AxiosError } from "axios";
+import Constants from "expo-constants";
+import { createReport, useCreateReport } from "@/api/report/report";
+
+const API_URL = Constants.expoConfig?.extra?.apiUrl || "http://localhost:3000";
 
 type ProductDetailParams = {
   id: number;
@@ -17,6 +29,7 @@ type ProductDetailParams = {
   image: null | any;
   marketId?: number;
   marketName?: string;
+  priceId?: string;
 };
 
 type RootStackParamList = {
@@ -42,6 +55,7 @@ export default function ProductDetailScreen() {
   const params = route.params as ProductDetailParams;
   const [isFavorite, setIsFavorite] = useState(false);
   const [reportModalVisible, setReportModalVisible] = useState(false);
+  const [reportSubmitted, setReportSubmitted] = useState(false);
 
   const associatedMarket = {
     id: params.marketId || 1,
@@ -69,21 +83,36 @@ export default function ProductDetailScreen() {
     });
   };
 
-  const handleReport = (reason: ReportReason, details: string) => {
-    // Aqui você implementaria a lógica para enviar o relatório ao backend
-    console.log("Denúncia:", {
-      productId: params.id,
-      productName: params.name,
-      reason,
-      details,
-    });
-    // Exemplo de API call:
-    // api.reports.create({
-    //   productId: params.id,
-    //   reason,
-    //   details,
-    //   reportedAt: new Date()
-    // });
+  const createReportMutation = useCreateReport();
+
+  const handleReport = async (reason: ReportReason, details: string) => {
+    const reportData = {
+      priceId: "013672f2-152f-4842-b8eb-0ce0d5b559cb",
+      reason: reason,
+    };
+
+    try {
+      await createReportMutation.mutateAsync({
+        data: reportData,
+      });
+
+      setReportSubmitted(true);
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("Erro na chamada da API:", axiosError);
+      Alert.alert(
+        "Erro",
+        "Não foi possível enviar a denúncia. Tente novamente mais tarde.",
+        [{ text: "OK" }]
+      );
+    }
+  };
+
+  const handleReportModalDismiss = () => {
+    setReportModalVisible(false);
+    if (reportSubmitted) {
+      setReportSubmitted(false);
+    }
   };
 
   return (
@@ -158,16 +187,19 @@ export default function ProductDetailScreen() {
             style={styles.reportButton}
             onPress={() => setReportModalVisible(true)}
           >
-            <Text style={styles.reportButtonText}>Denunciar Produto</Text>
+            <Text style={styles.reportButtonText}>
+              {reportSubmitted ? "Denúncia enviada" : "Denunciar Produto"}
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
 
       <ReportModal
         visible={reportModalVisible}
-        onDismiss={() => setReportModalVisible(false)}
+        onDismiss={handleReportModalDismiss}
         onSubmit={handleReport}
         productName={params.name}
+        isSubmitted={reportSubmitted}
       />
     </SafeAreaView>
   );

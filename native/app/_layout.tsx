@@ -19,6 +19,7 @@ import { NotificationProvider } from "@/contexts/NotificationContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { tokenCache } from "@/utils/secureToken";
 import { PaperProvider } from "react-native-paper";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -38,21 +39,25 @@ export default function RootLayout() {
     return null;
   }
 
+  const queryClient = new QueryClient();
+
   return (
-    <ClerkProvider
-      publishableKey={EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? ""}
-      tokenCache={tokenCache}
-    >
-      <PaperProvider theme={theme}>
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-          <NotificationProvider>
-            <NotificationsManager />
-            <Slot />
-          </NotificationProvider>
-        </ThemeProvider>
-      </PaperProvider>
-    </ClerkProvider>
+    <QueryClientProvider client={queryClient}>
+      <ClerkProvider
+        publishableKey={EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? ""}
+        tokenCache={tokenCache}
+      >
+        <PaperProvider theme={theme}>
+          <ThemeProvider
+            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+          >
+            <NotificationProvider>
+              <NotificationsManager />
+              <Slot />
+            </NotificationProvider>
+          </ThemeProvider>
+        </PaperProvider>
+      </ClerkProvider>
+    </QueryClientProvider>
   );
 }
