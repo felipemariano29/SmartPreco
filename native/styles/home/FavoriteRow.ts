@@ -1,65 +1,40 @@
-import { StyleSheet, Dimensions } from "react-native";
-
-const { width } = Dimensions.get("window");
-const FAVORITE_WIDTH = width * 0.28;
+import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-  favoritesList: {
-    paddingVertical: 5,
+  container: {
+    paddingVertical: 10,
+  },
+  emptyContainer: {
+    padding: 20,
+    alignItems: "center",
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#666",
   },
   favoriteItem: {
-    width: FAVORITE_WIDTH,
+    width: 150,
     marginRight: 10,
-    borderRadius: 10,
-    backgroundColor: "white",
-    elevation: 2,
-    overflow: "hidden",
   },
-  favoriteContent: {
-    padding: 8,
-    position: "relative",
-    alignItems: "center",
-    height: 90,
-  },
-  favoriteTextContainer: {
-    marginTop: 6,
-    alignItems: "center",
-  },
-  favoriteName: {
-    fontSize: 12,
-    fontWeight: "500",
-    textAlign: "center",
-  },
-  favoritePrice: {
-    fontSize: 11,
-    fontWeight: "bold",
-    color: "#2e8b57",
-    marginTop: 2,
-  },
-  favoriteTag: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    width: 16,
-    height: 16,
+  card: {
     borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
+    elevation: 2,
   },
-  marketTag: {
-    backgroundColor: "#e6f7ff",
+  cardContent: {
+    padding: 12,
   },
-  productTag: {
-    backgroundColor: "#f6ffed",
+  name: {
+    fontSize: 16,
+    fontWeight: "500",
+    marginBottom: 4,
   },
-  favoriteTagText: {
-    fontSize: 8,
-    fontWeight: "bold",
+  price: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 4,
   },
-  marketAvatar: {
-    backgroundColor: "#1890ff",
-  },
-  productAvatar: {
-    backgroundColor: "#52c41a",
+  type: {
+    fontSize: 12,
+    color: "#999",
   },
 });

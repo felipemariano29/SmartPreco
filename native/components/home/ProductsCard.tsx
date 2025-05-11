@@ -7,9 +7,13 @@ import { styles } from "@/styles/home/ProductsCard";
 
 type ProductCardProps = {
   product: ItemType;
+  onToggleFavorite: (item: ItemType) => void;
 };
 
-export const ProductCard = ({ product }: ProductCardProps) => {
+export const ProductCard = ({
+  product,
+  onToggleFavorite,
+}: ProductCardProps) => {
   const navigateToProductDetails = () => {
     router.push({
       pathname: "/product-details",
@@ -17,6 +21,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         id: product.id,
         name: product.name,
         price: product.price,
+        category: product.category,
       },
     });
   };
@@ -34,13 +39,14 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
         <View style={styles.productInfo}>
           <Text style={styles.productName}>{product.name}</Text>
+          <Text style={styles.productPrice}>{product.category}</Text>
           <Text style={styles.productPrice}>{product.price}</Text>
         </View>
 
         <IconButton
-          icon="star-outline"
+          icon={product.isFavorite ? "star" : "star-outline"}
           size={24}
-          onPress={() => console.log(`Favoritar produto ${product.id}`)}
+          onPress={() => onToggleFavorite(product)}
           style={styles.favoriteButton}
         />
       </View>

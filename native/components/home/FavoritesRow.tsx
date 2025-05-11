@@ -1,15 +1,19 @@
 import React from "react";
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { Card } from "react-native-paper";
 import { router } from "expo-router";
-import { Avatar } from "react-native-paper";
 import { ItemType } from "@/app/(protected)/(tabs)";
 import { styles } from "@/styles/home/FavoriteRow";
 
 type FavoritesRowProps = {
   favorites: ItemType[];
+  onToggleFavorite: (item: ItemType) => void;
 };
 
-export const FavoritesRow = ({ favorites }: FavoritesRowProps) => {
+export const FavoritesRow = ({
+  favorites,
+  onToggleFavorite,
+}: FavoritesRowProps) => {
   const navigateToDetails = (item: ItemType) => {
     if (item.type === "product") {
       router.push({
@@ -31,51 +35,41 @@ export const FavoritesRow = ({ favorites }: FavoritesRowProps) => {
     }
   };
 
-  const renderFavoriteItem = ({ item }: { item: ItemType }) => (
-    <TouchableOpacity
-      style={styles.favoriteItem}
-      onPress={() => navigateToDetails(item)}
-    >
-      <View style={styles.favoriteContent}>
-        <Avatar.Icon
-          size={40}
-          icon={item.type === "market" ? "store" : "package"}
-          style={
-            item.type === "market" ? styles.marketAvatar : styles.productAvatar
-          }
-        />
-
-        <View style={styles.favoriteTextContainer}>
-          <Text style={styles.favoriteName} numberOfLines={1}>
-            {item.name}
-          </Text>
-          {item.price ? (
-            <Text style={styles.favoritePrice}>{item.price}</Text>
-          ) : null}
-        </View>
-
-        <View
-          style={[
-            styles.favoriteTag,
-            item.type === "market" ? styles.marketTag : styles.productTag,
-          ]}
-        >
-          <Text style={styles.favoriteTagText}>
-            {item.type === "market" ? "M" : "P"}
-          </Text>
-        </View>
+  if (favorites.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>Nenhum favorito adicionado</Text>
       </View>
-    </TouchableOpacity>
-  );
+    );
+  }
 
   return (
-    <FlatList
-      data={favorites}
-      renderItem={renderFavoriteItem}
-      keyExtractor={(item) => item.id.toString()}
+    <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.favoritesList}
-    />
+      contentContainerStyle={styles.container}
+    >
+      {favorites.map((item) => (
+        <TouchableOpacity
+          key={item.id}
+          onPress={() => navigateToDetails(item)}
+          style={styles.favoriteItem}
+        >
+          <Card style={styles.card}>
+            <View style={styles.cardContent}>
+              <Text style={styles.name} numberOfLines={1}>
+                {item.name}
+              </Text>
+              {item.price ? (
+                <Text style={styles.price}>{item.price}</Text>
+              ) : null}
+              <Text style={styles.type}>
+                {item.type === "market" ? "Mercado" : "Produto"}
+              </Text>
+            </View>
+          </Card>
+        </TouchableOpacity>
+      ))}
+    </ScrollView>
   );
 };

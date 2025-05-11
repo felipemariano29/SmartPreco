@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  ToastAndroid,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { IconButton } from "react-native-paper";
@@ -19,6 +20,12 @@ import ReportModal from "@/components/ReportModal";
 import { AxiosError } from "axios";
 import Constants from "expo-constants";
 import { createReport, useCreateReport } from "@/api/report/report";
+import {
+  useFavoriteProduct,
+  useGetFavoriteProducts,
+  useUnfavoriteProduct,
+} from "@/api/favorite-product/favorite-product";
+import { useQueryClient } from "@tanstack/react-query";
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || "http://localhost:3000";
 
@@ -56,6 +63,49 @@ export default function ProductDetailScreen() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [reportSubmitted, setReportSubmitted] = useState(false);
+  const queryClient = useQueryClient();
+
+  const { data: favoriteProducts, refetch: refetchFavorites } =
+    useGetFavoriteProducts();
+
+  useEffect(() => {
+    if (favoriteProducts) {
+      const isProductFavorite = favoriteProducts.some(
+        (product) => product.id === params.id.toString()
+      );
+      setIsFavorite(isProductFavorite);
+    }
+  }, [favoriteProducts, params.id]);
+
+  const { mutate: favoriteProduct } = useFavoriteProduct({
+    mutation: {
+      onSuccess: () => {
+        setIsFavorite(true);
+        refetchFavorites();
+        queryClient.invalidateQueries({ queryKey: ["favoriteProducts"] });
+        queryClient.invalidateQueries({ queryKey: ["products"] });
+        ToastAndroid.show(
+          "Produto favoritado com sucesso!",
+          ToastAndroid.SHORT
+        );
+      },
+    },
+  });
+
+  const { mutate: unfavoriteProduct } = useUnfavoriteProduct({
+    mutation: {
+      onSuccess: () => {
+        setIsFavorite(false);
+        refetchFavorites();
+        queryClient.invalidateQueries({ queryKey: ["favoriteProducts"] });
+        queryClient.invalidateQueries({ queryKey: ["products"] });
+        ToastAndroid.show(
+          "Produto removido dos favoritos!",
+          ToastAndroid.SHORT
+        );
+      },
+    },
+  });
 
   const associatedMarket = {
     id: params.marketId || 1,
@@ -70,8 +120,12 @@ export default function ProductDetailScreen() {
       "Este é um produto de alta qualidade que oferece excelente custo-benefício.",
   };
 
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
+  const handleToggleFavorite = () => {
+    if (isFavorite) {
+      unfavoriteProduct({ productId: params.id.toString() });
+    } else {
+      favoriteProduct({ productId: params.id.toString() });
+    }
   };
 
   const navigateToMarketDetail = () => {
@@ -123,11 +177,14 @@ export default function ProductDetailScreen() {
           size={24}
           onPress={() => navigation.goBack()}
         />
-        <Text style={styles.headerTitle}>Detalhes do Produto</Text>
+        <View style={styles.headerTitleContainer}>
+          <Text style={styles.headerTitle}>Detalhes do Produto</Text>
+          <Text style={styles.headerSubtitle}>{params.marketName}</Text>
+        </View>
         <IconButton
           icon={isFavorite ? "star" : "star-outline"}
           size={24}
-          onPress={toggleFavorite}
+          onPress={handleToggleFavorite}
         />
       </View>
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   ScrollView,
+  ToastAndroid,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { IconButton, Chip } from "react-native-paper";
@@ -15,12 +16,19 @@ import {
   NavigationProp,
 } from "@react-navigation/native";
 import { styles } from "@/styles/market-details";
+import {
+  useFavoriteMarket,
+  useGetFavoriteMarkets,
+  useUnfavoriteMarket,
+} from "@/api/favorite-market/favorite-market";
+import { useQueryClient } from "@tanstack/react-query";
 
 type MarketDetailParams = {
   id: number;
   name: string;
   rating: number;
   distance: string;
+  city: string;
 };
 
 type ProductItem = {
@@ -48,6 +56,58 @@ export default function MarketDetailScreen() {
   const route = useRoute();
   const params = route.params as MarketDetailParams;
   const [activeCategory, setActiveCategory] = useState<string>("Todos");
+  const [isFavorite, setIsFavorite] = useState(false);
+  const queryClient = useQueryClient();
+
+  const { data: favoriteMarkets, refetch: refetchFavorites } =
+    useGetFavoriteMarkets();
+
+  useEffect(() => {
+    if (favoriteMarkets) {
+      const isMarketFavorite = favoriteMarkets.some(
+        (market) => market.id === params.id.toString()
+      );
+      setIsFavorite(isMarketFavorite);
+    }
+  }, [favoriteMarkets, params.id]);
+
+  const { mutate: favoriteMarket } = useFavoriteMarket({
+    mutation: {
+      onSuccess: () => {
+        setIsFavorite(true);
+        refetchFavorites();
+        queryClient.invalidateQueries({ queryKey: ["favoriteMarkets"] });
+        queryClient.invalidateQueries({ queryKey: ["markets"] });
+        ToastAndroid.show(
+          "Mercado favoritado com sucesso!",
+          ToastAndroid.SHORT
+        );
+      },
+    },
+  });
+
+  const { mutate: unfavoriteMarket } = useUnfavoriteMarket({
+    mutation: {
+      onSuccess: () => {
+        setIsFavorite(false);
+        refetchFavorites();
+        queryClient.invalidateQueries({ queryKey: ["favoriteMarkets"] });
+        queryClient.invalidateQueries({ queryKey: ["markets"] });
+        ToastAndroid.show(
+          "Mercado removido dos favoritos!",
+          ToastAndroid.SHORT
+        );
+      },
+    },
+  });
+
+  const handleToggleFavorite = () => {
+    if (isFavorite) {
+      unfavoriteMarket({ marketId: params.id.toString() });
+    } else {
+      favoriteMarket({ marketId: params.id.toString() });
+    }
+  };
 
   const marketInfo = {
     address: "Av. Principal, 123 - Centro",
@@ -152,11 +212,14 @@ export default function MarketDetailScreen() {
           size={24}
           onPress={() => navigation.goBack()}
         />
-        <Text style={styles.headerTitle}>{params.name}</Text>
+        <View style={styles.headerTitleContainer}>
+          <Text style={styles.headerTitle}>{params.name}</Text>
+          <Text style={styles.headerSubtitle}>{params.city}</Text>
+        </View>
         <IconButton
-          icon="map-marker"
+          icon={isFavorite ? "star" : "star-outline"}
           size={24}
-          onPress={() => console.log("Abrir mapa")}
+          onPress={handleToggleFavorite}
         />
       </View>
 

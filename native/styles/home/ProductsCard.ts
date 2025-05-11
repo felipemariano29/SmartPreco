@@ -46,6 +46,11 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#2e8b57",
   },
+  productCategory: {
+    fontSize: 8,
+    fontWeight: "bold",
+    color: "#2e8b57",
+  },
   favoriteButton: {
     alignSelf: "center",
     margin: 0,

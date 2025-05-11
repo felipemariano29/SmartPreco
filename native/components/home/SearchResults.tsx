@@ -7,9 +7,13 @@ import { styles } from "@/styles/home/SearchResults";
 
 type SearchResultsProps = {
   results: ItemType[];
+  onToggleFavorite: (item: ItemType) => void;
 };
 
-export const SearchResults = ({ results }: SearchResultsProps) => {
+export const SearchResults = ({
+  results,
+  onToggleFavorite,
+}: SearchResultsProps) => {
   const navigateToDetails = (item: ItemType) => {
     if (item.type === "product") {
       router.push({
@@ -68,9 +72,9 @@ export const SearchResults = ({ results }: SearchResultsProps) => {
         </View>
 
         <IconButton
-          icon="star-outline"
+          icon={item.isFavorite ? "star" : "star-outline"}
           size={24}
-          onPress={() => console.log(`Favoritar ${item.type} ${item.id}`)}
+          onPress={() => onToggleFavorite(item)}
           style={styles.favoriteButton}
         />
       </View>
