@@ -3,10 +3,22 @@ import { useEffect, useRef, useState } from "react";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import * as Device from "expo-device";
+import { router } from "expo-router";
+import {
+  useNotification,
+  NotificationData,
+} from "@/contexts/NotificationContext";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
 
 async function registerForPushNotificationsAsync() {
   let token;
-  console.log(token);
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync("default", {
       name: "default",
@@ -27,7 +39,6 @@ async function registerForPushNotificationsAsync() {
     }
 
     if (finalStatus !== "granted") {
-      console.log("Falha ao obter permissão para notificações!");
       return;
     }
 
@@ -38,14 +49,10 @@ async function registerForPushNotificationsAsync() {
           projectId: projectId,
         });
         token = pushToken.data;
-      } else {
-        console.log("EXPO_PUBLIC_PROJECT_ID não configurado");
       }
     } catch (error) {
-      console.log("Erro ao obter token de push:", error);
+      console.error("Erro ao obter token de push:", error);
     }
-  } else {
-    console.log("As notificações push requerem um dispositivo físico.");
   }
 
   return token;
@@ -55,9 +62,46 @@ export function NotificationsManager() {
   const { user, isSignedIn } = useUser();
   const [isLoading, setIsLoading] = useState(true);
   const [expoPushToken, setExpoPushToken] = useState("");
+  const { handleNotificationData } = useNotification();
 
   const notificationListener = useRef<any | null>(null);
   const responseListener = useRef<Notifications.Subscription | null>(null);
+
+  const handleNotificationResponse = (
+    response: Notifications.NotificationResponse
+  ) => {
+    const data = response.notification.request.content.data as NotificationData;
+
+    handleNotificationData(data);
+
+    if (data && data.screen) {
+      switch (data.screen) {
+        case "product-details":
+          if (data.productId) {
+            router.push({
+              pathname: "/product-details",
+              params: {
+                id: data.productId,
+              },
+            });
+          }
+          break;
+        case "market-details":
+          if (data.marketId) {
+            router.push({
+              pathname: "/market-details",
+              params: {
+                id: data.marketId,
+              },
+            });
+          }
+          break;
+        default:
+          router.push("/(protected)/(tabs)");
+          break;
+      }
+    }
+  };
 
   const saveTokenToClerk = async (token: string) => {
     try {
@@ -65,7 +109,6 @@ export function NotificationsManager() {
         const currentMetadata = user.unsafeMetadata || {};
 
         if (currentMetadata.pushToken === token) {
-          console.log("Token já está atualizado no Clerk");
           return;
         }
 
@@ -77,8 +120,6 @@ export function NotificationsManager() {
             lastTokenUpdate: new Date().toISOString(),
           },
         });
-
-        console.log("Token salvo no Clerk com sucesso");
       }
     } catch (error) {
       console.error("Erro ao salvar token no Clerk:", error);
@@ -98,7 +139,6 @@ export function NotificationsManager() {
       const token = await registerForPushNotificationsAsync();
       if (token) {
         setExpoPushToken(token);
-        console.log("Expo Push Token:", token);
 
         if (isSignedIn && user) {
           await saveTokenToClerk(token);
@@ -110,8 +150,14 @@ export function NotificationsManager() {
 
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
-        console.log("Notificação recebida:", notification);
+        const data = notification.request.content.data as NotificationData;
+        handleNotificationData(data);
       });
+
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener(
+        handleNotificationResponse
+      );
 
     return () => {
       if (notificationListener.current) {

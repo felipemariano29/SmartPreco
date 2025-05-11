@@ -6,21 +6,65 @@ import {
 } from "@react-navigation/native";
 import Constants from "expo-constants";
 import { useFonts } from "expo-font";
-import { Slot } from "expo-router";
+import { Slot, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import "react-native-reanimated";
+import * as Notifications from "expo-notifications";
 
 const { EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY } = Constants.expoConfig?.extra || {};
 
 import { NotificationsManager } from "@/components/NotificationManager";
 import theme from "@/constants/theme";
-import { NotificationProvider } from "@/contexts/NotificationContext";
+import {
+  NotificationProvider,
+  useNotification,
+} from "@/contexts/NotificationContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { tokenCache } from "@/utils/secureToken";
 import { PaperProvider } from "react-native-paper";
 
 SplashScreen.preventAutoHideAsync();
+
+// Listener for receiving notifications when the app is in the foreground
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true, // Show alert even when app is in foreground
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
+
+function AppContent() {
+  const router = useRouter();
+  const { lastNotification } = useNotification();
+
+  // Handle navigation when a new notification comes in and app is in foreground
+  useEffect(() => {
+    if (lastNotification && lastNotification.screen) {
+      switch (lastNotification.screen) {
+        case "product-details":
+          if (lastNotification.productId) {
+            router.push({
+              pathname: "/product-details",
+              params: { id: lastNotification.productId },
+            });
+          }
+          break;
+        case "market-details":
+          if (lastNotification.marketId) {
+            router.push({
+              pathname: "/market-details",
+              params: { id: lastNotification.marketId },
+            });
+          }
+          break;
+      }
+    }
+  }, [lastNotification, router]);
+
+  return <Slot />;
+}
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -49,7 +93,7 @@ export default function RootLayout() {
         >
           <NotificationProvider>
             <NotificationsManager />
-            <Slot />
+            <AppContent />
           </NotificationProvider>
         </ThemeProvider>
       </PaperProvider>
