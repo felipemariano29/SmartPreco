@@ -48,8 +48,8 @@ export class ProductService {
   }
 
   private toDto(product: ProductTimestampDto): ProductDto {
-    const { id, name, description, category } = product;
-    return { id, name, description, category };
+    const { id, name, description, category, image_url, updated_at } = product;
+    return { id, name, description, category, imageUrl: image_url, updatedAt: updated_at };
   }
 
 }

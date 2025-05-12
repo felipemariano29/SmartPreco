@@ -69,17 +69,21 @@ export class ReportService {
       resolved: report.resolved,
       userId: report.user_id,
       status: report.status,
+      updatedAt: report.updated_at,
       price: {
         id: price.id,
         price: price.price,
         imageUrl: price.image_url,
         moderated: price.moderated,
         userId: price.user_id,
+        updatedAt: price.updated_at,
         product: {
           id: price.product.id,
           name: price.product.name,
           category: price.product.category,
           description: price.product.description,
+          imageUrl: price.product.image_url,
+          updatedAt: price.product.updated_at
         },
         market: {
           id: price.market.id,
@@ -87,6 +91,8 @@ export class ReportService {
           city: price.market.city,
           state: price.market.state,
           address: price.market.address,
+          imageUrl: price.market.image_url,
+          updatedAt: price.market.updated_at
         },
       },
     };

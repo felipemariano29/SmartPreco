@@ -45,8 +45,8 @@ export class MarketService {
   }
 
   private toDto(market: MarketTimestampDto): MarketDto {
-    const { id, name, address, city, state } = market;
-    return { id, name, address, city, state };
+    const { id, name, address, city, state, image_url, created_at } = market;
+    return { id, name, address, city, state, imageUrl: image_url, updatedAt: created_at };
   }
 
 }

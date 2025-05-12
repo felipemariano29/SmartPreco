@@ -15,3 +15,19 @@ export class TimestampDto {
   public updatedAt: Date;
 
 }
+
+export class TimestampRepositoryDto {
+
+  @ApiProperty({
+    description: 'Creation timestamp',
+    example: '2022-01-01T00:00:00.000Z'
+  })
+  public created_at: Date;
+
+  @ApiProperty({
+    description: 'Update timestamp',
+    example: '2022-01-01T00:00:00.000Z'
+  })
+  public updated_at: Date;
+
+}
