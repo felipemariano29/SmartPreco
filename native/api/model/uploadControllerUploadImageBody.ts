@@ -6,8 +6,6 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface ReportCreateDto {
-  /** Price's unique identifier */
-  priceId: string;
-  reason: string;
-}
+export type UploadControllerUploadImageBody = {
+  file?: Blob;
+};

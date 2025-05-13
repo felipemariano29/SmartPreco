@@ -5,14 +5,15 @@
  * SmartPreço API é uma API RESTful que fornece informações sobre mercados, produtos e seus preços.
  * OpenAPI spec version: 1.0
  */
+import type { PriceDto } from './priceDto';
+import type { ReportDtoStatus } from './reportDtoStatus';
 
 export interface ReportDto {
-  /** Report's unique identifier */
-  reportId: string;
-  /** Price's unique identifier */
-  priceId: string;
-  /** Report's reason */
+  /** User unique identifier */
+  userId: string;
+  id: string;
   reason: string;
-  /** Report's resolved status */
   resolved: boolean;
+  price: PriceDto;
+  status: ReportDtoStatus;
 }

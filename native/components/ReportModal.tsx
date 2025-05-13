@@ -1,5 +1,5 @@
 import { styles } from "@/styles/report-modal";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   Modal,
   TextInput,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { IconButton, RadioButton } from "react-native-paper";
 
@@ -23,6 +24,8 @@ interface ReportModalProps {
   onDismiss: () => void;
   onSubmit: (reason: ReportReason, details: string) => void;
   productName: string;
+  isSubmitting?: boolean;
+  isSubmitted?: boolean;
 }
 
 const ReportModal = ({
@@ -30,10 +33,22 @@ const ReportModal = ({
   onDismiss,
   onSubmit,
   productName,
+  isSubmitting = false,
+  isSubmitted = false,
 }: ReportModalProps) => {
   const [reason, setReason] = useState<ReportReason>("Preço incorreto");
   const [details, setDetails] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [internalSubmitted, setInternalSubmitted] = useState(false);
+
+  // Usar o estado interno ou o props de fora
+  const submitted = isSubmitted || internalSubmitted;
+
+  // Resetar o estado interno quando o modal é fechado
+  useEffect(() => {
+    if (!visible) {
+      setInternalSubmitted(false);
+    }
+  }, [visible]);
 
   const reasons: ReportReason[] = [
     "Preço incorreto",
@@ -47,13 +62,12 @@ const ReportModal = ({
   const resetAndClose = () => {
     setReason("Preço incorreto");
     setDetails("");
-    setSubmitted(false);
     onDismiss();
   };
 
   const handleSubmit = () => {
     onSubmit(reason, details);
-    setSubmitted(true);
+    setInternalSubmitted(true);
   };
 
   return (
@@ -100,11 +114,18 @@ const ReportModal = ({
               />
 
               <TouchableOpacity
-                style={styles.submitButton}
+                style={[
+                  styles.submitButton,
+                  (isSubmitting || !reason) && styles.submitButtonDisabled,
+                ]}
                 onPress={handleSubmit}
-                disabled={!reason}
+                disabled={isSubmitting || !reason}
               >
-                <Text style={styles.submitButtonText}>Enviar Denúncia</Text>
+                {isSubmitting ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <Text style={styles.submitButtonText}>Enviar Denúncia</Text>
+                )}
               </TouchableOpacity>
             </ScrollView>
           ) : (

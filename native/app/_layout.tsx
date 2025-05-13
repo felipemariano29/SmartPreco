@@ -4,14 +4,14 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import Constants from "expo-constants";
 import { useFonts } from "expo-font";
 import { Slot } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import "react-native-reanimated";
 
-const { EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY } = Constants.expoConfig?.extra || {};
+const CLERK_PUBLISHABLE_KEY =
+  process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || "";
 
 import { NotificationsManager } from "@/components/NotificationManager";
 import theme from "@/constants/theme";
@@ -19,6 +19,7 @@ import { NotificationProvider } from "@/contexts/NotificationContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { tokenCache } from "@/utils/secureToken";
 import { PaperProvider } from "react-native-paper";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -39,20 +40,22 @@ export default function RootLayout() {
   }
 
   return (
-    <ClerkProvider
-      publishableKey={EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? ""}
-      tokenCache={tokenCache}
-    >
-      <PaperProvider theme={theme}>
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-          <NotificationProvider>
-            <NotificationsManager />
-            <Slot />
-          </NotificationProvider>
-        </ThemeProvider>
-      </PaperProvider>
-    </ClerkProvider>
+    <QueryClientProvider client={new QueryClient()}>
+      <ClerkProvider
+        publishableKey={CLERK_PUBLISHABLE_KEY}
+        tokenCache={tokenCache}
+      >
+        <PaperProvider theme={theme}>
+          <ThemeProvider
+            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+          >
+            <NotificationProvider>
+              <NotificationsManager />
+              <Slot />
+            </NotificationProvider>
+          </ThemeProvider>
+        </PaperProvider>
+      </ClerkProvider>
+    </QueryClientProvider>
   );
 }

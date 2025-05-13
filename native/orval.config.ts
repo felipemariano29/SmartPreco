@@ -8,6 +8,13 @@ export default defineConfig({
       target: "./api",
       schemas: "./api/model",
       mock: true,
+      prettier: true,
+      override: {
+        mutator: {
+          path: "./api/axios.ts",
+          name: "axiosInstance",
+        },
+      },
     },
     input: {
       target: "https://api.smartpreco.mindsnap.tech/api-json",
