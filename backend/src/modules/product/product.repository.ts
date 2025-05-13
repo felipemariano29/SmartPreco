@@ -1,4 +1,4 @@
-import { ProductCreateDto, ProductReadDto, ProductsTimestampDto, ProductTimestampDto, ProductUpdateDto } from "@modules/product/product.dto";
+  import { ProductCreateDto, ProductReadDto, ProductsTimestampDto, ProductTimestampDto, ProductUpdateDto } from "@modules/product/product.dto";
 import { HttpStatus, Injectable } from "@nestjs/common";
 import { AppException, EntityEnum, ErrorEnum } from "@shared/errors";
 import { getSafeSearch } from "@shared/utils/get-safe-search";
