@@ -68,8 +68,8 @@ export class PriceService {
   }
 
   private toDto(params: PriceTimestampDto): PriceDto {
-    const { id, market, product, price, imageUrl, userId, moderated } = params;
-    return { id, market, product, price, imageUrl, userId, moderated };
+    const { id, market, product, price, imageUrl, userId, moderated, updated_at } = params;
+    return { id, market, product, price, imageUrl, userId, moderated, updatedAt: updated_at };
   }
 
   public async updateModeratedFlag(priceId: string, moderated: boolean): Promise<void> {
