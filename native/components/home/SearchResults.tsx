@@ -4,6 +4,7 @@ import { Card, IconButton, Chip } from "react-native-paper";
 import { router } from "expo-router";
 import { ItemType } from "@/app/(protected)/(tabs)";
 import { styles } from "@/styles/home/SearchResults";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 type SearchResultsProps = {
   results: ItemType[];
@@ -22,6 +23,9 @@ export const SearchResults = ({
           id: item.id,
           name: item.name,
           price: item.price,
+          category: item.category,
+          description: item.description,
+          priceId: item.priceId,
         },
       });
     } else {
@@ -30,45 +34,53 @@ export const SearchResults = ({
         params: {
           id: item.id,
           name: item.name,
+          city: item.city,
         },
       });
     }
   };
 
   const renderResultItem = ({ item }: { item: ItemType }) => (
-    <Card style={styles.resultCard}>
+    <Card style={styles.resultCard} onPress={() => navigateToDetails(item)}>
+      <View style={styles.typeBadge}>
+        <Text style={styles.typeBadgeText}>
+          {item.type === "market" ? "M" : "P"}
+        </Text>
+      </View>
+
       <View style={styles.resultContent}>
         <View style={styles.resultImageContainer}>
           {item.image ? (
             <Image source={item.image} style={styles.resultImage} />
           ) : (
-            <View style={styles.resultPlaceholder} />
+            <View style={styles.iconContainer}>
+              <MaterialCommunityIcons
+                name={item.type === "market" ? "store" : "shopping"}
+                size={30}
+                color="#777"
+              />
+            </View>
           )}
         </View>
 
         <View style={styles.resultInfo}>
-          <View style={styles.resultHeader}>
-            <Text style={styles.resultName}>{item.name}</Text>
-            <Chip
-              style={
-                item.type === "market" ? styles.marketChip : styles.productChip
-              }
-              textStyle={styles.chipText}
-            >
-              {item.type === "market" ? "Mercado" : "Produto"}
-            </Chip>
-          </View>
+          <Text style={styles.resultName}>{item.name}</Text>
 
-          {item.price ? (
-            <Text style={styles.resultPrice}>{item.price}</Text>
-          ) : null}
+          {item.category && (
+            <Text style={styles.resultCategory}>{item.category}</Text>
+          )}
 
-          <TouchableOpacity
-            style={styles.detailsButton}
-            onPress={() => navigateToDetails(item)}
-          >
-            <Text style={styles.detailsButtonText}>Ver detalhes</Text>
-          </TouchableOpacity>
+          {item.description && (
+            <Text style={styles.resultDescription} numberOfLines={2}>
+              {item.description}
+            </Text>
+          )}
+
+          {item.type === "market" && item.city && (
+            <Text style={styles.resultLocation}>{item.city}</Text>
+          )}
+
+          {item.price && <Text style={styles.resultPrice}>{item.price}</Text>}
         </View>
 
         <IconButton
@@ -76,6 +88,7 @@ export const SearchResults = ({
           size={24}
           onPress={() => onToggleFavorite(item)}
           style={styles.favoriteButton}
+          iconColor={item.isFavorite ? "#FFD700" : "#999"}
         />
       </View>
     </Card>

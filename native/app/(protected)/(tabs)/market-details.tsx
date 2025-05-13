@@ -13,11 +13,13 @@ import {
   useRoute,
 } from "@react-navigation/native";
 import { useQueryClient } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Button,
   FlatList,
   Image,
+  RefreshControl,
   ScrollView,
   Text,
   ToastAndroid,
@@ -67,46 +69,57 @@ export default function MarketDetailScreen() {
   const [categories, setCategories] = useState<string[]>(["Todos"]);
   const [products, setProducts] = useState<ProductItem[]>([]);
   const queryClient = useQueryClient();
+  const [refreshing, setRefreshing] = useState(false);
 
   // Fetch market details
-  const { data: marketData, isLoading: isLoadingMarket } = useReadMarket(
-    params.id.toString(),
-    {
-      query: {
-        enabled: !!params.id,
-      },
-    }
-  );
+  const {
+    data: marketData,
+    isLoading: isLoadingMarket,
+    refetch: refetchMarket,
+  } = useReadMarket(params.id.toString(), {
+    query: {
+      enabled: !!params.id,
+    },
+  });
 
   // Fetch prices for this market
-  const { data: pricesData, isLoading: isLoadingPrices } = useReadPrices(
+  const {
+    data: pricesData,
+    isLoading: isLoadingPrices,
+    refetch: refetchPrices,
+    error: pricesError,
+  } = useReadPrices(
     { marketId: params.id.toString() },
     {
       query: {
         enabled: !!params.id,
+        retry: 3,
+        retryDelay: 1000,
       },
     }
   );
 
   // Extract unique categories and product data from prices
   useEffect(() => {
-    if (pricesData?.prices && pricesData.prices.length > 0) {
-      // Extract unique categories
-      const uniqueCategories = new Set<string>(["Todos"]);
+    if (!pricesData) return;
 
-      // Create a map to deduplicate products (multiple prices for same product)
+    const prices = pricesData.prices || (pricesData as any).records || [];
+
+    if (prices.length === 0 && products.length > 0) {
+      return;
+    }
+
+    if (prices.length > 0) {
+      const uniqueCategories = new Set<string>(["Todos"]);
       const productMap = new Map<string, ProductItem>();
 
-      // Transform prices into product items
-      pricesData.prices.forEach((price: PriceDto) => {
+      prices.forEach((price: PriceDto) => {
         if (price.product.category) {
           uniqueCategories.add(price.product.category);
         }
 
-        // Create a unique ID by combining product ID and price ID
         const uniqueId = `${price.product.id}-${price.id}`;
 
-        // Add to map with unique ID
         productMap.set(uniqueId, {
           id: price.product.id,
           name: price.product.name,
@@ -121,7 +134,7 @@ export default function MarketDetailScreen() {
       setCategories(Array.from(uniqueCategories));
       setProducts(Array.from(productMap.values()));
     }
-  }, [pricesData]);
+  }, [pricesData, params.id]);
 
   const { data: favoriteMarkets, refetch: refetchFavorites } =
     useGetFavoriteMarkets();
@@ -229,6 +242,15 @@ export default function MarketDetailScreen() {
 
   const isLoading = isLoadingMarket || isLoadingPrices;
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+
+    Promise.all([refetchMarket(), refetchPrices()]).finally(() => {
+      setRefreshing(false);
+      ToastAndroid.show("Dados atualizados", ToastAndroid.SHORT);
+    });
+  }, [refetchMarket, refetchPrices]);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -256,7 +278,16 @@ export default function MarketDetailScreen() {
           <Text style={styles.loadingText}>Carregando informações...</Text>
         </View>
       ) : (
-        <ScrollView style={styles.scrollView}>
+        <ScrollView
+          style={styles.scrollView}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["#0000ff"]}
+            />
+          }
+        >
           <View style={styles.infoSection}>
             <View style={styles.ratingContainer}>
               <Text style={styles.rating}>{params.rating || 0}</Text>
@@ -285,40 +316,54 @@ export default function MarketDetailScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Produtos Disponíveis</Text>
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.categoriesContainer}
-            >
-              {categories.map((category) => (
-                <Chip
-                  key={category}
-                  selected={activeCategory === category}
-                  onPress={() => setActiveCategory(category)}
-                  style={[
-                    styles.categoryChip,
-                    activeCategory === category && styles.activeCategoryChip,
-                  ]}
-                >
-                  {category}
-                </Chip>
-              ))}
-            </ScrollView>
-
             {filteredProducts.length > 0 ? (
-              <FlatList
-                data={filteredProducts}
-                renderItem={renderProduct}
-                keyExtractor={(item) => item.uniqueId}
-                numColumns={2}
-                scrollEnabled={false}
-                contentContainerStyle={styles.productsGrid}
-              />
+              <>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.categoriesContainer}
+                >
+                  {categories.map((category) => (
+                    <Chip
+                      key={category}
+                      selected={activeCategory === category}
+                      onPress={() => setActiveCategory(category)}
+                      style={[
+                        styles.categoryChip,
+                        activeCategory === category &&
+                          styles.activeCategoryChip,
+                      ]}
+                    >
+                      {category}
+                    </Chip>
+                  ))}
+                </ScrollView>
+
+                <FlatList
+                  data={filteredProducts}
+                  renderItem={renderProduct}
+                  keyExtractor={(item) => item.uniqueId}
+                  numColumns={2}
+                  scrollEnabled={false}
+                  contentContainerStyle={styles.productsGrid}
+                />
+              </>
             ) : (
               <View style={styles.noProductsContainer}>
                 <Text style={styles.noProductsText}>
-                  Nenhum produto encontrado para esta categoria.
+                  {refreshing || isLoading
+                    ? "Carregando produtos..."
+                    : pricesError
+                    ? "Erro ao carregar produtos. Tente novamente."
+                    : "Nenhum produto encontrado para este mercado."}
                 </Text>
+                {!!pricesError && (
+                  <Button
+                    title="Tentar novamente"
+                    onPress={onRefresh}
+                    disabled={refreshing || isLoading}
+                  />
+                )}
               </View>
             )}
           </View>

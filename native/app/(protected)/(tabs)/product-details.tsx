@@ -74,7 +74,7 @@ export default function ProductDetailScreen() {
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [reportSubmitted, setReportSubmitted] = useState(false);
   const queryClient = useQueryClient();
-
+  console.log({ params });
   const { data: pricesData, isLoading: isLoadingPrices } = useReadPrices(
     { productId: params.id.toString() },
     {
@@ -84,15 +84,24 @@ export default function ProductDetailScreen() {
     }
   );
 
+  console.log({ pricesData });
+
   const [productPrices, setProductPrices] = useState<PriceDto[]>([]);
   const [marketPrice, setMarketPrice] = useState<PriceDto | null>(null);
 
   useEffect(() => {
-    if (!pricesData?.prices?.length) return;
+    setProductPrices([]);
+    setMarketPrice(null);
+  }, [params.id]);
 
-    const sortedPrices = [...pricesData.prices].sort(
-      (a, b) => a.price - b.price
-    );
+  useEffect(() => {
+    if (!pricesData) return;
+
+    const pricesArray = pricesData.prices || (pricesData as any).records || [];
+
+    if (!pricesArray.length) return;
+
+    const sortedPrices = [...pricesArray].sort((a, b) => a.price - b.price);
     setProductPrices(sortedPrices);
   }, [pricesData]);
 

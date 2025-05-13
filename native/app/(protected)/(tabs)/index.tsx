@@ -205,11 +205,6 @@ export default function HomeScreen() {
     return `R$ ${price.toFixed(2).replace(".", ",")}`;
   }, []);
 
-  const getPriceHistoryForProduct = useCallback((productId: string) => {
-    const params = { productId };
-    return useReadPrices(params);
-  }, []);
-
   useEffect(() => {
     if (pricesData?.prices && pricesData.prices.length > 0) {
       productPriceMapRef.current.clear();
