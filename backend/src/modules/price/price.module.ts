@@ -5,12 +5,12 @@ import { PriceController } from '@modules/price/price.controller';
 import { PriceListener } from '@modules/price/price.listener';
 import { PriceRepository } from '@modules/price/price.repository';
 import { PriceService } from '@modules/price/price.service';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ClerkModule } from '@shared/clerk/clerk.module';
 
 @Module({
   imports: [
-    FavoriteModule,
+    forwardRef(() => FavoriteModule),
     ClerkModule,
     NotificationModule
    ],
