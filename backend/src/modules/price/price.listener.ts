@@ -1,8 +1,9 @@
-import { NotificationService } from '@modules/notification/notification.service';
+import { NOTIFICATION_STRATEGIES } from '@modules/notification/notification.const';
+import { NotificationStrategy } from '@modules/notification/strategies/notification.strategy';
 import { PriceComparatorService } from '@modules/price/price-comparator/price-comparator.service';
 import { PriceTimestampDto } from '@modules/price/price.dto';
 import { PriceService } from '@modules/price/price.service';
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 
 import { EventEnum } from '@shared/events/event.enum';
@@ -15,7 +16,9 @@ export class PriceListener {
   public constructor(
     private readonly priceService: PriceService,
     private readonly priceComparatorService: PriceComparatorService,
-    private readonly notificationService: NotificationService
+
+    @Inject(NOTIFICATION_STRATEGIES)
+    private readonly notificationStrategies: NotificationStrategy[],
   ) { }
 
   @OnEvent(EventEnum.REPORT_CREATED)
@@ -43,15 +46,17 @@ export class PriceListener {
 
       if (!result.shouldNotify) return;
 
-      await this.notificationService.sendNotifications({
-        usersToNotify: result.usersToNotify,
-        title: 'Novo desconto!',
-        body: `O produto ${result.productName} está custando R$${result.newPrice.toFixed(2)}. Aproveite!`,
-        data: {
-          screen: 'product-details',
-          productId,
-        },
-      });
+      for (const notificationStrategy of this.notificationStrategies) {
+        await notificationStrategy.send({
+          usersToNotify: result.usersToNotify,
+          title: 'Novo desconto!',
+          body: `O produto ${result.productName} está custando R$${result.newPrice.toFixed(2)}. Aproveite!`,
+          data: {
+            screen: 'product-details',
+            productId,
+          },
+        });
+      }
     } catch (error) {
       this.logger.error(`Failed to process PRICE_CREATED for priceId ${priceId}`, error.stack);
     }
