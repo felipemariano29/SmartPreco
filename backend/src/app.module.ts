@@ -11,10 +11,15 @@ import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ClerkModule } from "@shared/clerk/clerk.module";
 import { SharedModule } from "@shared/shared.module";
 import { SupabaseModule } from "@shared/supabase/supabase.module";
-
+import { ServeStaticModule } from "@nestjs/serve-static";
+import { join } from "path";
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, "..", "docs"),
+      serveRoot: "/docs",
+    }),
     ConfigModule.forRoot({ isGlobal: true }),
     SupabaseModule.forRoot(),
     EventEmitterModule.forRoot(),
