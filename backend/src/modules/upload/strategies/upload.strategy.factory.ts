@@ -1,10 +1,10 @@
+import { S3UploadStrategy } from '@modules/upload/strategies/upload-s3.strategy';
+import { SupabaseUploadStrategy } from '@modules/upload/strategies/upload-supabase.strategy';
+import { UploadStrategy } from '@modules/upload/strategies/upload.strategy';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-
 import { MainTag } from 'main.enum';
-import { S3UploadStrategy } from './upload-s3.strategy';
-import { SupabaseUploadStrategy } from './upload-supabase.strategy';
-import { UploadStrategy } from './upload.strategy';
+
 
 @Injectable()
 export class UploadStrategyFactory {

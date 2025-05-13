@@ -7,6 +7,7 @@ export interface PriceComparatorPriceData {
 export interface PriceComparatorUser {
   userId: string;
   deviceId: string;
+  email?: string;
 }
 
 export interface PriceComparatorNotification {

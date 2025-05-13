@@ -2,7 +2,6 @@ import { PriceService } from '@modules/price/price.service';
 import { ProductCreateDto, ProductDto, ProductReadDto, ProductsDto, ProductTimestampDto, ProductUpdateDto } from '@modules/product/product.dto';
 import { ProductRepository } from '@modules/product/product.repository';
 import { Injectable } from '@nestjs/common';
-import { DtoMapper } from '@shared/utils/dto-mapper';
 
 @Injectable()
 export class ProductService {
@@ -15,7 +14,7 @@ export class ProductService {
   public async createProduct(params: ProductCreateDto): Promise<ProductDto> {
     const product = await this.productRepository.createProduct(params);
 
-    return DtoMapper.mapOne(product, this.toDto);
+    return this.toDto(product);
   }
 
   public async readProducts(params: ProductReadDto): Promise<ProductsDto> {
@@ -25,7 +24,7 @@ export class ProductService {
     const limit = params.limit ?? 20;
 
     return {
-      records: await Promise.all(DtoMapper.mapMany(records, this.toDto)),
+      records: await Promise.all(records.map(record => this.toDto(record))),
       count: records.length,
       total,
       nextOffset: (offset + limit) < total ? offset + limit : null,
@@ -35,7 +34,7 @@ export class ProductService {
   public async readProductById(productId: string): Promise<ProductDto> {
     const product = await this.productRepository.readProductById(productId);
 
-    return DtoMapper.mapOne(product, this.toDto);
+    return this.toDto(product);
   }
 
   public async updateProductById(
@@ -44,7 +43,7 @@ export class ProductService {
   ): Promise<ProductDto> {
     const product = await this.productRepository.updateProductById(productId, updateProductDto);
 
-    return DtoMapper.mapOne(product, this.toDto);
+    return this.toDto(product);
   }
 
   public async deleteProductById(productId: string): Promise<void> {

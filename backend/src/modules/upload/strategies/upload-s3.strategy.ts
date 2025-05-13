@@ -1,10 +1,9 @@
-import { PutObjectCommand,S3Client } from '@aws-sdk/client-s3';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { UploadStrategy } from '@modules/upload/strategies/upload.strategy';
+import { UploadImageDto } from '@modules/upload/upload.dto';
+import { UploadParams } from '@modules/upload/upload.interface';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-
-import { UploadImageDto } from './upload.dto';
-import { UploadParams } from './upload.interface';
-import { UploadStrategy } from './upload.strategy';
 
 @Injectable()
 export class S3UploadStrategy implements UploadStrategy {
