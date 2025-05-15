@@ -16,16 +16,25 @@ export const getCreatePriceResponseMock = (
 ): PriceDto => ({
   imageUrl: faker.string.alpha(20),
   userId: faker.string.alpha(20),
+  updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
   id: faker.string.alpha(20),
   price: faker.number.int({ min: undefined, max: undefined }),
   moderated: faker.datatype.boolean(),
   product: {
+    updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+    imageUrl: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     id: faker.string.alpha(20),
     name: faker.string.alpha(20),
     description: faker.string.alpha(20),
     category: faker.string.alpha(20),
+    lowestPrice: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
   },
   market: {
+    updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+    imageUrl: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     id: faker.string.alpha(20),
     name: faker.string.alpha(20),
     address: faker.string.alpha(20),
@@ -38,22 +47,31 @@ export const getCreatePriceResponseMock = (
 export const getReadPricesResponseMock = (
   overrideResponse: Partial<PricesDto> = {},
 ): PricesDto => ({
-  prices: Array.from(
+  records: Array.from(
     { length: faker.number.int({ min: 1, max: 10 }) },
     (_, i) => i + 1,
   ).map(() => ({
     imageUrl: faker.string.alpha(20),
     userId: faker.string.alpha(20),
+    updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
     id: faker.string.alpha(20),
     price: faker.number.int({ min: undefined, max: undefined }),
     moderated: faker.datatype.boolean(),
     product: {
+      updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+      imageUrl: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
       id: faker.string.alpha(20),
       name: faker.string.alpha(20),
       description: faker.string.alpha(20),
       category: faker.string.alpha(20),
+      lowestPrice: faker.helpers.arrayElement([
+        faker.number.int({ min: undefined, max: undefined }),
+        undefined,
+      ]),
     },
     market: {
+      updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+      imageUrl: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
       id: faker.string.alpha(20),
       name: faker.string.alpha(20),
       address: faker.string.alpha(20),
@@ -61,6 +79,15 @@ export const getReadPricesResponseMock = (
       state: faker.string.alpha(20),
     },
   })),
+  count: faker.number.int({ min: undefined, max: undefined }),
+  total: faker.number.int({ min: undefined, max: undefined }),
+  nextOffset: faker.helpers.arrayElement([
+    faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      null,
+    ]),
+    undefined,
+  ]),
   ...overrideResponse,
 });
 

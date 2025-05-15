@@ -6,86 +6,88 @@
  * OpenAPI spec version: 1.0
  */
 export interface ProductCreateDto {
-  /** Product's name */
+  /** Product's image URL */
+  imageUrl?: string;
+  /** Name of the product */
   name: string;
-  /** Product's description */
+  /** Detailed description of the product */
   description: string;
-  /** Product's category */
+  /** Category to which the product belongs */
   category: string;
+  /** Lowest available moderated price for the product */
+  lowestPrice?: number;
 }
 
 export interface ProductDto {
-  /** Product's unique identifier */
+  /** Update timestamp */
+  updatedAt: string;
+  /** Product's image URL */
+  imageUrl?: string;
+  /** Unique identifier of the product */
   id: string;
-  /** Product's name */
+  /** Name of the product */
   name: string;
-  /** Product's description */
+  /** Detailed description of the product */
   description: string;
-  /** Product's category */
+  /** Category to which the product belongs */
   category: string;
+  /** Lowest available moderated price for the product */
+  lowestPrice?: number;
 }
 
 export interface ProductsDto {
-  products: ProductDto[];
+  /** List of products returned in the current page */
+  records: ProductDto[];
+  /** Number of records in this page */
+  count: number;
+  /** Total number of records across all pages */
+  total: number;
+  /**
+   * Next offset for fetching the next page, null if no more records
+   * @nullable
+   */
+  nextOffset?: number | null;
 }
 
 export interface ProductUpdateDto {
-  /** Product's name */
+  /** Product's image URL */
+  imageUrl?: string;
+  /** Name of the product */
   name?: string;
-  /** Product's description */
+  /** Detailed description of the product */
   description?: string;
-  /** Product's category */
+  /** Category to which the product belongs */
   category?: string;
-}
-
-export interface MarketCreateDto {
-  /** Market's name */
-  name: string;
-  /** Market's address */
-  address: string;
-  /** Market's city */
-  city: string;
-  /** Market's state */
-  state: string;
-}
-
-export interface MarketDto {
-  /** Market's unique identifier */
-  id: string;
-  /** Market's name */
-  name: string;
-  /** Market's address */
-  address: string;
-  /** Market's city */
-  city: string;
-  /** Market's state */
-  state: string;
-}
-
-export interface MarketsDto {
-  markets: MarketDto[];
-}
-
-export interface MarketUpdateDto {
-  /** Market's name */
-  name?: string;
-  /** Market's address */
-  address?: string;
-  /** Market's city */
-  city?: string;
-  /** Market's state */
-  state?: string;
+  /** Lowest available moderated price for the product */
+  lowestPrice?: number;
 }
 
 export interface PriceCreateDto {
-  /** Product's unique identifier */
+  /** Unique identifier for the product */
   productId: string;
-  /** Market's unique identifier */
+  /** Unique identifier for the market */
   marketId: string;
   /** Product's image URL */
   imageUrl: string;
-  /** Product's price */
+  /** Product price value */
   price: number;
+}
+
+export interface MarketDto {
+  /** Update timestamp */
+  updatedAt: string;
+  /** Product's image URL */
+  imageUrl?: string;
+  /** Unique identifier of the market */
+  id: string;
+  /** Name of the market */
+  name: string;
+  /** Street address of the market */
+  address: string;
+  /** City where the market is located */
+  city: string;
+  /** State where the market is located */
+  state: string;
 }
 
 export interface PriceDto {
@@ -93,26 +95,82 @@ export interface PriceDto {
   imageUrl: string;
   /** User unique identifier */
   userId: string;
-  /** Price's unique identifier */
+  /** Update timestamp */
+  updatedAt: string;
+  /** Unique identifier of the price entry */
   id: string;
-  /** Product's price */
+  /** Product price value */
   price: number;
-  /** Whether the price is currently moderated (approved for public view) */
+  /** Indicates if the price was moderated (approved for public listing) */
   moderated: boolean;
   product: ProductDto;
   market: MarketDto;
 }
 
 export interface PricesDto {
-  prices: PriceDto[];
+  /** List of price entries returned in the current page */
+  records: PriceDto[];
+  /** Number of records in this page */
+  count: number;
+  /** Total number of records across all pages */
+  total: number;
+  /**
+   * Next offset for fetching the next page, null if no more records
+   * @nullable
+   */
+  nextOffset?: number | null;
+}
+
+export interface MarketCreateDto {
+  /** Product's image URL */
+  imageUrl?: string;
+  /** Name of the market */
+  name: string;
+  /** Street address of the market */
+  address: string;
+  /** City where the market is located */
+  city: string;
+  /** State where the market is located */
+  state: string;
+}
+
+export interface MarketsDto {
+  /** List of markets returned in the current page */
+  records: MarketDto[];
+  /** Number of records in this page */
+  count: number;
+  /** Total number of records across all pages */
+  total: number;
+  /**
+   * Next offset for fetching the next page, null if no more records
+   * @nullable
+   */
+  nextOffset?: number | null;
+}
+
+export interface MarketUpdateDto {
+  /** Product's image URL */
+  imageUrl?: string;
+  /** Name of the market */
+  name?: string;
+  /** Street address of the market */
+  address?: string;
+  /** City where the market is located */
+  city?: string;
+  /** State where the market is located */
+  state?: string;
 }
 
 export interface ReportCreateDto {
-  /** Price's unique identifier */
+  /** Unique identifier for the price entry */
   priceId: string;
+  /** Reason for reporting a price */
   reason: string;
 }
 
+/**
+ * Current status of the report
+ */
 export type ReportDtoStatus =
   (typeof ReportDtoStatus)[keyof typeof ReportDtoStatus];
 
@@ -125,17 +183,37 @@ export const ReportDtoStatus = {
 export interface ReportDto {
   /** User unique identifier */
   userId: string;
+  /** Update timestamp */
+  updatedAt: string;
+  /** Unique identifier of the report */
   id: string;
+  /** Reason for reporting a price */
   reason: string;
+  /** Indicates whether the report has been resolved */
   resolved: boolean;
+  /** Information about the price associated with the report */
   price: PriceDto;
-  status: ReportDtoStatus;
+  /** Current status of the report */
+  status?: ReportDtoStatus;
 }
 
 export interface ReportsDto {
-  reports: ReportDto[];
+  /** List of reports returned in the current page */
+  records: ReportDto[];
+  /** Number of records in this page */
+  count: number;
+  /** Total number of records across all pages */
+  total: number;
+  /**
+   * Next offset for fetching the next page, null if no more records
+   * @nullable
+   */
+  nextOffset?: number | null;
 }
 
+/**
+ * Current status of the report
+ */
 export type ReportUpdateDtoStatus =
   (typeof ReportUpdateDtoStatus)[keyof typeof ReportUpdateDtoStatus];
 
@@ -146,39 +224,73 @@ export const ReportUpdateDtoStatus = {
 } as const;
 
 export interface ReportUpdateDto {
+  /** Indicates whether the report has been resolved */
   resolved: boolean;
-  status: ReportUpdateDtoStatus;
+  /** Current status of the report */
+  status?: ReportUpdateDtoStatus;
 }
 
 export type ReadProductsParams = {
   /**
-   * Search term to filter the results
+   * Number of products to skip for pagination
+   */
+  offset?: number;
+  /**
+   * Maximum number of products to return
+   */
+  limit?: number;
+  /**
+   * Field to order the products by
+   */
+  orderBy?: string;
+  /**
+   * Search term to filter products by name or description
    */
   search?: string;
-  /**
-   * Product's category
-   */
-  category?: string;
-};
-
-export type ReadMarketsParams = {
-  /**
-   * Search term to filter the results
-   */
-  search?: string;
-  /**
-   * Market's city
-   */
-  city?: string;
 };
 
 export type ReadPricesParams = {
   /**
-   * Product's unique identifier
+   * Offset for pagination
+   */
+  offset?: number;
+  /**
+   * Limit for pagination
+   */
+  limit?: number;
+  /**
+   * Field to order by
+   */
+  orderBy?: string;
+  /**
+   * Search term to filter results
+   */
+  search?: string;
+  /**
+   * Optional product ID to filter prices
    */
   productId?: string;
   /**
-   * Market's unique identifier
+   * Optional market ID to filter prices
    */
   marketId?: string;
+};
+
+export type ReadMarketsParams = {
+  /**
+   * Number of markets to skip for pagination
+   */
+  offset?: number;
+  /**
+   * Maximum number of markets to return
+   */
+  limit?: number;
+  /**
+   * Field to order the markets by
+   */
+  orderBy?: string;
+  /**
+   * Search term to filter markets by name or address
+   */
+  search?: string;
 };

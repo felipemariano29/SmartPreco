@@ -1,0 +1,226 @@
+{
+  "common": {
+    "buttons": {
+      "save": "Salvar",
+      "cancel": "Cancelar",
+      "delete": "Excluir",
+      "edit": "Editar",
+      "view": "Visualizar",
+      "add": "Adicionar",
+      "search": "Buscar",
+      "copy": "Copiar"
+    },
+    "navigation": {
+      "dashboard": "Painel",
+      "products": "Produtos",
+      "markets": "Mercados",
+      "reports": "Relatórios",
+      "admin": "Admin"
+    },
+    "theme": {
+      "light": "Claro",
+      "dark": "Escuro",
+      "system": "Sistema"
+    },
+    "language": {
+      "en": "Inglês",
+      "pt-BR": "Português (BR)"
+    },
+    "clipboard": {
+      "copied": "Copiado para a área de transferência"
+    }
+  },
+  "dashboard": {
+    "title": "Painel",
+    "overview": "Visão geral do seu painel de administração",
+    "cards": {
+      "products": {
+        "title": "Produtos",
+        "description": "Total de produtos no sistema"
+      },
+      "markets": {
+        "title": "Mercados",
+        "description": "Total de mercados no sistema"
+      },
+      "reports": {
+        "title": "Relatórios",
+        "description": "Total de relatórios"
+      }
+    },
+    "reportsOverview": {
+      "title": "Visão Geral dos Relatórios",
+      "resolvedReports": {
+        "title": "Relatórios Resolvidos",
+        "description": "taxa de resolução"
+      },
+      "pendingReports": {
+        "title": "Relatórios Pendentes",
+        "description": "Aguardando revisão"
+      },
+      "approvalRate": {
+        "title": "Taxa de Aprovação",
+        "description": "aprovados / rejeitados"
+      }
+    },
+    "quickActions": {
+      "title": "Ações Rápidas",
+      "description": "Ações comuns que você pode realizar",
+      "products": {
+        "title": "Gerenciar Produtos",
+        "description": "Adicionar, editar e remover produtos",
+        "link": "Ir para Produtos"
+      },
+      "markets": {
+        "title": "Gerenciar Mercados",
+        "description": "Adicionar, editar e remover mercados",
+        "link": "Ir para Mercados"
+      },
+      "reports": {
+        "title": "Revisar Relatórios",
+        "description": "Verificar e gerenciar relatórios pendentes",
+        "link": "Ir para Relatórios"
+      }
+    }
+  },
+  "products": {
+    "title": "Gerenciamento de Produtos",
+    "description": "Gerenciar produtos no sistema",
+    "table": {
+      "image": "Imagem",
+      "name": "Nome",
+      "category": "Categoria",
+      "description": "Descrição",
+      "price": "Preço",
+      "id": "ID",
+      "actions": "Ações"
+    },
+    "form": {
+      "name": "Nome do Produto",
+      "nameDescription": "Digite o nome do produto",
+      "category": "Categoria",
+      "categoryDescription": "Selecione ou digite uma categoria de produto",
+      "description": "Descrição",
+      "descriptionPlaceholder": "Digite uma descrição do produto",
+      "imageUrl": "URL da Imagem",
+      "imageUrlDescription": "Digite uma URL para a imagem do produto",
+      "editTitle": "Editar Produto",
+      "addTitle": "Adicionar Novo Produto",
+      "editDescription": "Atualize as informações do produto no formulário abaixo.",
+      "addDescription": "Preencha os detalhes do produto para criar um novo produto.",
+      "imagePreview": "Pré-visualização do produto",
+      "optional": "Opcional"
+    },
+    "actions": {
+      "add": "Adicionar Produto",
+      "edit": "Editar Produto",
+      "delete": "Excluir Produto"
+    },
+    "search": "Buscar produtos...",
+    "filter": {
+      "category": "Categoria",
+      "all": "Todas as Categorias"
+    },
+    "details": {
+      "title": "Detalhes do Produto",
+      "description": "Visualizar informações detalhadas sobre este produto.",
+      "lowestPrice": "Menor Preço",
+      "notAvailable": "N/D",
+      "lastUpdated": "Última Atualização"
+    },
+    "foundSingular": "produto encontrado",
+    "foundPlural": "produtos encontrados",
+    "noProductsFound": "Nenhum produto encontrado.",
+    "confirmDelete": "Tem certeza que deseja excluir {name}?"
+  },
+  "markets": {
+    "title": "Gerenciamento de Mercados",
+    "description": "Gerenciar mercados no sistema",
+    "table": {
+      "image": "Imagem",
+      "name": "Nome",
+      "address": "Endereço",
+      "city": "Cidade",
+      "state": "Estado",
+      "id": "ID",
+      "actions": "Ações"
+    },
+    "form": {
+      "name": "Nome do Mercado",
+      "nameDescription": "Digite o nome do mercado",
+      "address": "Endereço",
+      "addressDescription": "Digite o endereço do mercado",
+      "city": "Cidade",
+      "cityDescription": "Digite a cidade onde o mercado está localizado",
+      "state": "Estado",
+      "stateDescription": "Digite o estado onde o mercado está localizado",
+      "imageUrl": "URL da Imagem",
+      "imageUrlDescription": "Digite uma URL para a imagem do mercado"
+    },
+    "actions": {
+      "add": "Adicionar Mercado",
+      "edit": "Editar Mercado",
+      "delete": "Excluir Mercado"
+    },
+    "search": "Buscar mercados...",
+    "filter": {
+      "title": "Estado",
+      "all": "Todos os Estados"
+    }
+  },
+  "reports": {
+    "title": "Gerenciamento de Relatórios",
+    "description": "Revisar e gerenciar relatórios de preços enviados pelos usuários",
+    "table": {
+      "product": "Produto",
+      "market": "Mercado",
+      "price": "Preço",
+      "priceId": "ID do Preço",
+      "reporter": "Relator",
+      "reason": "Motivo",
+      "status": "Status",
+      "date": "Data",
+      "actions": "Ações",
+      "id": "ID do Relatório"
+    },
+    "status": {
+      "approved": "Aprovado",
+      "rejected": "Rejeitado",
+      "pending": "Pendente"
+    },
+    "filter": {
+      "title": "Filtro",
+      "all": "Todos os Relatórios",
+      "resolved": "Apenas Resolvidos",
+      "unresolved": "Apenas Não Resolvidos"
+    },
+    "search": "Buscar relatórios...",
+    "details": {
+      "title": "Detalhes do Relatório",
+      "description": "Informações detalhadas sobre o relatório selecionado.",
+      "price": "Preço",
+      "marketDetails": "Detalhes do Mercado",
+      "imageDescription": "Imagem fornecida pelo usuário para verificação de preço",
+      "approve": "Aprovar",
+      "reject": "Rejeitar"
+    },
+    "foundSingular": "relatório encontrado",
+    "foundPlural": "relatórios encontrados",
+    "noReportsFound": "Nenhum relatório encontrado."
+  },
+  "notifications": {
+    "success": {
+      "created": "{entity} criado",
+      "updated": "{entity} atualizado",
+      "deleted": "{entity} excluído",
+      "created-description": "O item foi criado com sucesso.",
+      "updated-description": "O item foi atualizado com sucesso.",
+      "deleted-description": "O item foi excluído com sucesso."
+    },
+    "error": {
+      "generic": "Erro",
+      "creation": "Falha ao criar {entity}. Por favor, tente novamente.",
+      "update": "Falha ao atualizar {entity}. Por favor, tente novamente.",
+      "delete": "Falha ao excluir {entity}. Por favor, tente novamente."
+    }
+  }
+} 

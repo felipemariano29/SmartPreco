@@ -1,6 +1,8 @@
 "use client";
 
+import { LanguageProvider } from "@/components/language-provider";
 import { MswProvider } from "@/components/msw-provider";
+import { ThemeProvider } from "@/components/theme-provider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
@@ -12,8 +14,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <ClerkProvider>
       <MswProvider>
         <QueryClientProvider client={queryClient}>
-          <Toaster richColors/>
-          {children}
+          <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+            <LanguageProvider>
+              <Toaster richColors/>
+              {children}
+            </LanguageProvider>
+          </ThemeProvider>
         </QueryClientProvider>
       </MswProvider>
     </ClerkProvider>
