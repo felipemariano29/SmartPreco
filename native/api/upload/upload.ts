@@ -15,58 +15,59 @@ import type {
   UseMutationResult
 } from '@tanstack/react-query';
 
-import axios from 'axios';
 import type {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
-
-import type {
-  UploadCreateDto,
+  UploadControllerUploadImageBody,
   UploadImageDto
 } from '.././model';
 
+import { axiosInstance } from '.././axios';
 
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
 /**
- * @summary Uploads an image.
+ * @summary Uploads an image and returns the public URL
  */
-export const uploadImage = (
-    uploadCreateDto: UploadCreateDto, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<UploadImageDto>> => {
-    
-    const formData = new FormData();
-formData.append(`file`, uploadCreateDto.file)
+export const uploadControllerUploadImage = (
+    uploadControllerUploadImageBody: UploadControllerUploadImageBody,
+ options?: SecondParameter<typeof axiosInstance>,signal?: AbortSignal
+) => {
+      
+      const formData = new FormData();
+if(uploadControllerUploadImageBody.file !== undefined) {
+ formData.append(`file`, uploadControllerUploadImageBody.file)
+ }
 
-    return axios.post(
-      `/upload`,
-      formData,options
-    );
-  }
+      return axiosInstance<UploadImageDto>(
+      {url: `/upload/image`, method: 'POST',
+      headers: {'Content-Type': 'multipart/form-data', },
+       data: formData, signal
+    },
+      options);
+    }
+  
 
 
+export const getUploadControllerUploadImageMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadControllerUploadImage>>, TError,{data: UploadControllerUploadImageBody}, TContext>, request?: SecondParameter<typeof axiosInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadControllerUploadImage>>, TError,{data: UploadControllerUploadImageBody}, TContext> => {
 
-export const getUploadImageMutationOptions = <TError = AxiosError<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadImage>>, TError,{data: UploadCreateDto}, TContext>, axios?: AxiosRequestConfig}
-): UseMutationOptions<Awaited<ReturnType<typeof uploadImage>>, TError,{data: UploadCreateDto}, TContext> => {
-
-const mutationKey = ['uploadImage'];
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
+const mutationKey = ['uploadControllerUploadImage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadImage>>, {data: UploadCreateDto}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadControllerUploadImage>>, {data: UploadControllerUploadImageBody}> = (props) => {
           const {data} = props ?? {};
 
-          return  uploadImage(data,axiosOptions)
+          return  uploadControllerUploadImage(data,requestOptions)
         }
 
         
@@ -74,23 +75,23 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type UploadImageMutationResult = NonNullable<Awaited<ReturnType<typeof uploadImage>>>
-    export type UploadImageMutationBody = UploadCreateDto
-    export type UploadImageMutationError = AxiosError<unknown>
+    export type UploadControllerUploadImageMutationResult = NonNullable<Awaited<ReturnType<typeof uploadControllerUploadImage>>>
+    export type UploadControllerUploadImageMutationBody = UploadControllerUploadImageBody
+    export type UploadControllerUploadImageMutationError = unknown
 
     /**
- * @summary Uploads an image.
+ * @summary Uploads an image and returns the public URL
  */
-export const useUploadImage = <TError = AxiosError<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadImage>>, TError,{data: UploadCreateDto}, TContext>, axios?: AxiosRequestConfig}
+export const useUploadControllerUploadImage = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadControllerUploadImage>>, TError,{data: UploadControllerUploadImageBody}, TContext>, request?: SecondParameter<typeof axiosInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof uploadImage>>,
+        Awaited<ReturnType<typeof uploadControllerUploadImage>>,
         TError,
-        {data: UploadCreateDto},
+        {data: UploadControllerUploadImageBody},
         TContext
       > => {
 
-      const mutationOptions = getUploadImageMutationOptions(options);
+      const mutationOptions = getUploadControllerUploadImageMutationOptions(options);
 
       return useMutation(mutationOptions , queryClient);
     }

@@ -1,18 +1,23 @@
 import { FavoriteModule } from '@modules/favorite/favorite.module';
 import { NotificationModule } from '@modules/notification/notification.module';
+import { DiscordNotificationStrategy } from '@modules/notification/strategies/discord-notification.strategy';
+import { ExpoPushNotificationStrategy } from '@modules/notification/strategies/expo-push-notification.strategy';
 import { PriceComparatorService } from '@modules/price/price-comparator/price-comparator.service';
 import { PriceController } from '@modules/price/price.controller';
 import { PriceListener } from '@modules/price/price.listener';
 import { PriceRepository } from '@modules/price/price.repository';
 import { PriceService } from '@modules/price/price.service';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ClerkModule } from '@shared/clerk/clerk.module';
 
 @Module({
   imports: [
-    FavoriteModule,
+    forwardRef(() => FavoriteModule),
     ClerkModule,
-    NotificationModule
+    NotificationModule.register([
+      ExpoPushNotificationStrategy,
+      DiscordNotificationStrategy
+    ]),
    ],
   controllers: [ PriceController ],
   providers: [ PriceService, PriceRepository, PriceListener, PriceComparatorService ],

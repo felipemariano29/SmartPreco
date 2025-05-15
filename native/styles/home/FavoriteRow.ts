@@ -1,65 +1,81 @@
-import { StyleSheet, Dimensions } from "react-native";
-
-const { width } = Dimensions.get("window");
-const FAVORITE_WIDTH = width * 0.28;
+import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-  favoritesList: {
-    paddingVertical: 5,
+  container: {
+    paddingVertical: 10,
+  },
+  emptyContainer: {
+    padding: 20,
+    alignItems: "center",
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#666",
   },
   favoriteItem: {
-    width: FAVORITE_WIDTH,
+    width: 150,
     marginRight: 10,
-    borderRadius: 10,
-    backgroundColor: "white",
+  },
+  card: {
+    borderRadius: 8,
     elevation: 2,
-    overflow: "hidden",
+    height: 160,
+    position: 'relative',
+    overflow: 'hidden',
   },
-  favoriteContent: {
-    padding: 8,
-    position: "relative",
-    alignItems: "center",
-    height: 90,
-  },
-  favoriteTextContainer: {
-    marginTop: 6,
-    alignItems: "center",
-  },
-  favoriteName: {
-    fontSize: 12,
-    fontWeight: "500",
-    textAlign: "center",
-  },
-  favoritePrice: {
-    fontSize: 11,
-    fontWeight: "bold",
-    color: "#2e8b57",
-    marginTop: 2,
-  },
-  favoriteTag: {
-    position: "absolute",
+  typeBadge: {
+    position: 'absolute',
     top: 0,
     right: 0,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: '#3498db',
+    width: 24,
+    height: 24,
+    borderBottomLeftRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
   },
-  marketTag: {
-    backgroundColor: "#e6f7ff",
+  typeBadgeText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
-  productTag: {
-    backgroundColor: "#f6ffed",
+  imageContainer: {
+    width: '100%',
+    height: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
   },
-  favoriteTagText: {
-    fontSize: 8,
-    fontWeight: "bold",
+  iconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#e0e0e0',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  marketAvatar: {
-    backgroundColor: "#1890ff",
+  cardContent: {
+    padding: 12,
+    height: 80,
   },
-  productAvatar: {
-    backgroundColor: "#52c41a",
+  name: {
+    fontSize: 14,
+    fontWeight: "500",
+    marginBottom: 4,
+  },
+  price: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 4,
+  },
+  address: {
+    fontSize: 12,
+    color: "#666",
+    marginBottom: 4,
+  },
+  type: {
+    fontSize: 12,
+    color: "#999",
   },
 });

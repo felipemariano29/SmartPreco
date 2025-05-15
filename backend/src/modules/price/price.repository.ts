@@ -42,8 +42,8 @@ export class PriceRepository {
       imageUrl: data.image_url,
       userId: data.user_id,
       moderated: data.moderated,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
     };
   }
 
@@ -126,6 +126,34 @@ export class PriceRepository {
     }
 
     return (data ?? []).map((item) => item.price);
+  }
+
+  public async findLowestModeratedPriceByProductId(productId: string): Promise<number> {
+    const { data, error } = await this.supabase
+      .from(this.tableName)
+      .select('price')
+      .eq('moderated', true)
+      .eq('product_id', productId)
+      .order('price', { ascending: true })
+      .limit(1)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      throw new AppException(ErrorEnum.NOT_FOUND, error.message, this.tableName);
+    }
+
+    return data?.price ?? null;
+  }
+
+  public async updateProductIds(oldProductIds: string[], newProductId: string): Promise<void> {
+    const { error } = await this.supabase
+      .from(this.tableName)
+      .update({ product_id: newProductId })
+      .in('product_id', oldProductIds);
+
+    if (error) {
+      throw new AppException(ErrorEnum.UPDATE, error.message, this.tableName);
+    }
   }
 
 }

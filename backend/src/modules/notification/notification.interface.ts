@@ -1,5 +1,7 @@
 export interface NotificationUserToNotify {
   deviceId: string;
+  userId: string;
+  email?: string;
 }
 
 export interface NotificationParams {

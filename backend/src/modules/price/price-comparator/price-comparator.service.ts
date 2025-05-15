@@ -82,9 +82,9 @@ export class PriceComparatorService {
     const userIds = await this.favoriteService.findUserIdsByProductId(productId);
 
     const usersPromises = userIds.map(async (userId) => {
-        const deviceId = await this.clerkService.getDeviceIdByUserId(userId);
+        const userData = await this.clerkService.getUserData(userId);
 
-        return deviceId ? { userId, deviceId } : null;
+        return userData ? userData : null;
     });
 
     return Promise.all(usersPromises);

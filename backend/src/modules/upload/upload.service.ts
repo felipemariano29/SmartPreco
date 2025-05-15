@@ -1,9 +1,8 @@
+import { UploadStrategy } from '@modules/upload/strategies/upload.strategy';
+import { UploadImageDto } from '@modules/upload/upload.dto';
+import { UploadParams } from '@modules/upload/upload.interface';
+import { validateImageFile } from '@modules/upload/upload.validator';
 import { Inject, Injectable } from '@nestjs/common';
-
-import { UploadImageDto } from './upload.dto';
-import { UploadParams } from './upload.interface';
-import { UploadStrategy } from './upload.strategy';
-import { validateImageFile } from './upload.validator';
 
 @Injectable()
 export class UploadService implements UploadStrategy {

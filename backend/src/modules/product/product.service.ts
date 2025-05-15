@@ -1,17 +1,24 @@
-import { ProductCreateDto, ProductDto, ProductReadDto, ProductsDto, ProductTimestampDto, ProductUpdateDto } from '@modules/product/product.dto';
+import { FavoriteProductService } from '@modules/favorite/favorite-product/favorite-product.service';
+import { PriceService } from '@modules/price/price.service';
+import { ProductCreateDto, ProductDto, ProductReadDto, ProductsDto, ProductsMergeDto, ProductTimestampDto, ProductUpdateDto } from '@modules/product/product.dto';
 import { ProductRepository } from '@modules/product/product.repository';
-import { Injectable } from '@nestjs/common';
-import { DtoMapper } from '@shared/utils/dto-mapper';
+import { BadRequestException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class ProductService {
 
-  public constructor(private readonly productRepository: ProductRepository) {}
+  public constructor(
+    private readonly productRepository: ProductRepository,
+    private readonly priceService: PriceService,
+
+    @Inject(forwardRef(() => FavoriteProductService))
+    private readonly favoriteProductService: FavoriteProductService,
+  ) {}
 
   public async createProduct(params: ProductCreateDto): Promise<ProductDto> {
     const product = await this.productRepository.createProduct(params);
 
-    return DtoMapper.mapOne(product, this.toDto);
+    return this.toDto(product);
   }
 
   public async readProducts(params: ProductReadDto): Promise<ProductsDto> {
@@ -21,7 +28,7 @@ export class ProductService {
     const limit = params.limit ?? 20;
 
     return {
-      records: DtoMapper.mapMany(records, this.toDto),
+      records: await Promise.all(records.map(record => this.toDto(record))),
       count: records.length,
       total,
       nextOffset: (offset + limit) < total ? offset + limit : null,
@@ -31,7 +38,7 @@ export class ProductService {
   public async readProductById(productId: string): Promise<ProductDto> {
     const product = await this.productRepository.readProductById(productId);
 
-    return DtoMapper.mapOne(product, this.toDto);
+    return this.toDto(product);
   }
 
   public async updateProductById(
@@ -40,16 +47,57 @@ export class ProductService {
   ): Promise<ProductDto> {
     const product = await this.productRepository.updateProductById(productId, updateProductDto);
 
-    return DtoMapper.mapOne(product, this.toDto);
+    return this.toDto(product);
   }
 
   public async deleteProductById(productId: string): Promise<void> {
     await this.productRepository.deleteProductById(productId);
   }
 
-  private toDto(product: ProductTimestampDto): ProductDto {
-    const { id, name, description, category } = product;
-    return { id, name, description, category };
+  public async mergeProducts(params: ProductsMergeDto): Promise<void> {
+    const { targetProductId, productIds } = params;
+
+    if (productIds.includes(targetProductId)) {
+      throw new BadRequestException('Target product cannot be included in the list of products to merge.');
+    }
+
+    const targetExists = await this.productRepository.existsProductById(targetProductId);
+
+    if (!targetExists) {
+      throw new NotFoundException(`Target product ${targetProductId} does not exist.`);
+    }
+
+    // Confirma se todos os productIds existem
+    const productsExist = await this.productRepository.existAllProductsByIds(productIds);
+
+    if (!productsExist) {
+      throw new NotFoundException('Some products to merge do not exist.');
+    }
+
+    // Atualizar references em price
+    await this.priceService.updateProductIds(productIds, targetProductId);
+
+    // Atualizar references em favorite_product
+    await this.favoriteProductService.updateProductIds(productIds, targetProductId);
+
+    // Deletar produtos antigos
+    await this.productRepository.deleteProductsByIds(productIds);
+  }
+
+  private async toDto(product: ProductTimestampDto): Promise<ProductDto> {
+    const { id, name, description, category, image_url, updated_at } = product;
+
+    const lowestPrice = await this.priceService.findLowestPriceByProductId(id);
+
+    return {
+      id,
+      name,
+      description,
+      category,
+      imageUrl: image_url,
+      updatedAt: updated_at,
+      lowestPrice,
+    };
   }
 
 }

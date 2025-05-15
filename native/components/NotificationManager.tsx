@@ -1,13 +1,14 @@
 import { useUser } from "@clerk/clerk-expo";
-import { useEffect, useRef, useState } from "react";
-import * as Notifications from "expo-notifications";
-import { Platform } from "react-native";
 import * as Device from "expo-device";
 import { router } from "expo-router";
 import {
   useNotification,
   NotificationData,
 } from "@/contexts/NotificationContext";
+
+import * as Notifications from "expo-notifications";
+import { useEffect, useRef, useState } from "react";
+import { Platform } from "react-native";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -49,12 +50,10 @@ async function registerForPushNotificationsAsync() {
           projectId: projectId,
         });
         token = pushToken.data;
+      } else {
       }
-    } catch (error) {
-      console.error("Erro ao obter token de push:", error);
-    }
+    } catch (error) {}
   }
-
   return token;
 }
 
@@ -139,7 +138,6 @@ export function NotificationsManager() {
       const token = await registerForPushNotificationsAsync();
       if (token) {
         setExpoPushToken(token);
-
         if (isSignedIn && user) {
           await saveTokenToClerk(token);
         }

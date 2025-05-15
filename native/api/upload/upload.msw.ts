@@ -20,20 +20,20 @@ import type {
 } from '.././model';
 
 
-export const getUploadImageResponseMock = (overrideResponse: Partial< UploadImageDto > = {}): UploadImageDto => ({imageUrl: faker.string.alpha(20), ...overrideResponse})
+export const getUploadControllerUploadImageResponseMock = (overrideResponse: Partial< UploadImageDto > = {}): UploadImageDto => ({imageUrl: faker.string.alpha(20), ...overrideResponse})
 
 
-export const getUploadImageMockHandler = (overrideResponse?: UploadImageDto | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<UploadImageDto> | UploadImageDto)) => {
-  return http.post('*/upload', async (info) => {await delay(1000);
+export const getUploadControllerUploadImageMockHandler = (overrideResponse?: UploadImageDto | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<UploadImageDto> | UploadImageDto)) => {
+  return http.post('*/upload/image', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined 
             ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse) 
-            : getUploadImageResponseMock()),
+            : getUploadControllerUploadImageResponseMock()),
       { status: 201,
         headers: { 'Content-Type': 'application/json' }
       })
   })
 }
 export const getUploadMock = () => [
-  getUploadImageMockHandler()
+  getUploadControllerUploadImageMockHandler()
 ]

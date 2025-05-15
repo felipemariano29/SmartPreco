@@ -68,12 +68,20 @@ export class PriceService {
   }
 
   private toDto(params: PriceTimestampDto): PriceDto {
-    const { id, market, product, price, imageUrl, userId, moderated } = params;
-    return { id, market, product, price, imageUrl, userId, moderated };
+    const { id, market, product, price, imageUrl, userId, moderated, updated_at } = params;
+    return { id, market, product, price, imageUrl, userId, moderated, updatedAt: updated_at };
   }
 
   public async updateModeratedFlag(priceId: string, moderated: boolean): Promise<void> {
     await this.priceRepository.updatePriceById(priceId, { moderated });
+  }
+
+  public async findLowestPriceByProductId(productId: string): Promise<number> {
+    return this.priceRepository.findLowestModeratedPriceByProductId(productId);
+  }
+
+  public async updateProductIds(oldProductIds: string[], newProductId: string): Promise<void> {
+    await this.priceRepository.updateProductIds(oldProductIds, newProductId);
   }
 
 }
