@@ -114,6 +114,13 @@ export class MarketCreateDto extends OmitType(MarketDto, [ 'id', 'updatedAt' ] a
 
 export class MarketUpdateDto extends PartialType(MarketCreateDto) {}
 
+// == Repository DTOs ==
+
+export class MarketCreateRepositoryDto extends IntersectionType(
+  PickType(MarketCreateDto, [ 'name', 'address', 'city', 'state' ] as const),
+  UploadImageRepositoryDto,
+) {}
+
 // == Pagination DTOs ==
 
 export class MarketsDto extends PaginationResponseDto<MarketDto> {

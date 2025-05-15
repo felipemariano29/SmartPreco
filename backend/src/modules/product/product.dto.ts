@@ -69,14 +69,6 @@ export class ProductDto extends IntersectionType(
   public lowestPrice?: number;
 }
 
-// == Repository DTOs ==
-
-export class ProductTimestampDto extends IntersectionType(
-  OmitType(ProductDto, [ 'imageUrl', 'updatedAt' ] as const),
-  UploadImageRepositoryDto,
-  TimestampRepositoryDto,
-) {}
-
 // == Input DTOs ==
 
 export class ProductReadDto extends PaginationReadDto {
@@ -135,6 +127,20 @@ export class ProductsMergeDto {
   public productIds: string[];
 
 }
+
+
+// == Repository DTOs ==
+
+export class ProductTimestampDto extends IntersectionType(
+  OmitType(ProductDto, [ 'imageUrl', 'updatedAt' ] as const),
+  UploadImageRepositoryDto,
+  TimestampRepositoryDto,
+) {}
+
+export class ProductCreateRepositoryDto extends IntersectionType(
+  PickType(ProductCreateDto, [ 'name', 'description', 'category' ] as const),
+  UploadImageRepositoryDto,
+) {}
 
 // == Pagination DTOs ==
 

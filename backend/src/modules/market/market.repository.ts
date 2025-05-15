@@ -1,4 +1,4 @@
-import { MarketCreateDto, MarketReadDto, MarketsTimestampDto, MarketTimestampDto, MarketUpdateDto } from "@modules/market/market.dto";
+import { MarketCreateDto, MarketCreateRepositoryDto, MarketReadDto, MarketsTimestampDto, MarketTimestampDto, MarketUpdateDto } from "@modules/market/market.dto";
 import { HttpStatus, Injectable } from "@nestjs/common";
 import { AppException, EntityEnum, ErrorEnum } from "@shared/errors";
 import { getSafeSearch } from "@shared/utils/get-safe-search";
@@ -12,7 +12,7 @@ export class MarketRepository {
 
   public constructor(private readonly supabase: SupabaseClient) {}
 
-  public async createMarket(params: MarketCreateDto): Promise<MarketTimestampDto> {
+  public async createMarket(params: MarketCreateRepositoryDto): Promise<MarketTimestampDto> {
     const { data, error } = await this.supabase
       .from(this.tableName)
       .insert(params)
@@ -34,7 +34,7 @@ export class MarketRepository {
     if (search) {
       const safeSearch = getSafeSearch(search);
 
-      query = query.ilike('name', `%${safeSearch}%`).or(`address.ilike.%${safeSearch}%`);
+      query = query.or(`name.ilike.%${safeSearch}%,address.ilike.%${safeSearch}%`);
     }
 
     if (orderBy) {

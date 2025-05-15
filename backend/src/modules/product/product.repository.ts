@@ -1,4 +1,4 @@
-  import { ProductCreateDto, ProductReadDto, ProductsTimestampDto, ProductTimestampDto, ProductUpdateDto } from "@modules/product/product.dto";
+  import { ProductCreateRepositoryDto, ProductReadDto, ProductsTimestampDto, ProductTimestampDto, ProductUpdateDto } from "@modules/product/product.dto";
 import { HttpStatus, Injectable } from "@nestjs/common";
 import { AppException, EntityEnum, ErrorEnum } from "@shared/errors";
 import { getSafeSearch } from "@shared/utils/get-safe-search";
@@ -12,7 +12,9 @@ export class ProductRepository {
 
   public constructor(private readonly supabase: SupabaseClient) {}
 
-    public async createProduct(params: ProductCreateDto): Promise<ProductTimestampDto> {
+    public async createProduct(params: ProductCreateRepositoryDto): Promise<ProductTimestampDto> {
+      console.log('createProduct', params);
+
       const { data, error } = await this.supabase
       .from(this.tableName)
       .insert(params)
@@ -36,7 +38,7 @@ export class ProductRepository {
       if (search) {
         const safeSearch = getSafeSearch(search);
 
-        query = query.ilike('name', `%${safeSearch}%`).or(`description.ilike.%${safeSearch}%`);
+        query = query.or(`name.ilike.%${safeSearch}%,description.ilike.%${safeSearch}%`);
       }
 
       if (orderBy) {

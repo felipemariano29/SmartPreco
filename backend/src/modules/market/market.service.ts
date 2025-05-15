@@ -9,7 +9,9 @@ export class MarketService {
   public constructor(private readonly marketRepository: MarketRepository) {}
 
   public async createMarket(params: MarketCreateDto): Promise<MarketDto> {
-    const market = await this.marketRepository.createMarket(params);
+    const { imageUrl, ...rest } = params;
+
+    const market = await this.marketRepository.createMarket({ ...rest, image_url: imageUrl });
 
     return DtoMapper.mapOne(market, this.toDto);
   }

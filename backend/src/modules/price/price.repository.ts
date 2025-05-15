@@ -66,7 +66,7 @@ export class PriceRepository {
     if (search) {
       const safeSearch = getSafeSearch(search);
 
-      query = query.ilike('product.name', `%${safeSearch}%`).or(`market.name.ilike.%${safeSearch}%`);
+      query = query.or(`product.name.ilike.%${safeSearch}%,market.name.ilike.%${safeSearch}%`);
     }
 
     if (orderBy) {
