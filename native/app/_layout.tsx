@@ -26,15 +26,6 @@ import { PaperProvider } from "react-native-paper";
 
 SplashScreen.preventAutoHideAsync();
 
-// Listener for receiving notifications when the app is in the foreground
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true, // Show alert even when app is in foreground
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
-
 function AppContent() {
   const router = useRouter();
   const { lastNotification } = useNotification();
