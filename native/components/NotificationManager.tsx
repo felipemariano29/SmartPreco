@@ -1,8 +1,22 @@
 import { useUser } from "@clerk/clerk-expo";
 import * as Device from "expo-device";
+import { router } from "expo-router";
+import {
+  useNotification,
+  NotificationData,
+} from "@/contexts/NotificationContext";
+
 import * as Notifications from "expo-notifications";
 import { useEffect, useRef, useState } from "react";
 import { Platform } from "react-native";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
 
 async function registerForPushNotificationsAsync() {
   let token;
@@ -47,9 +61,46 @@ export function NotificationsManager() {
   const { user, isSignedIn } = useUser();
   const [isLoading, setIsLoading] = useState(true);
   const [expoPushToken, setExpoPushToken] = useState("");
+  const { handleNotificationData } = useNotification();
 
   const notificationListener = useRef<any | null>(null);
   const responseListener = useRef<Notifications.Subscription | null>(null);
+
+  const handleNotificationResponse = (
+    response: Notifications.NotificationResponse
+  ) => {
+    const data = response.notification.request.content.data as NotificationData;
+
+    handleNotificationData(data);
+
+    if (data && data.screen) {
+      switch (data.screen) {
+        case "product-details":
+          if (data.productId) {
+            router.push({
+              pathname: "/product-details",
+              params: {
+                id: data.productId,
+              },
+            });
+          }
+          break;
+        case "market-details":
+          if (data.marketId) {
+            router.push({
+              pathname: "/market-details",
+              params: {
+                id: data.marketId,
+              },
+            });
+          }
+          break;
+        default:
+          router.push("/(protected)/(tabs)");
+          break;
+      }
+    }
+  };
 
   const saveTokenToClerk = async (token: string) => {
     try {
@@ -96,7 +147,15 @@ export function NotificationsManager() {
     getNotificationToken();
 
     notificationListener.current =
-      Notifications.addNotificationReceivedListener((notification) => {});
+      Notifications.addNotificationReceivedListener((notification) => {
+        const data = notification.request.content.data as NotificationData;
+        handleNotificationData(data);
+      });
+
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener(
+        handleNotificationResponse
+      );
 
     return () => {
       if (notificationListener.current) {
