@@ -1,10 +1,9 @@
+import { S3UploadStrategy } from '@modules/upload/strategies/upload-s3.strategy';
+import { SupabaseUploadStrategy } from '@modules/upload/strategies/upload-supabase.strategy';
+import { UploadStrategyFactory } from '@modules/upload/strategies/upload.strategy.factory';
+import { UploadController } from '@modules/upload/upload.controller';
+import { UploadService } from '@modules/upload/upload.service';
 import { Module } from '@nestjs/common';
-
-import { UploadController } from './upload.controller';
-import { UploadService } from './upload.service';
-import { UploadStrategyFactory } from './upload.strategy.factory';
-import { S3UploadStrategy } from './upload-s3.strategy';
-import { SupabaseUploadStrategy } from './upload-supabase.strategy';
 
 @Module({
   controllers: [ UploadController ],

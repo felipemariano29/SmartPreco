@@ -1,3 +1,4 @@
+import { appColors } from "@/constants/theme";
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
@@ -9,81 +10,89 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
+  },
+  headerTitleContainer: {
+    flex: 1,
+    marginLeft: 8,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: "bold",
   },
+  headerSubtitle: {
+    fontSize: 14,
+    color: "#666",
+  },
   scrollView: {
     flex: 1,
   },
   imageContainer: {
-    alignItems: "center",
-    padding: 20,
+    width: "100%",
+    height: 300,
+    backgroundColor: "#f0f0f0",
   },
   productImage: {
-    width: 200,
-    height: 200,
-    resizeMode: "contain",
+    width: "100%",
+    height: "100%",
   },
   placeholderImage: {
-    width: 200,
-    height: 200,
-    backgroundColor: "#e0e0e0",
-    borderRadius: 8,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#f0f0f0",
   },
   infoSection: {
-    paddingHorizontal: 20,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    padding: 16,
   },
   productName: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "bold",
     marginBottom: 8,
   },
   productPrice: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#2e8b57",
+    color: appColors.primary,
+    marginBottom: 16,
+  },
+  productCategory: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 8,
   },
   section: {
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 15,
+    marginBottom: 12,
   },
   description: {
     fontSize: 16,
-    lineHeight: 22,
     color: "#333",
+    lineHeight: 24,
   },
   marketItem: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: "#eee",
+    justifyContent: "space-between",
+    padding: 12,
+    backgroundColor: "#f8f8f8",
     borderRadius: 8,
-    padding: 15,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   marketInfo: {
     flex: 1,
   },
   marketName: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "500",
     marginBottom: 4,
   },
   marketDetail: {
@@ -97,21 +106,22 @@ export const styles = StyleSheet.create({
   marketPrice: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#2e8b57",
+    color: appColors.primary,
+    marginRight: 8,
   },
   marketArrow: {
     margin: 0,
-    padding: 0,
   },
   compareSection: {
-    padding: 20,
-    alignItems: "center",
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
   },
   compareButton: {
-    backgroundColor: "#2e8b57",
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 25,
+    backgroundColor: appColors.primary,
+    padding: 16,
+    borderRadius: 8,
+    alignItems: "center",
   },
   compareButtonText: {
     color: "#fff",
@@ -119,22 +129,33 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   reportSection: {
-    marginTop: 20,
-    marginBottom: 30,
-    paddingHorizontal: 15,
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
   },
   reportButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 25,
-    borderWidth: 1,
-    borderColor: "#ff5252",
-    padding: 10,
+    padding: 16,
     alignItems: "center",
   },
   reportButtonText: {
-    color: "#ff5252",
-    fontSize: 14,
-    fontWeight: "500",
-  }
-});
+    color: "#FF3B30",
+    fontSize: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: "#666",
+    marginTop: 12,
+  },
+  noDataText: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+    padding: 16,
+  },
+}); 

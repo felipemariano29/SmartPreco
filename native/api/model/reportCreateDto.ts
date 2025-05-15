@@ -9,6 +9,5 @@
 export interface ReportCreateDto {
   /** Price's unique identifier */
   priceId: string;
-  /** Report's reason */
   reason: string;
 }

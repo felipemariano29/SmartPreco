@@ -62,6 +62,10 @@ export const styles = StyleSheet.create({
       marginTop: 20,
       marginBottom: 20,
     },
+    submitButtonDisabled: {
+      backgroundColor: "#a0c9b6", // Uma versão mais clara do verde original
+      opacity: 0.7,
+    },
     submitButtonText: {
       color: "white",
       fontWeight: "500",

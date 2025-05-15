@@ -7,11 +7,11 @@ import { FavoriteProductService } from '@modules/favorite/favorite-product/favor
 import { FavoriteStrategyToken } from '@modules/favorite/favorite.strategy';
 import { MarketModule } from '@modules/market/market.module';
 import { ProductModule } from '@modules/product/product.module';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 
 @Module({
   imports: [
-    ProductModule,
+    forwardRef(() => ProductModule),
     MarketModule,
   ],
   controllers: [

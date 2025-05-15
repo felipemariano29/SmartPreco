@@ -52,9 +52,9 @@ export default function BarcodeScannerScreen() {
     }
   };
 
-  const toggleFlash = () => {
-    setFlashMode((current) => (current === "off" ? "torch" : "off"));
-  };
+  // const toggleFlash = () => {
+  //   setFlashMode((current) => (current === "off" ? "torch" : "off"));
+  // };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -64,14 +64,14 @@ export default function BarcodeScannerScreen() {
         <IconButton
           icon={flashMode === "off" ? "flashlight" : "flashlight-off"}
           size={24}
-          onPress={toggleFlash}
+          // onPress={toggleFlash}
         />
       </View>
 
       <CameraView
         style={styles.camera}
         facing="back"
-        flashMode={flashMode}
+        // flashMode={flashMode}
         barcodeScannerSettings={{
           barcodeTypes: [
             "ean13",
