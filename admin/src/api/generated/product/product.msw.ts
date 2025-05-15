@@ -14,45 +14,78 @@ import type { ProductDto, ProductsDto } from "../smartPreçoAPI.schemas";
 export const getCreateProductResponseMock = (
   overrideResponse: Partial<ProductDto> = {},
 ): ProductDto => ({
+  updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+  imageUrl: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
   id: faker.string.alpha(20),
   name: faker.string.alpha(20),
   description: faker.string.alpha(20),
   category: faker.string.alpha(20),
+  lowestPrice: faker.helpers.arrayElement([
+    faker.number.int({ min: undefined, max: undefined }),
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
 export const getReadProductsResponseMock = (
   overrideResponse: Partial<ProductsDto> = {},
 ): ProductsDto => ({
-  products: Array.from(
+  records: Array.from(
     { length: faker.number.int({ min: 1, max: 10 }) },
     (_, i) => i + 1,
   ).map(() => ({
+    updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+    imageUrl: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     id: faker.string.alpha(20),
     name: faker.string.alpha(20),
     description: faker.string.alpha(20),
     category: faker.string.alpha(20),
+    lowestPrice: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
   })),
+  count: faker.number.int({ min: undefined, max: undefined }),
+  total: faker.number.int({ min: undefined, max: undefined }),
+  nextOffset: faker.helpers.arrayElement([
+    faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      null,
+    ]),
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
 export const getReadProductResponseMock = (
   overrideResponse: Partial<ProductDto> = {},
 ): ProductDto => ({
+  updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+  imageUrl: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
   id: faker.string.alpha(20),
   name: faker.string.alpha(20),
   description: faker.string.alpha(20),
   category: faker.string.alpha(20),
+  lowestPrice: faker.helpers.arrayElement([
+    faker.number.int({ min: undefined, max: undefined }),
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
 export const getUpdateProductResponseMock = (
   overrideResponse: Partial<ProductDto> = {},
 ): ProductDto => ({
+  updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+  imageUrl: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
   id: faker.string.alpha(20),
   name: faker.string.alpha(20),
   description: faker.string.alpha(20),
   category: faker.string.alpha(20),
+  lowestPrice: faker.helpers.arrayElement([
+    faker.number.int({ min: undefined, max: undefined }),
+    undefined,
+  ]),
   ...overrideResponse,
 });
 

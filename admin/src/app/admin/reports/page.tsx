@@ -3,11 +3,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 "use client";
 
-import { useReadReports, useUpdateReport } from "@/api/generated/report/report";
 import {
   type ReportDto,
-  ReportUpdateDtoStatus
-} from "@/api/generated/smartPreçoAPI.schemas";
+  ReportUpdateDtoStatus,
+  useReadReports,
+  useUpdateReport
+} from "@/api";
 import { ReportDetails } from "@/components/reports/report-details";
 import { ReportStatusBadge } from "@/components/reports/report-status-badge";
 import { Button } from "@/components/ui/button";
@@ -34,10 +35,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ChevronDown, Copy, Eye, Filter, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export default function ReportsPage() {
+  const t = useTranslations();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedReport, setSelectedReport] = useState<ReportDto | null>(null);
@@ -46,21 +49,21 @@ export default function ReportsPage() {
   const updateReportMutation = useUpdateReport({
     mutation: {
       onSuccess: () => {
-        toast.success("Report updated", {
-          description: "The report status has been updated successfully.",
+        toast.success(t("notifications.success.updated", { entity: t("reports.title") }), {
+          description: t("notifications.success.updated-description"),
         });
         void refetch();
         setSelectedReport(null);
       },
       onError: () => {
-        toast.error("Error", {
-          description: "Failed to update report status. Please try again.",
+        toast.error(t("notifications.error.generic"), {
+          description: t("notifications.error.update", { entity: t("reports.title") }),
         });
       },
     },
   });
 
-  const reports = data?.reports ?? [];
+  const reports = data?.records ?? [];
 
   const filteredReports = reports.filter((report) => {
     const matchesSearch =
@@ -77,7 +80,7 @@ export default function ReportsPage() {
 
   const handleApproveReport = (report: ReportDto) => {
     updateReportMutation.mutate({
-      reportId: report.id ?? "",
+      reportId: report.id,
       data: {
         resolved: true,
         status: ReportUpdateDtoStatus.APPROVED,
@@ -87,7 +90,7 @@ export default function ReportsPage() {
 
   const handleRejectReport = (report: ReportDto) => {
     updateReportMutation.mutate({
-      reportId: report.id ?? "",
+      reportId: report.id,
       data: {
         resolved: true,
         status: ReportUpdateDtoStatus.REJECTED,
@@ -97,7 +100,7 @@ export default function ReportsPage() {
 
   const handleCopyToClipboard = (text: string) => {
     void navigator.clipboard.writeText(text);
-    toast.success("Copied to clipboard");
+    toast.success(t("common.clipboard.copied"));
   };
 
   return (
@@ -105,9 +108,9 @@ export default function ReportsPage() {
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Reports Management</h1>
+            <h1 className="text-3xl font-bold">{t("reports.title")}</h1>
             <p className="mt-1 text-muted-foreground">
-              Review and manage price reports submitted by users
+              {t("reports.description")}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -115,29 +118,29 @@ export default function ReportsPage() {
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Search reports..."
-                className="w-[250px] pl-8"
+                placeholder={t("reports.search")}
+                className="w-[250px] pl-8 bg-card"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="ml-2">
+                <Button variant="outline" size="sm" className="ml-2 bg-card">
                   <Filter className="mr-2 h-4 w-4" />
-                  Filter
+                  {t("reports.filter.title")}
                   <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setStatusFilter("all")}>
-                  All Reports
+                  {t("reports.filter.all")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setStatusFilter("resolved")}>
-                  Resolved Only
+                  {t("reports.filter.resolved")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setStatusFilter("unresolved")}>
-                  Unresolved Only
+                  {t("reports.filter.unresolved")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -146,10 +149,12 @@ export default function ReportsPage() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle>Reports</CardTitle>
+            <CardTitle>{t("reports.title")}</CardTitle>
             <CardDescription>
               {filteredReports.length}{" "}
-              {filteredReports.length === 1 ? "report" : "reports"} found
+              {filteredReports.length === 1 
+                ? t("reports.foundSingular") 
+                : t("reports.foundPlural")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -161,13 +166,13 @@ export default function ReportsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Report ID</TableHead>
-                    <TableHead>Price ID</TableHead>
-                    <TableHead>Product</TableHead>
-                    <TableHead>Market</TableHead>
-                    <TableHead>Reason</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Review</TableHead>
+                    <TableHead>{t("reports.table.id")}</TableHead>
+                    <TableHead>{t("reports.table.priceId")}</TableHead>
+                    <TableHead>{t("reports.table.product")}</TableHead>
+                    <TableHead>{t("reports.table.market")}</TableHead>
+                    <TableHead>{t("reports.table.reason")}</TableHead>
+                    <TableHead>{t("reports.table.status")}</TableHead>
+                    <TableHead className="text-right">{t("reports.table.actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -177,20 +182,21 @@ export default function ReportsPage() {
                         colSpan={7}
                         className="py-8 text-center text-muted-foreground"
                       >
-                        No reports found.
+                        {t("reports.noReportsFound")}
                       </TableCell>
                     </TableRow>
                   ) : (
                     filteredReports.map((report) => (
-                      <TableRow key={report.id ?? ""}>
+                      <TableRow key={report.id}>
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
-                            <span>{report.id?.substring(0, 8)}...</span>
+                            <span>{report.id.substring(0, 8)}...</span>
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-6 w-6"
-                              onClick={() => handleCopyToClipboard(report.id ?? "")}
+                              onClick={() => handleCopyToClipboard(report.id)}
+                              title={t("common.buttons.copy")}
                             >
                               <Copy className="h-3 w-3" />
                             </Button>
@@ -198,19 +204,20 @@ export default function ReportsPage() {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <span>{report.price?.id?.substring(0, 8)}...</span>
+                            <span>{report.price.id.substring(0, 8)}...</span>
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-6 w-6"
-                              onClick={() => handleCopyToClipboard(report.price?.id ?? "")}
+                              onClick={() => handleCopyToClipboard(report.price.id)}
+                              title={t("common.buttons.copy")}
                             >
                               <Copy className="h-3 w-3" />
                             </Button>
                           </div>
                         </TableCell>
-                        <TableCell>{report.price?.product?.name}</TableCell>
-                        <TableCell>{report.price?.market?.name}</TableCell>
+                        <TableCell>{report.price.product.name}</TableCell>
+                        <TableCell>{report.price.market.name}</TableCell>
                         <TableCell className="max-w-[300px] truncate">
                           {report.reason}
                         </TableCell>
@@ -222,6 +229,7 @@ export default function ReportsPage() {
                             variant="ghost"
                             size="icon"
                             onClick={() => setSelectedReport(report)}
+                            title={t("common.buttons.view")}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>

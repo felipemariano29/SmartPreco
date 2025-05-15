@@ -1,0 +1,226 @@
+{
+  "common": {
+    "buttons": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "edit": "Edit",
+      "view": "View",
+      "add": "Add",
+      "search": "Search",
+      "copy": "Copy"
+    },
+    "navigation": {
+      "dashboard": "Dashboard",
+      "products": "Products",
+      "markets": "Markets",
+      "reports": "Reports",
+      "admin": "Admin"
+    },
+    "theme": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "language": {
+      "en": "English",
+      "pt-BR": "Portuguese (BR)"
+    },
+    "clipboard": {
+      "copied": "Copied to clipboard"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "overview": "Overview of your admin dashboard",
+    "cards": {
+      "products": {
+        "title": "Products",
+        "description": "Total products in system"
+      },
+      "markets": {
+        "title": "Markets",
+        "description": "Total markets in system"
+      },
+      "reports": {
+        "title": "Reports",
+        "description": "Total reports"
+      }
+    },
+    "reportsOverview": {
+      "title": "Reports Overview",
+      "resolvedReports": {
+        "title": "Resolved Reports",
+        "description": "resolution rate"
+      },
+      "pendingReports": {
+        "title": "Pending Reports",
+        "description": "Awaiting review"
+      },
+      "approvalRate": {
+        "title": "Approval Rate",
+        "description": "approved / rejected"
+      }
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "description": "Common actions you can take",
+      "products": {
+        "title": "Manage Products",
+        "description": "Add, edit and remove products",
+        "link": "Go to Products"
+      },
+      "markets": {
+        "title": "Manage Markets",
+        "description": "Add, edit and remove markets",
+        "link": "Go to Markets"
+      },
+      "reports": {
+        "title": "Review Reports",
+        "description": "Check and manage pending reports",
+        "link": "Go to Reports"
+      }
+    }
+  },
+  "products": {
+    "title": "Products Management",
+    "description": "Manage products in the system",
+    "table": {
+      "image": "Image",
+      "name": "Name",
+      "category": "Category",
+      "description": "Description",
+      "price": "Price",
+      "id": "ID",
+      "actions": "Actions"
+    },
+    "form": {
+      "name": "Product Name",
+      "nameDescription": "Enter the name of the product",
+      "category": "Category",
+      "categoryDescription": "Select or enter a product category",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter a description of the product",
+      "imageUrl": "Image URL",
+      "imageUrlDescription": "Enter a URL for the product image",
+      "editTitle": "Edit Product",
+      "addTitle": "Add New Product",
+      "editDescription": "Update the product information in the form below.",
+      "addDescription": "Fill in the product details to create a new product.",
+      "imagePreview": "Product preview",
+      "optional": "Optional"
+    },
+    "actions": {
+      "add": "Add Product",
+      "edit": "Edit Product",
+      "delete": "Delete Product"
+    },
+    "search": "Search products...",
+    "filter": {
+      "category": "Category",
+      "all": "All Categories"
+    },
+    "details": {
+      "title": "Product Details",
+      "description": "View detailed information about this product.",
+      "lowestPrice": "Lowest Price",
+      "notAvailable": "N/A",
+      "lastUpdated": "Last Updated"
+    },
+    "foundSingular": "product found",
+    "foundPlural": "products found",
+    "noProductsFound": "No products found.",
+    "confirmDelete": "Are you sure you want to delete {name}?"
+  },
+  "markets": {
+    "title": "Markets Management",
+    "description": "Manage markets in the system",
+    "table": {
+      "image": "Image",
+      "name": "Name",
+      "address": "Address",
+      "city": "City",
+      "state": "State",
+      "id": "ID",
+      "actions": "Actions"
+    },
+    "form": {
+      "name": "Market Name",
+      "nameDescription": "Enter the name of the market",
+      "address": "Address",
+      "addressDescription": "Enter the street address of the market",
+      "city": "City",
+      "cityDescription": "Enter the city where the market is located",
+      "state": "State",
+      "stateDescription": "Enter the state where the market is located",
+      "imageUrl": "Image URL",
+      "imageUrlDescription": "Enter a URL for the market image"
+    },
+    "actions": {
+      "add": "Add Market",
+      "edit": "Edit Market",
+      "delete": "Delete Market"
+    },
+    "search": "Search markets...",
+    "filter": {
+      "title": "State",
+      "all": "All States"
+    }
+  },
+  "reports": {
+    "title": "Reports Management",
+    "description": "Review and manage price reports submitted by users",
+    "table": {
+      "product": "Product",
+      "market": "Market",
+      "price": "Price",
+      "priceId": "Price ID",
+      "reporter": "Reporter",
+      "reason": "Reason",
+      "status": "Status",
+      "date": "Date",
+      "actions": "Actions",
+      "id": "Report ID"
+    },
+    "status": {
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "pending": "Pending"
+    },
+    "filter": {
+      "title": "Filter",
+      "all": "All Reports",
+      "resolved": "Resolved Only",
+      "unresolved": "Unresolved Only"
+    },
+    "search": "Search reports...",
+    "details": {
+      "title": "Report Details",
+      "description": "Detailed information about the selected report.",
+      "price": "Price",
+      "marketDetails": "Market Details",
+      "imageDescription": "Image provided by the user for price verification",
+      "approve": "Approve",
+      "reject": "Reject"
+    },
+    "foundSingular": "report found",
+    "foundPlural": "reports found",
+    "noReportsFound": "No reports found."
+  },
+  "notifications": {
+    "success": {
+      "created": "{entity} created",
+      "updated": "{entity} updated",
+      "deleted": "{entity} deleted",
+      "created-description": "The item has been created successfully.",
+      "updated-description": "The item has been updated successfully.",
+      "deleted-description": "The item has been deleted successfully."
+    },
+    "error": {
+      "generic": "Error",
+      "creation": "Failed to create {entity}. Please try again.",
+      "update": "Failed to update {entity}. Please try again.",
+      "delete": "Failed to delete {entity}. Please try again."
+    }
+  }
+} 

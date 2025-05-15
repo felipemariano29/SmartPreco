@@ -1,38 +1,43 @@
 "use client";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { LanguageToggle } from "@/components/language-toggle";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 import { SignedIn, UserButton } from "@clerk/nextjs";
 import {
   AlertCircle,
   BarChart3,
-  LogOut,
-  Settings,
-  User
+  Package,
+  Store
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type React from "react";
+import { useLanguage } from "./language-provider";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
-const navigation = [
+const navigationKeys = [
   {
-    name: "Dashboard",
+    nameKey: "dashboard",
     href: "/admin",
     icon: BarChart3,
   },
   {
-    name: "Reports",
+    nameKey: "products",
+    href: "/admin/products",
+    icon: Package,
+  },
+  {
+    nameKey: "markets",
+    href: "/admin/markets",
+    icon: Store,
+  },
+  {
+    nameKey: "reports",
     href: "/admin/reports",
     icon: AlertCircle,
   },
@@ -40,40 +45,43 @@ const navigation = [
 
 export function AdminLayoutComponent({ children }: AdminLayoutProps) {
   const pathname = usePathname();
+  const t = useTranslations('common');
+  const { locale } = useLanguage();
+
+  const navigation = navigationKeys.map(item => ({
+    ...item,
+    name: t(`navigation.${item.nameKey}`)
+  }));
 
   return (
     <div className="flex min-h-screen flex-1 flex-col">
-      <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
-        <div className="ml-auto flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <SignedIn>
-                <UserButton />
-              </SignedIn>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <LogOut className="mr-2 h-4 w-4" />
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+      <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-primary px-4 shadow-sm sm:px-6">
+        <div className="flex items-center rounded-sm border-2 border-black bg-white px-2 py-0.5">
+          <Link href="/admin" className="text-lg font-extrabold text-primary">
+            <img
+              src="/logo.png"
+              alt="SmartPreço"
+              className="w-24 object-cover h-10"
+            />
+          </Link>
+        </div>
+        <div className="ml-auto flex items-center gap-4">
+          <LanguageToggle />
+          <ThemeToggle />
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
         </div>
       </header>
 
       <div className="flex flex-1">
-        <aside className="hidden w-64 border-r bg-background md:block">
+        <aside className="hidden w-64 border-r bg-background drop-shadow-sm md:block">
+          <div className="border-b p-4">
+            <h2 className="font-semibold text-primary">{t('navigation.admin')}</h2>
+            <div className="mt-1 text-xs text-muted-foreground">
+              {locale === 'pt-BR' ? '🇧🇷 Português' : '🇺🇸 English'}
+            </div>
+          </div>
           <nav className="flex flex-col gap-2 p-4">
             {navigation.map((item) => {
               const isActive = pathname === item.href;
@@ -82,11 +90,18 @@ export function AdminLayoutComponent({ children }: AdminLayoutProps) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                    isActive ? "bg-accent" : "transparent",
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-secondary/10 hover:text-secondary",
                   )}
                 >
-                  <item.icon className="h-4 w-4" />
+                  <item.icon
+                    className={cn(
+                      "h-5 w-5",
+                      isActive ? "" : "text-muted-foreground",
+                    )}
+                  />
                   {item.name}
                 </Link>
               );
@@ -94,7 +109,7 @@ export function AdminLayoutComponent({ children }: AdminLayoutProps) {
           </nav>
         </aside>
 
-        <main className="flex-1 p-4 sm:p-6">{children}</main>
+        <main className="flex-1 bg-background/50 p-4 sm:p-6">{children}</main>
       </div>
     </div>
   );
