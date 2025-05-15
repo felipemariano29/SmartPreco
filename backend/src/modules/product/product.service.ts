@@ -16,7 +16,9 @@ export class ProductService {
   ) {}
 
   public async createProduct(params: ProductCreateDto): Promise<ProductDto> {
-    const product = await this.productRepository.createProduct(params);
+    const { imageUrl, ...rest } = params;
+
+    const product = await this.productRepository.createProduct({ ...rest, image_url: params.imageUrl });
 
     return this.toDto(product);
   }
