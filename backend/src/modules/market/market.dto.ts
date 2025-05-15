@@ -110,7 +110,7 @@ export class MarketReadDto extends PaginationReadDto {
   public orderBy?: string;
 }
 
-export class MarketCreateDto extends OmitType(MarketDto, [ 'id' ] as const) {}
+export class MarketCreateDto extends OmitType(MarketDto, [ 'id', 'updatedAt' ] as const) {}
 
 export class MarketUpdateDto extends PartialType(MarketCreateDto) {}
 

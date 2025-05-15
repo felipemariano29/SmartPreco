@@ -109,7 +109,7 @@ export class ProductReadDto extends PaginationReadDto {
   public orderBy?: string;
 }
 
-export class ProductCreateDto extends OmitType(ProductDto, [ 'id' ] as const) {}
+export class ProductCreateDto extends OmitType(ProductDto, [ 'id', 'updatedAt' ] as const) {}
 
 export class ProductUpdateDto extends PartialType(ProductCreateDto) {}
 
