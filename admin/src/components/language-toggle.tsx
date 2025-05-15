@@ -22,9 +22,6 @@ export function LanguageToggle() {
     
     // Update the context
     setLocale(newLocale);
-    
-    // Force reload to ensure all components get updated
-    window.location.reload();
   };
 
   return (

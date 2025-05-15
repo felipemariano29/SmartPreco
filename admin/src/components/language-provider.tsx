@@ -30,6 +30,7 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('locale', locale);
     // Client-side only code
     const storedLocale = localStorage.getItem('language') as Locale | null;
     const browserLocale = navigator.language as Locale;
@@ -57,7 +58,7 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
           setLoading(false);
         }
       });
-  }, []);
+  }, [locale]);
 
   if (loading) {
     // Simple loading state
