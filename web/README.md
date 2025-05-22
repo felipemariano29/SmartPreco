@@ -1,33 +1,117 @@
 # SmartPreço Web
 
-This is the project for the web section of the product. 
+Landing page moderna e responsiva para o aplicativo SmartPreço, desenvolvida com React e Vite.
 
-## How to run locally
+## 🚀 Tecnologias
 
-If you want to work locally using your own IDE, you can clone this repo and push changes.
+- **React 18** - Biblioteca JavaScript para interfaces
+- **TypeScript** - Tipagem estática para JavaScript
+- **Vite** - Build tool rápido e moderno
+- **Tailwind CSS** - Framework CSS utility-first
+- **React Router** - Roteamento para aplicações React
+- **TanStack Query** - Gerenciamento de estado e cache
+- **Radix UI** - Componentes acessíveis e customizáveis
+- **Lucide React** - Ícones modernos
 
-Make sure you have bun installed
+## 📁 Estrutura
 
-Follow these steps:
-```sh
+```
+web/
+├── src/
+│   ├── components/         # Componentes reutilizáveis
+│   │   ├── ui/            # Componentes base (shadcn/ui)
+│   │   ├── Hero.tsx       # Seção principal
+│   │   ├── Features.tsx   # Funcionalidades
+│   │   ├── HowItWorks.tsx # Como funciona
+│   │   ├── Partnership.tsx # Parcerias
+│   │   └── ...
+│   ├── pages/             # Páginas da aplicação
+│   ├── hooks/             # Hooks customizados
+│   ├── lib/               # Utilitários
+│   └── main.tsx          # Ponto de entrada
+```
+
+## 🎨 Componentes Principais
+
+### Hero
+Seção de destaque com call-to-action e imagens responsivas
+
+### Features
+Showcase das funcionalidades principais do app:
+- Preços em tempo real
+- Alertas de preço
+- Comunidade ativa
+- Economia garantida
+
+### HowItWorks
+Processo em 4 etapas para usar o aplicativo
+
+### Partnership
+Formulário e benefícios para estabelecimentos parceiros
+
+### Testimonials
+Depoimentos de usuários satisfeitos
+
+### Security
+Informações sobre segurança e privacidade
+
+### FAQ
+Perguntas frequentes com accordion interativo
+
+## 🚀 Instalação
+
+```bash
 bun install
+```
 
+## 🔧 Desenvolvimento
+
+```bash
 bun dev
 ```
 
+## 🏗️ Build
 
-## Tools and Frameworks
+```bash
+bun build
+```
 
-This project is built with:
+## 📱 Responsividade
 
-- Bun
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Design mobile-first com breakpoints otimizados:
+- Mobile: < 768px
+- Tablet: 768px - 1024px  
+- Desktop: > 1024px
 
-## Deploy
+## 🎯 Funcionalidades
 
-This simple app can be built and served as a static app from any bucket/server storage service.
-For instance, we are using GitHub Actions to build the project and serve the `dist` folder in github pages.
+- **Design Responsivo** - Adaptado para todos os dispositivos
+- **Navegação Suave** - Scroll suave entre seções
+- **Formulários Interativos** - Validação e feedback
+- **Animações CSS** - Transições e hover effects
+- **SEO Otimizado** - Meta tags e estrutura semântica
+- **Acessibilidade** - Componentes acessíveis (Radix UI)
+
+## 🔧 Customização
+
+### Cores
+Defina as cores do tema em `src/index.css`:
+```css
+:root {
+  --brand-green: 34 197 94;
+  --brand-orange: 249 115 22;
+  --brand-blue: 59 130 246;
+}
+```
+
+### Componentes
+Todos os componentes UI estão em `src/components/ui/` e podem ser customizados conforme necessário.
+
+## 📦 Deploy
+
+Build otimizado para produção:
+```bash
+bun build
+```
+
+Os arquivos ficam na pasta `dist/` prontos para deploy em qualquer servidor estático.
