@@ -163,10 +163,3 @@ async handlePriceCreated(price: PriceTimestampDto) {
 ```
 
 O listener **observa** eventos de domínio; produtores e consumidores seguem desacoplados.
-
-
----
-
-## Licença
-
-MIT © 2025 SmartPreço
