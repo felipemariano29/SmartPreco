@@ -64,8 +64,8 @@ export const FavoritesRow = ({
             </View>
 
             <View style={styles.imageContainer}>
-              {item.image ? (
-                <Avatar.Image size={60} source={item.image} />
+              {item.imageUrl ? (
+                <Avatar.Image size={60} source={{ uri: item.imageUrl }} />
               ) : (
                 <View style={styles.iconContainer}>
                   <MaterialCommunityIcons

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -19,7 +19,6 @@ import { useReadProducts } from "@/api/product/product";
 import { useReadMarkets } from "@/api/market/market";
 import { useGetFavoriteMarkets } from "@/api/favorite-market/favorite-market";
 import { useGetFavoriteProducts } from "@/api/favorite-product/favorite-product";
-import { useReadPrices } from "@/api/price/price";
 import {
   useFavoriteMarket,
   useUnfavoriteMarket,
@@ -29,13 +28,12 @@ import {
   useUnfavoriteProduct,
 } from "@/api/favorite-product/favorite-product";
 import { useQueryClient } from "@tanstack/react-query";
-import { PriceDto } from "@/api/model";
 
 export type ItemType = {
   id: string;
   name: string;
   price: string;
-  image: null;
+  imageUrl: string | null;
   type: "product" | "market";
   category?: string;
   description?: string;
@@ -43,22 +41,17 @@ export type ItemType = {
   city?: string;
   address?: string;
   isFavorite?: boolean;
-  priceId?: string;
 };
 
 export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<ItemType[]>([]);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [localProducts, setLocalProducts] = useState<ItemType[]>([]);
   const [localMarkets, setLocalMarkets] = useState<ItemType[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
   const queryClient = useQueryClient();
-  const productPriceMapRef = useRef(
-    new Map<string, { price: number; priceId: string; imageUrl?: string }>()
-  );
 
   const {
     data: productsData,
@@ -78,25 +71,17 @@ export default function HomeScreen() {
   const { data: favoriteMarketsData, refetch: refetchFavoriteMarkets } =
     useGetFavoriteMarkets();
 
-  const {
-    data: pricesData,
-    isLoading: isLoadingPrices,
-    refetch: refetchPrices,
-  } = useReadPrices();
-
   useFocusEffect(
     useCallback(() => {
       refetchProducts();
       refetchMarkets();
       refetchFavoriteProducts();
       refetchFavoriteMarkets();
-      refetchPrices();
     }, [
       refetchProducts,
       refetchMarkets,
       refetchFavoriteProducts,
       refetchFavoriteMarkets,
-      refetchPrices,
     ])
   );
 
@@ -108,7 +93,6 @@ export default function HomeScreen() {
       refetchMarkets(),
       refetchFavoriteProducts(),
       refetchFavoriteMarkets(),
-      refetchPrices(),
     ]).finally(() => {
       setRefreshing(false);
     });
@@ -117,7 +101,6 @@ export default function HomeScreen() {
     refetchMarkets,
     refetchFavoriteProducts,
     refetchFavoriteMarkets,
-    refetchPrices,
   ]);
 
   const { mutate: favoriteMarket } = useFavoriteMarket({
@@ -200,81 +183,52 @@ export default function HomeScreen() {
     },
   });
 
-  const isLoading = isLoadingProducts || isLoadingMarkets || isLoadingPrices;
+  const isLoading = isLoadingProducts || isLoadingMarkets;
 
-  const formatPrice = useCallback((price: number) => {
+  const formatPrice = useCallback((price: number | null | undefined) => {
+    if (price == null) return "Indisponível";
     return `R$ ${price.toFixed(2).replace(".", ",")}`;
   }, []);
 
   useEffect(() => {
-    if (pricesData?.records && pricesData.records.length > 0) {
-      productPriceMapRef.current.clear();
+    if (!productsData?.records) return;
 
-      pricesData.records.forEach((price: PriceDto) => {
-        const productId = price.product.id;
-        if (
-          !productPriceMapRef.current.has(productId) ||
-          price.price < productPriceMapRef.current.get(productId)!.price
-        ) {
-          productPriceMapRef.current.set(productId, {
-            price: price.price,
-            priceId: price.id,
-            imageUrl: price.imageUrl,
-          });
-        }
-      });
-    }
-  }, [pricesData]);
-
-  useEffect(() => {
-    if (!productsData) return;
-
-    const productsList = (productsData as any).records || [];
-
-    const products = productsList.map((product: any) => {
-      const priceInfo = productPriceMapRef.current.get(product.id);
-
-      return {
-        id: product.id,
-        name: product.name,
-        price: priceInfo
-          ? formatPrice(priceInfo.price)
-          : "Preço não disponível",
-        category: product.category,
-        description: product.description,
-        image: priceInfo?.imageUrl || null,
-        type: "product" as const,
-        priceId: priceInfo?.priceId,
-        isFavorite:
-          favoriteProductsData?.some(
-            (fp: { id: string }) => fp.id === product.id
-          ) || false,
-      };
-    });
+    const products = productsData.records.map((product: any) => ({
+      id: product.id,
+      name: product.name,
+      price: formatPrice(product.lowestPrice),
+      category: product.category,
+      description: product.description,
+      imageUrl: product.imageUrl || null,
+      type: "product" as const,
+      isFavorite:
+        favoriteProductsData?.some(
+          (fp: { id: string }) => fp.id === product.id
+        ) || false,
+    }));
 
     setLocalProducts(products);
   }, [productsData, favoriteProductsData, formatPrice]);
 
   useEffect(() => {
-    if (marketsData) {
-      const marketsList = (marketsData as any).records || [];
+    if (!marketsData?.records) return;
 
-      const markets = marketsList.map((market: any) => ({
-        id: market.id,
-        name: market.name,
-        state: market.state,
-        city: market.city,
-        address: market.address,
-        price: "",
-        image: null,
-        type: "market" as const,
-        isFavorite:
-          favoriteMarketsData?.some(
-            (fm: { id: string }) => fm.id === market.id
-          ) || false,
-      }));
-      setLocalMarkets(markets);
-    }
+    const markets = marketsData.records.map((market: any) => ({
+      id: market.id,
+      name: market.name,
+      state: market.state,
+      city: market.city,
+      address: market.address,
+      price: "",
+      imageUrl: market.imageUrl || null,
+      type: "market" as const,
+      isFavorite:
+        favoriteMarketsData?.some(
+          (fm: { id: string }) => fm.id === market.id
+        ) || false,
+    }));
+
+    setLocalMarkets(markets);
   }, [marketsData, favoriteMarketsData]);
 
   const favorites: ItemType[] = [
@@ -325,15 +279,6 @@ export default function HomeScreen() {
     },
     [localProducts, localMarkets]
   );
-
-  const handleLoadMore = () => {
-    if (isLoadingMore) return;
-    setIsLoadingMore(true);
-
-    setTimeout(() => {
-      setIsLoadingMore(false);
-    }, 1000);
-  };
 
   const renderListHeader = useCallback(
     () => (
@@ -409,8 +354,6 @@ export default function HomeScreen() {
               colors={["#0000ff"]}
             />
           }
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.5}
         />
       )}
     </SafeAreaView>

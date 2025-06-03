@@ -39,7 +39,7 @@ type ProductDetailParams = {
   description?: string;
   category?: string;
   price: string;
-  image: null | any;
+  imageUrl: null | any;
   marketId?: number;
   marketName?: string;
   priceId?: string;
@@ -308,16 +308,6 @@ export default function ProductDetailScreen() {
           ) : (
             <Text style={styles.noDataText}>Nenhum mercado disponível</Text>
           )}
-        </View>
-
-        <View style={styles.compareSection}>
-          <TouchableOpacity
-            style={[styles.compareButton]}
-            onPress={navigateToPriceComparison}
-            disabled={productPrices.length <= 1}
-          >
-            <Text style={styles.compareButtonText}>Comparar Preços</Text>
-          </TouchableOpacity>
         </View>
 
         <View style={styles.reportSection}>

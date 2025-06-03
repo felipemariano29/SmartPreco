@@ -5,14 +5,16 @@ import { styles } from "@/styles/product-details";
 
 type ProductImageProps = {
   params: {
-    image: null | any;
+    imageUrl: null | any;
   };
   marketPrice: PriceDto | null;
 };
 
 export const ProductImage = ({ params, marketPrice }: ProductImageProps) => {
-  if (params.image) {
-    return <Image source={params.image} style={styles.productImage} />;
+  if (params.imageUrl) {
+    return (
+      <Image source={{ uri: params.imageUrl }} style={styles.productImage} />
+    );
   }
 
   if (marketPrice?.imageUrl) {

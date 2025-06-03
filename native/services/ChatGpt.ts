@@ -47,7 +47,9 @@ Suas respostas devem ser curtas (3-4 frases), em português brasileiro, com tom 
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(
-        `Erro na API do ChatGPT: ${errorData.error?.message || response.statusText}`
+        `Erro na API do ChatGPT: ${
+          errorData.error?.message || response.statusText
+        }`
       );
     }
 

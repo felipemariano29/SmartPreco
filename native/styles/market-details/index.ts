@@ -104,7 +104,6 @@ export const styles = StyleSheet.create({
     height: 120,
     marginBottom: 8,
     borderRadius: 4,
-    overflow: "hidden",
   },
   productImage: {
     width: "100%",
@@ -149,4 +148,4 @@ export const styles = StyleSheet.create({
     color: "#666",
     textAlign: "center",
   },
-}); 
+});

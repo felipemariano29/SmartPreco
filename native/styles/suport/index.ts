@@ -40,7 +40,6 @@ export const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
     borderRadius: 8,
     marginBottom: 10,
-    overflow: "hidden",
   },
   topicHeader: {
     flexDirection: "row",

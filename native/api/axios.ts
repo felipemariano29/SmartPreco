@@ -7,8 +7,8 @@ export const clerkInstance = getClerkInstance();
 const axiosClient = axios.create({
   baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json'
-  }
+    "Content-Type": "application/json",
+  },
 });
 
 axiosClient.interceptors.request.use(
@@ -27,14 +27,14 @@ export const axiosInstance = <T>(
   options?: AxiosRequestConfig
 ): Promise<T> => {
   const source = axios.CancelToken.source();
-  
+
   const promise = axiosClient({
     ...config,
     ...options,
     cancelToken: source.token,
-  }).then(res => res.data as T);
-  
-  (promise as any).cancel = () => source.cancel('Query was cancelled');
+  }).then((res) => res.data as T);
+
+  (promise as any).cancel = () => source.cancel("Query was cancelled");
   return promise;
 };
 

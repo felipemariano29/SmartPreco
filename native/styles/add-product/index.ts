@@ -74,7 +74,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
     borderRadius: 12,
     marginBottom: 8,
-    overflow: "hidden",
+
     borderWidth: 1,
     borderColor: "#E0E0E0",
     borderStyle: "dashed",
@@ -562,7 +562,7 @@ export const styles = StyleSheet.create({
     color: "#555",
     fontWeight: "500",
   },
-  
+
   // Selected product styles (for market selection step)
   selectedProductContainer: {
     backgroundColor: "#F9F9F9",
@@ -613,7 +613,7 @@ export const styles = StyleSheet.create({
     color: "#555",
     fontWeight: "500",
   },
-  
+
   // Summary styles for Price Details step
   summaryContainer: {
     backgroundColor: "#F9F9F9",
