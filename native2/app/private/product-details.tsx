@@ -7,6 +7,7 @@ import {
   Alert,
   ToastAndroid,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { IconButton } from "react-native-paper";
@@ -73,8 +74,13 @@ export default function ProductDetailScreen() {
   const params = route.params as ProductDetailParams;
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [reportSubmitted, setReportSubmitted] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const queryClient = useQueryClient();
-  const { data: pricesData, isLoading: isLoadingPrices } = useReadPrices(
+  const {
+    data: pricesData,
+    isLoading: isLoadingPrices,
+    refetch: refetchPrices,
+  } = useReadPrices(
     { productId: params.id.toString() },
     {
       query: {
@@ -252,6 +258,15 @@ export default function ProductDetailScreen() {
     return params.category || marketPrice?.product?.category || "";
   }, [params.category, marketPrice?.product?.category]);
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+
+    Promise.all([refetchPrices(), refetchFavorites()]).finally(() => {
+      setRefreshing(false);
+      ToastAndroid.show("Dados atualizados", ToastAndroid.SHORT);
+    });
+  }, [refetchPrices, refetchFavorites]);
+
   const renderContent = () => {
     if (isLoadingPrices) {
       return (
@@ -263,7 +278,16 @@ export default function ProductDetailScreen() {
     }
 
     return (
-      <ScrollView style={styles.scrollView}>
+      <ScrollView
+        style={styles.scrollView}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#007BFF"]}
+          />
+        }
+      >
         <View style={styles.imageContainer}>
           <ProductImage params={params} marketPrice={marketPrice} />
         </View>
