@@ -78,7 +78,7 @@ export function NotificationsManager() {
         case "product-details":
           if (data.productId) {
             router.push({
-              pathname: "/product-details",
+              pathname: "/private/product-details",
               params: {
                 id: data.productId,
               },
@@ -88,7 +88,7 @@ export function NotificationsManager() {
         case "market-details":
           if (data.marketId) {
             router.push({
-              pathname: "/market-details",
+              pathname: "/private/market-details",
               params: {
                 id: data.marketId,
               },
@@ -96,7 +96,7 @@ export function NotificationsManager() {
           }
           break;
         default:
-          router.push("/(protected)/(tabs)");
+          router.push("/private");
           break;
       }
     }

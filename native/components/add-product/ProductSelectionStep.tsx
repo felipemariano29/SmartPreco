@@ -49,7 +49,6 @@ const ProductSelectionStep: React.FC<ProductSelectionStepProps> = ({
   handleCreateNewProduct,
   openBarcodeScanner,
 }) => {
-  // Render both create and scan buttons
   const renderActionButtons = () => (
     <View style={{ marginTop: 16, marginBottom: 16 }}>
       <TouchableOpacity
@@ -59,7 +58,7 @@ const ProductSelectionStep: React.FC<ProductSelectionStepProps> = ({
         <Text style={styles.createNewButtonText}>Criar novo produto</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={[
           styles.createNewButton,
           { backgroundColor: "#4B7BEC", marginTop: 10 },
@@ -81,7 +80,7 @@ const ProductSelectionStep: React.FC<ProductSelectionStepProps> = ({
           />
           <Text style={styles.createNewButtonText}>Escanear código</Text>
         </View>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 
@@ -112,7 +111,7 @@ const ProductSelectionStep: React.FC<ProductSelectionStepProps> = ({
       ) : searchQuery.length > 2 && searchResults?.products?.length === 0 ? (
         <View style={styles.noResultsContainer}>
           <Text style={styles.noResultsText}>
-            Nenhum produto encontrado para "{searchQuery}"
+            Nenhum produto encontrado para &quot;{searchQuery}&quot;
           </Text>
           {renderActionButtons()}
         </View>
@@ -125,6 +124,14 @@ const ProductSelectionStep: React.FC<ProductSelectionStepProps> = ({
           )}
           style={styles.productsList}
           ListFooterComponent={renderActionButtons()}
+          nestedScrollEnabled={true}
+          showsVerticalScrollIndicator={false}
+          scrollEnabled={false}
+          getItemLayout={(data, index) => ({
+            length: 80,
+            offset: 80 * index,
+            index,
+          })}
         />
       ) : (
         <View style={styles.initialSelectionContainer}>

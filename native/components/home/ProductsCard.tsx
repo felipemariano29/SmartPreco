@@ -2,9 +2,9 @@ import React from "react";
 import { View, Text, Image } from "react-native";
 import { Card, IconButton } from "react-native-paper";
 import { router } from "expo-router";
-import { ItemType } from "@/app/(protected)/(tabs)";
 import { styles } from "@/styles/home/ProductsCard";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { ItemType } from "@/app/private";
 
 type ProductCardProps = {
   product: ItemType;
@@ -17,7 +17,7 @@ export const ProductCard = ({
 }: ProductCardProps) => {
   const navigateToProductDetails = () => {
     router.push({
-      pathname: "/product-details",
+      pathname: "/private/product-details",
       params: {
         id: product.id,
         name: product.name,

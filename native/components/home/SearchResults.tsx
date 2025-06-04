@@ -1,10 +1,10 @@
-import React from "react";
-import { View, Text, FlatList, TouchableOpacity, Image } from "react-native";
-import { Card, IconButton, Chip } from "react-native-paper";
-import { router } from "expo-router";
-import { ItemType } from "@/app/(protected)/(tabs)";
+import { ItemType } from "@/app/private";
 import { styles } from "@/styles/home/SearchResults";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import React from "react";
+import { FlatList, Image, Text, View } from "react-native";
+import { Card, IconButton } from "react-native-paper";
 
 type SearchResultsProps = {
   results: ItemType[];
@@ -18,28 +18,28 @@ export const SearchResults = ({
   const navigateToDetails = (item: ItemType) => {
     if (item.type === "product") {
       router.push({
-        pathname: "/product-details",
+        pathname: "/private/product-details",
         params: {
           id: item.id,
           name: item.name,
           price: item.price,
           category: item.category,
           description: item.description,
+          imageUrl: item.imageUrl,
         },
       });
     } else {
       router.push({
-        pathname: "/market-details",
+        pathname: "/private/market-details",
         params: {
           id: item.id,
           name: item.name,
           city: item.city,
+          imageUrl: item.imageUrl,
         },
       });
     }
   };
-
-  console.log(results);
 
   const renderResultItem = ({ item }: { item: ItemType }) => (
     <Card style={styles.resultCard} onPress={() => navigateToDetails(item)}>

@@ -2,9 +2,9 @@ import React from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { Card, Avatar } from "react-native-paper";
 import { router } from "expo-router";
-import { ItemType } from "@/app/(protected)/(tabs)";
 import { styles } from "@/styles/home/FavoriteRow";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { ItemType } from "@/app/private";
 
 type FavoritesRowProps = {
   favorites: ItemType[];
@@ -18,7 +18,7 @@ export const FavoritesRow = ({
   const navigateToDetails = (item: ItemType) => {
     if (item.type === "product") {
       router.push({
-        pathname: "/product-details",
+        pathname: "/private/product-details",
         params: {
           id: item.id,
           name: item.name,
@@ -27,7 +27,7 @@ export const FavoritesRow = ({
       });
     } else {
       router.push({
-        pathname: "/market-details",
+        pathname: "/private/market-details",
         params: {
           id: item.id,
           name: item.name,

@@ -1,27 +1,42 @@
-import { ClerkProvider } from "@clerk/clerk-expo";
+import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Slot } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import "react-native-reanimated";
 
-const CLERK_PUBLISHABLE_KEY =
-  process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || "";
-
 import { NotificationsManager } from "@/components/NotificationManager";
-import theme from "@/constants/theme";
+import { theme } from "@/constants/theme";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { tokenCache } from "@/utils/secureToken";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PaperProvider } from "react-native-paper";
 
-SplashScreen.preventAutoHideAsync();
+const CLERK_PUBLISHABLE_KEY =
+  process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || "";
+
+function ProtectedStack() {
+  const { isSignedIn } = useAuth();
+
+  return (
+    <Stack>
+      <Stack.Protected guard={!isSignedIn}>
+        <Stack.Screen name="sign-in" options={{ headerShown: false }} />
+        <Stack.Screen name="sign-up" options={{ headerShown: false }} />
+      </Stack.Protected>
+
+      <Stack.Protected guard={isSignedIn as boolean}>
+        <Stack.Screen name="private" options={{ headerShown: false }} />
+      </Stack.Protected>
+    </Stack>
+  );
+}
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -51,7 +66,7 @@ export default function RootLayout() {
           >
             <NotificationProvider>
               <NotificationsManager />
-              <Slot />
+              <ProtectedStack />
             </NotificationProvider>
           </ThemeProvider>
         </PaperProvider>

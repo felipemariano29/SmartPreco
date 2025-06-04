@@ -6,6 +6,8 @@ import {
   TextInput,
   ActivityIndicator,
   ScrollView,
+  Image,
+  FlatList,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { appColors } from "@/constants/theme";
@@ -39,6 +41,8 @@ interface MarketSelectionStepProps {
   setFocusedField: (field: string | null) => void;
   selectedProduct: any;
   handleChangeProduct: () => void;
+  marketImage?: string | null;
+  showMarketImageOptions?: () => void;
 }
 
 interface MarketItemProps {
@@ -46,7 +50,6 @@ interface MarketItemProps {
   onSelect: (market: MarketDto) => void;
 }
 
-// Extract all the small components
 const MarketItem = ({ item, onSelect }: MarketItemProps) => (
   <TouchableOpacity
     style={styles.marketItem}
@@ -95,6 +98,8 @@ const MarketForm = ({
   errors,
   focusedField,
   setFocusedField,
+  marketImage,
+  showMarketImageOptions,
 }: {
   marketName: string;
   address: string;
@@ -112,6 +117,8 @@ const MarketForm = ({
   };
   focusedField: string | null;
   setFocusedField: (field: string | null) => void;
+  marketImage?: string | null;
+  showMarketImageOptions?: () => void;
 }) => (
   <>
     <View style={styles.formGroup}>
@@ -187,6 +194,44 @@ const MarketForm = ({
         {errors.state && <Text style={styles.errorText}>{errors.state}</Text>}
       </View>
     </View>
+
+    {showMarketImageOptions && (
+      <View style={styles.formGroup}>
+        <Text style={styles.inputLabel}>Imagem do Mercado (Opcional)</Text>
+        <TouchableOpacity
+          style={styles.scannerButton}
+          onPress={showMarketImageOptions}
+          activeOpacity={0.7}
+        >
+          <View style={styles.scannerButtonContent}>
+            {marketImage ? (
+              <>
+                <Image
+                  source={{ uri: marketImage }}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 8,
+                    marginRight: 10,
+                  }}
+                />
+                <Text style={styles.createNewButtonText}>Alterar Imagem</Text>
+              </>
+            ) : (
+              <>
+                <MaterialCommunityIcons
+                  name="camera-plus"
+                  size={24}
+                  color={appColors.primary}
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={styles.createNewButtonText}>Adicionar Imagem</Text>
+              </>
+            )}
+          </View>
+        </TouchableOpacity>
+      </View>
+    )}
   </>
 );
 
@@ -222,7 +267,6 @@ const MarketSearch = ({
   searchResults,
   handleCreateNewMarket,
   handleSelectMarket,
-  renderMarketItems,
 }: {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -230,9 +274,7 @@ const MarketSearch = ({
   searchResults: { markets: MarketDto[] } | undefined;
   handleCreateNewMarket: () => void;
   handleSelectMarket: (market: MarketDto | null) => void;
-  renderMarketItems: () => React.ReactNode;
 }) => {
-  // Search input field
   const renderSearchInput = () => (
     <View style={styles.searchContainer}>
       <TextInput
@@ -250,7 +292,6 @@ const MarketSearch = ({
     </View>
   );
 
-  // Create new market button
   const renderCreateNewButton = () => (
     <TouchableOpacity
       style={styles.createNewButton}
@@ -260,7 +301,6 @@ const MarketSearch = ({
     </TouchableOpacity>
   );
 
-  // Loading indicator
   if (isSearching) {
     return (
       <>
@@ -273,14 +313,13 @@ const MarketSearch = ({
     );
   }
 
-  // No search results
   if (searchQuery.length > 2 && searchResults?.markets?.length === 0) {
     return (
       <>
         {renderSearchInput()}
         <View style={styles.noResultsContainer}>
           <Text style={styles.noResultsText}>
-            Nenhum mercado encontrado para "{searchQuery}"
+            Nenhum mercado encontrado para {searchQuery}
           </Text>
           {renderCreateNewButton()}
         </View>
@@ -288,25 +327,31 @@ const MarketSearch = ({
     );
   }
 
-  // Search results
   if (searchQuery.length > 2) {
     return (
       <>
         {renderSearchInput()}
-        <View>
-          <ScrollView
-            style={styles.marketsScrollView}
-            nestedScrollEnabled={true}
-          >
-            {renderMarketItems()}
-          </ScrollView>
-          {renderCreateNewButton()}
-        </View>
+        <FlatList
+          data={searchResults?.markets || []}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <MarketItem item={item} onSelect={handleSelectMarket} />
+          )}
+          style={styles.marketsScrollView}
+          ListFooterComponent={renderCreateNewButton()}
+          nestedScrollEnabled={true}
+          showsVerticalScrollIndicator={false}
+          scrollEnabled={false}
+          getItemLayout={(data, index) => ({
+            length: 90,
+            offset: 90 * index,
+            index,
+          })}
+        />
       </>
     );
   }
 
-  // Initial state
   return (
     <>
       {renderSearchInput()}
@@ -342,16 +387,9 @@ const MarketSelectionStep: React.FC<MarketSelectionStepProps> = ({
   setFocusedField,
   selectedProduct,
   handleChangeProduct,
+  marketImage,
+  showMarketImageOptions,
 }) => {
-  const renderMarketItems = () => {
-    if (!searchResults?.markets?.length) return null;
-
-    return searchResults.markets.map((item) => (
-      <MarketItem key={item.id} item={item} onSelect={handleSelectMarket} />
-    ));
-  };
-
-  // Creating new market view
   if (isCreatingMarket) {
     return (
       <View style={styles.stepContent}>
@@ -369,6 +407,8 @@ const MarketSelectionStep: React.FC<MarketSelectionStepProps> = ({
           errors={errors}
           focusedField={focusedField}
           setFocusedField={setFocusedField}
+          marketImage={marketImage}
+          showMarketImageOptions={showMarketImageOptions}
         />
 
         {selectedProduct && (
@@ -381,7 +421,6 @@ const MarketSelectionStep: React.FC<MarketSelectionStepProps> = ({
     );
   }
 
-  // Market selection view
   return (
     <View style={styles.stepContent}>
       <Text style={styles.stepTitle}>Selecionar ou Criar Mercado</Text>
@@ -409,7 +448,6 @@ const MarketSelectionStep: React.FC<MarketSelectionStepProps> = ({
             searchResults={searchResults}
             handleCreateNewMarket={handleCreateNewMarket}
             handleSelectMarket={handleSelectMarket}
-            renderMarketItems={renderMarketItems}
           />
 
           {selectedProduct && (

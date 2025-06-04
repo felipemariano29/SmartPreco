@@ -28,5 +28,4 @@ export * from './reportUpdateDto';
 export * from './reportUpdateDtoStatus';
 export * from './reportsDto';
 export * from './uploadControllerUploadImageBody';
-export * from './uploadCreateDto';
 export * from './uploadImageDto';
