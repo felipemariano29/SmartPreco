@@ -1,29 +1,99 @@
-# Create T3 App
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+# SmartPreço Admin Dashboard
 
-## What's next? How do I make an app with this?
+Dashboard de administração do SmartPreço, desenvolvido em **Next.js** com foco em gerenciamento de produtos, mercados e preços. O painel é destinado à moderação, acompanhamento e geração de relatórios sobre os dados colaborativos inseridos pelos usuários no app mobile.
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+## 📁 Estrutura de Pastas
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+```
+src/
+├── api/                # Integrações com backend e definição de schemas (MSW/axios)
+├── app/                # Estrutura das rotas (Next.js app router)
+├── components/         # Componentes reutilizáveis e específicos do admin
+├── hooks/              # React hooks customizados
+├── lib/                # Funções utilitárias
+├── mocks/              # Configuração de mocks para testes e desenvolvimento local
+├── styles/             # Estilos globais
+├── env.js              # Configurações de ambiente
+├── i18n.config.ts      # Configuração de internacionalização
+├── instrumentation.ts  # Observabilidade e métricas
+├── middleware.ts       # Middlewares para rotas
+└── ...
+```
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+### Principais Módulos
 
-## Learn More
+* **api/**: Configuração de integração via Axios e endpoints tipados para Market, Price, Product e Report. Uso de MSW para mocks.
+* **app/**: Rotas principais do admin (`/admin/products`, `/admin/markets`, `/admin/reports`), layouts e providers globais.
+* **components/**: Dividido em subcomponentes por domínio (products, markets, reports) e componentes de UI próprios ou shadcn/ui.
+* **mocks/**: Mock Service Worker para facilitar desenvolvimento sem backend ativo.
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+## 🚀 Tecnologias Utilizadas
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+* [Next.js](https://nextjs.org/) (App Router)
+* [TypeScript](https://www.typescriptlang.org/)
+* [MSW (Mock Service Worker)](https://mswjs.io/) para mocks de API
+* [Axios](https://axios-http.com/) para requisições HTTP
+* [shadcn/ui](https://ui.shadcn.com/) para componentes visuais e padrões de UI
+* [i18next](https://www.i18next.com/) para internacionalização
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+## 🏗️ Funcionalidades
 
-## How do I deploy this?
+* **Gestão de Produtos**: Visualização, cadastro e edição de produtos.
+* **Gestão de Mercados**: Gerenciamento de mercados cadastrados na plataforma.
+* **Gestão de Preços**: Consulta e moderação dos preços submetidos.
+* **Relatórios**: Visualização de dados agregados e exportação de relatórios.
+* **Moderação**: Aprovação/rejeição de preços enviados por usuários.
+* **Internacionalização**: Suporte a múltiplos idiomas.
+* **Dark/Light Mode**: Alternância de tema pelo usuário.
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+## 💻 Rodando o Projeto Localmente
+
+### 1. Pré-requisitos
+
+* Node.js 18+
+* Yarn ou npm
+
+### 2. Instalação
+
+```bash
+# Instale as dependências
+yarn install
+# ou
+npm install
+```
+
+### 3. Rodando em modo desenvolvimento
+
+```bash
+yarn dev
+# ou
+npm run dev
+```
+
+O app estará disponível em [http://localhost:3000](http://localhost:3000).
+
+### 4. Testando com Mocks
+
+O projeto utiliza [MSW](https://mswjs.io/) para simular as APIs durante o desenvolvimento. Os handlers podem ser encontrados em `src/api/generated/**` e configurados em `src/mocks/`.
+
+## 🌎 Internacionalização
+
+* Configure o idioma em `src/i18n.config.ts`.
+* O provider de idioma pode ser alternado em tempo real pelo componente `language-toggle`.
+
+## 📝 Contribuindo
+
+1. Fork este repositório.
+2. Crie uma branch: `git checkout -b feature/minha-nova-feature`
+3. Commit suas alterações: `git commit -m 'feat: Minha nova feature'`
+4. Push para a branch: `git push origin feature/minha-nova-feature`
+5. Abra um Pull Request.
+
+## 📦 Build para Produção
+
+```bash
+yarn build
+# ou
+npm run build
+```
