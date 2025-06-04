@@ -24,6 +24,7 @@ export const ProductCard = ({
         price: product.price,
         category: product.category,
         description: product.description,
+        imageUrl: product.imageUrl,
       },
     });
   };
@@ -38,8 +39,11 @@ export const ProductCard = ({
 
       <View style={styles.productContent}>
         <View style={styles.productImageContainer}>
-          {product.image ? (
-            <Image source={product.image} style={styles.productImage} />
+          {product.imageUrl ? (
+            <Image
+              source={{ uri: product.imageUrl }}
+              style={styles.productImage}
+            />
           ) : (
             <View style={styles.iconContainer}>
               <MaterialCommunityIcons

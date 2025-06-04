@@ -25,7 +25,6 @@ export const SearchResults = ({
           price: item.price,
           category: item.category,
           description: item.description,
-          priceId: item.priceId,
         },
       });
     } else {
@@ -40,6 +39,8 @@ export const SearchResults = ({
     }
   };
 
+  console.log(results);
+
   const renderResultItem = ({ item }: { item: ItemType }) => (
     <Card style={styles.resultCard} onPress={() => navigateToDetails(item)}>
       <View style={styles.typeBadge}>
@@ -50,8 +51,8 @@ export const SearchResults = ({
 
       <View style={styles.resultContent}>
         <View style={styles.resultImageContainer}>
-          {item.image ? (
-            <Image source={item.image} style={styles.resultImage} />
+          {item.imageUrl ? (
+            <Image source={{ uri: item.imageUrl }} style={styles.resultImage} />
           ) : (
             <View style={styles.iconContainer}>
               <MaterialCommunityIcons
