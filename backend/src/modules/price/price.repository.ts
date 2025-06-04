@@ -54,8 +54,8 @@ export class PriceRepository {
       .from(this.tableName)
       .select(`
         *,
-        market:market_id (id, name, address, city, state),
-        product:product_id (id, name, category, description)
+        market:market_id (id, name, address, city, state, image_url),
+        product:product_id (id, name, category, description, image_url)
       `, { count: 'exact' })
       .eq('moderated', true);
 
