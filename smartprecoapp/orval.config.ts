@@ -13,11 +13,11 @@ export default defineConfig({
         mutator: {
           path: "./api/axios.ts",
           name: "axiosInstance",
-        },
-      },
+        },
+      },
     },
     input: {
-      target: "https://api.smartpreco.mindsnap.tech/api-json",
+      target: process.env.EXPO_PUBLIC_API_URL || "",
     },
   },
 });

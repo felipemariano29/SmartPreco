@@ -1,9 +1,9 @@
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const EXPO_PUBLIC_OPENAI_API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
 const API_URL = "https://api.openai.com/v1/chat/completions";
 
 export async function sendMessageToChatGPT(message: string): Promise<string> {
   try {
-    if (!OPENAI_API_KEY) {
+    if (!EXPO_PUBLIC_OPENAI_API_KEY) {
       throw new Error("API key não configurada");
     }
 
@@ -11,7 +11,7 @@ export async function sendMessageToChatGPT(message: string): Promise<string> {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        Authorization: `Bearer ${EXPO_PUBLIC_OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: "gpt-3.5-turbo",

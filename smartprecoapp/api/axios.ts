@@ -1,11 +1,13 @@
 import { getClerkInstance } from "@clerk/clerk-expo";
 import axios, { type AxiosRequestConfig } from "axios";
 
-const API_URL = process.env.API_URL;
+const EXPO_PUBLIC_API_URL = process.env.EXPO_PUBLIC_API_URL;
 export const clerkInstance = getClerkInstance();
 
+console.log("API URL:", EXPO_PUBLIC_API_URL);
+
 const axiosClient = axios.create({
-  baseURL: API_URL,
+  baseURL: EXPO_PUBLIC_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
