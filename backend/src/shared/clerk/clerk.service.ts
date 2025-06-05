@@ -16,8 +16,7 @@ export class ClerkService {
   public async getUserData(userId: string): Promise<UserData> {
     try {
       const user = await clerkClient.users.getUser(userId);
-
-      const deviceId = user.privateMetadata?.pushToken as string | undefined;
+      const deviceId = user.unsafeMetadata?.pushToken as string | undefined;
       const email = user.emailAddresses[0].emailAddress;
 
       if (!deviceId) {
