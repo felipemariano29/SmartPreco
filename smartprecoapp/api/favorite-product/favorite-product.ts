@@ -28,10 +28,8 @@ import type {
   ProductDto
 } from '.././model';
 
-import { axiosInstance } from '.././axios';
+import { customInstance } from '.././axios';
 
-
-type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
@@ -40,14 +38,14 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
  */
 export const getFavoriteProducts = (
     
- options?: SecondParameter<typeof axiosInstance>,signal?: AbortSignal
+ signal?: AbortSignal
 ) => {
       
       
-      return axiosInstance<ProductDto[]>(
+      return customInstance<ProductDto[]>(
       {url: `/favorites/products`, method: 'GET', signal
     },
-      options);
+      );
     }
   
 
@@ -56,16 +54,16 @@ export const getGetFavoriteProductsQueryKey = () => {
     }
 
     
-export const getGetFavoriteProductsQueryOptions = <TData = Awaited<ReturnType<typeof getFavoriteProducts>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFavoriteProducts>>, TError, TData>>, request?: SecondParameter<typeof axiosInstance>}
+export const getGetFavoriteProductsQueryOptions = <TData = Awaited<ReturnType<typeof getFavoriteProducts>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFavoriteProducts>>, TError, TData>>, }
 ) => {
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetFavoriteProductsQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFavoriteProducts>>> = ({ signal }) => getFavoriteProducts(requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFavoriteProducts>>> = ({ signal }) => getFavoriteProducts(signal);
 
       
 
@@ -85,7 +83,7 @@ export function useGetFavoriteProducts<TData = Awaited<ReturnType<typeof getFavo
           TError,
           Awaited<ReturnType<typeof getFavoriteProducts>>
         > , 'initialData'
-      >, request?: SecondParameter<typeof axiosInstance>}
+      >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetFavoriteProducts<TData = Awaited<ReturnType<typeof getFavoriteProducts>>, TError = unknown>(
@@ -95,11 +93,11 @@ export function useGetFavoriteProducts<TData = Awaited<ReturnType<typeof getFavo
           TError,
           Awaited<ReturnType<typeof getFavoriteProducts>>
         > , 'initialData'
-      >, request?: SecondParameter<typeof axiosInstance>}
+      >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetFavoriteProducts<TData = Awaited<ReturnType<typeof getFavoriteProducts>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFavoriteProducts>>, TError, TData>>, request?: SecondParameter<typeof axiosInstance>}
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFavoriteProducts>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -107,7 +105,7 @@ export function useGetFavoriteProducts<TData = Awaited<ReturnType<typeof getFavo
  */
 
 export function useGetFavoriteProducts<TData = Awaited<ReturnType<typeof getFavoriteProducts>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFavoriteProducts>>, TError, TData>>, request?: SecondParameter<typeof axiosInstance>}
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFavoriteProducts>>, TError, TData>>, }
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -127,28 +125,28 @@ export function useGetFavoriteProducts<TData = Awaited<ReturnType<typeof getFavo
  */
 export const favoriteProduct = (
     productId: string,
- options?: SecondParameter<typeof axiosInstance>,signal?: AbortSignal
+ signal?: AbortSignal
 ) => {
       
       
-      return axiosInstance<void>(
+      return customInstance<void>(
       {url: `/favorites/products/${productId}`, method: 'POST', signal
     },
-      options);
+      );
     }
   
 
 
 export const getFavoriteProductMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof favoriteProduct>>, TError,{productId: string}, TContext>, request?: SecondParameter<typeof axiosInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof favoriteProduct>>, TError,{productId: string}, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof favoriteProduct>>, TError,{productId: string}, TContext> => {
 
 const mutationKey = ['favoriteProduct'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
+const {mutation: mutationOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
+      : {mutation: { mutationKey, }};
 
       
 
@@ -156,7 +154,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof favoriteProduct>>, {productId: string}> = (props) => {
           const {productId} = props ?? {};
 
-          return  favoriteProduct(productId,requestOptions)
+          return  favoriteProduct(productId,)
         }
 
         
@@ -172,7 +170,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  * @summary Favorites a product
  */
 export const useFavoriteProduct = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof favoriteProduct>>, TError,{productId: string}, TContext>, request?: SecondParameter<typeof axiosInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof favoriteProduct>>, TError,{productId: string}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof favoriteProduct>>,
         TError,
@@ -189,27 +187,27 @@ export const useFavoriteProduct = <TError = unknown,
  */
 export const unfavoriteProduct = (
     productId: string,
- options?: SecondParameter<typeof axiosInstance>,) => {
+ ) => {
       
       
-      return axiosInstance<void>(
+      return customInstance<void>(
       {url: `/favorites/products/${productId}`, method: 'DELETE'
     },
-      options);
+      );
     }
   
 
 
 export const getUnfavoriteProductMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unfavoriteProduct>>, TError,{productId: string}, TContext>, request?: SecondParameter<typeof axiosInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unfavoriteProduct>>, TError,{productId: string}, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof unfavoriteProduct>>, TError,{productId: string}, TContext> => {
 
 const mutationKey = ['unfavoriteProduct'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
+const {mutation: mutationOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
+      : {mutation: { mutationKey, }};
 
       
 
@@ -217,7 +215,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof unfavoriteProduct>>, {productId: string}> = (props) => {
           const {productId} = props ?? {};
 
-          return  unfavoriteProduct(productId,requestOptions)
+          return  unfavoriteProduct(productId,)
         }
 
         
@@ -233,7 +231,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  * @summary Removes a product from the user's favorites
  */
 export const useUnfavoriteProduct = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unfavoriteProduct>>, TError,{productId: string}, TContext>, request?: SecondParameter<typeof axiosInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unfavoriteProduct>>, TError,{productId: string}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof unfavoriteProduct>>,
         TError,

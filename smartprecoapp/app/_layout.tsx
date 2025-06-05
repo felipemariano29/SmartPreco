@@ -11,7 +11,6 @@ import { theme } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/useColorScheme.web";
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
-console.log("Clerk key:", publishableKey ? "loaded" : "missing");
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();

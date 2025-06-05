@@ -12,12 +12,14 @@ export default defineConfig({
       override: {
         mutator: {
           path: "./api/axios.ts",
-          name: "axiosInstance",
+          name: "customInstance",
         },
       },
     },
     input: {
-      target: process.env.EXPO_PUBLIC_API_URL || "",
+      target:
+        process.env.EXPO_PUBLIC_SWAGGER_URL ||
+        "https://api.smartpreco.mindsnap.tech/api-json",
     },
   },
 });

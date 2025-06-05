@@ -28,10 +28,8 @@ import type {
   MarketDto
 } from '.././model';
 
-import { axiosInstance } from '.././axios';
+import { customInstance } from '.././axios';
 
-
-type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
@@ -40,14 +38,14 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
  */
 export const getFavoriteMarkets = (
     
- options?: SecondParameter<typeof axiosInstance>,signal?: AbortSignal
+ signal?: AbortSignal
 ) => {
       
       
-      return axiosInstance<MarketDto[]>(
+      return customInstance<MarketDto[]>(
       {url: `/favorites/markets`, method: 'GET', signal
     },
-      options);
+      );
     }
   
 
@@ -56,16 +54,16 @@ export const getGetFavoriteMarketsQueryKey = () => {
     }
 
     
-export const getGetFavoriteMarketsQueryOptions = <TData = Awaited<ReturnType<typeof getFavoriteMarkets>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFavoriteMarkets>>, TError, TData>>, request?: SecondParameter<typeof axiosInstance>}
+export const getGetFavoriteMarketsQueryOptions = <TData = Awaited<ReturnType<typeof getFavoriteMarkets>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFavoriteMarkets>>, TError, TData>>, }
 ) => {
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetFavoriteMarketsQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFavoriteMarkets>>> = ({ signal }) => getFavoriteMarkets(requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFavoriteMarkets>>> = ({ signal }) => getFavoriteMarkets(signal);
 
       
 
@@ -85,7 +83,7 @@ export function useGetFavoriteMarkets<TData = Awaited<ReturnType<typeof getFavor
           TError,
           Awaited<ReturnType<typeof getFavoriteMarkets>>
         > , 'initialData'
-      >, request?: SecondParameter<typeof axiosInstance>}
+      >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetFavoriteMarkets<TData = Awaited<ReturnType<typeof getFavoriteMarkets>>, TError = unknown>(
@@ -95,11 +93,11 @@ export function useGetFavoriteMarkets<TData = Awaited<ReturnType<typeof getFavor
           TError,
           Awaited<ReturnType<typeof getFavoriteMarkets>>
         > , 'initialData'
-      >, request?: SecondParameter<typeof axiosInstance>}
+      >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetFavoriteMarkets<TData = Awaited<ReturnType<typeof getFavoriteMarkets>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFavoriteMarkets>>, TError, TData>>, request?: SecondParameter<typeof axiosInstance>}
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFavoriteMarkets>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -107,7 +105,7 @@ export function useGetFavoriteMarkets<TData = Awaited<ReturnType<typeof getFavor
  */
 
 export function useGetFavoriteMarkets<TData = Awaited<ReturnType<typeof getFavoriteMarkets>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFavoriteMarkets>>, TError, TData>>, request?: SecondParameter<typeof axiosInstance>}
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFavoriteMarkets>>, TError, TData>>, }
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -127,28 +125,28 @@ export function useGetFavoriteMarkets<TData = Awaited<ReturnType<typeof getFavor
  */
 export const favoriteMarket = (
     marketId: string,
- options?: SecondParameter<typeof axiosInstance>,signal?: AbortSignal
+ signal?: AbortSignal
 ) => {
       
       
-      return axiosInstance<void>(
+      return customInstance<void>(
       {url: `/favorites/markets/${marketId}`, method: 'POST', signal
     },
-      options);
+      );
     }
   
 
 
 export const getFavoriteMarketMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof favoriteMarket>>, TError,{marketId: string}, TContext>, request?: SecondParameter<typeof axiosInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof favoriteMarket>>, TError,{marketId: string}, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof favoriteMarket>>, TError,{marketId: string}, TContext> => {
 
 const mutationKey = ['favoriteMarket'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
+const {mutation: mutationOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
+      : {mutation: { mutationKey, }};
 
       
 
@@ -156,7 +154,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof favoriteMarket>>, {marketId: string}> = (props) => {
           const {marketId} = props ?? {};
 
-          return  favoriteMarket(marketId,requestOptions)
+          return  favoriteMarket(marketId,)
         }
 
         
@@ -172,7 +170,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  * @summary Favorites a market
  */
 export const useFavoriteMarket = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof favoriteMarket>>, TError,{marketId: string}, TContext>, request?: SecondParameter<typeof axiosInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof favoriteMarket>>, TError,{marketId: string}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof favoriteMarket>>,
         TError,
@@ -189,27 +187,27 @@ export const useFavoriteMarket = <TError = unknown,
  */
 export const unfavoriteMarket = (
     marketId: string,
- options?: SecondParameter<typeof axiosInstance>,) => {
+ ) => {
       
       
-      return axiosInstance<void>(
+      return customInstance<void>(
       {url: `/favorites/markets/${marketId}`, method: 'DELETE'
     },
-      options);
+      );
     }
   
 
 
 export const getUnfavoriteMarketMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unfavoriteMarket>>, TError,{marketId: string}, TContext>, request?: SecondParameter<typeof axiosInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unfavoriteMarket>>, TError,{marketId: string}, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof unfavoriteMarket>>, TError,{marketId: string}, TContext> => {
 
 const mutationKey = ['unfavoriteMarket'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
+const {mutation: mutationOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
+      : {mutation: { mutationKey, }};
 
       
 
@@ -217,7 +215,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof unfavoriteMarket>>, {marketId: string}> = (props) => {
           const {marketId} = props ?? {};
 
-          return  unfavoriteMarket(marketId,requestOptions)
+          return  unfavoriteMarket(marketId,)
         }
 
         
@@ -233,7 +231,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  * @summary Removes a market from the user's favorites
  */
 export const useUnfavoriteMarket = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unfavoriteMarket>>, TError,{marketId: string}, TContext>, request?: SecondParameter<typeof axiosInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unfavoriteMarket>>, TError,{marketId: string}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof unfavoriteMarket>>,
         TError,
