@@ -27,8 +27,6 @@ export class BenefitRepository {
   public async createBenefit(
     params: BenefitCreateRepositoryDto
   ): Promise<BenefitTimestampDto> {
-    console.log("createBenefit", params);
-
     const { data, error } = await this.supabase
       .from(this.benefitsTableName)
       .insert(params)
@@ -192,9 +190,7 @@ export class BenefitRepository {
   public async createUserBenefit(
     params: UserBenefitCreateRepositoryDto
   ): Promise<UserBenefitTimestampDto> {
-    console.log("createUserBenefit", params);
-
-    const { data, error } = await this.supabase
+   const { data, error } = await this.supabase
       .from(this.userBenefitsTableName)
       .insert(params)
       .select()

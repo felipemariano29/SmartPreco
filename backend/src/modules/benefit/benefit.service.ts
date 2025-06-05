@@ -309,16 +309,4 @@ export class BenefitService {
 
     return dto;
   }
-
-  // TODO: Implement SMS sending
-  private async sendSmsNotifications(
-    userIds: string[],
-    benefitId: string
-  ): Promise<void> {
-    // This would integrate with your SMS service
-    // For now, just a placeholder
-    console.log(
-      `Would send SMS to ${userIds.length} users about benefit ${benefitId}`
-    );
-  }
 }
