@@ -5,8 +5,8 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
     "api-gen": "orval"
@@ -22,12 +22,14 @@
     "expo": "~53.0.10",
     "expo-blur": "~14.1.5",
     "expo-constants": "~17.1.6",
+    "expo-device": "~7.1.4",
     "expo-font": "~13.3.1",
     "expo-haptics": "~14.1.4",
     "expo-image": "~2.2.0",
     "expo-image-picker": "~16.1.4",
     "expo-linking": "~7.1.5",
     "expo-router": "~5.0.7",
+    "expo-secure-store": "~14.2.3",
     "expo-splash-screen": "~0.30.9",
     "expo-status-bar": "~2.2.3",
     "expo-symbols": "~0.4.5",
@@ -44,13 +46,11 @@
     "react-native-screens": "~4.11.1",
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
-    "zod": "^3.25.51",
-    "expo-notifications": "~0.31.3",
-    "expo-device": "~7.1.4",
-    "expo-secure-store": "~14.2.3"
+    "zod": "^3.25.51"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@react-native-community/cli": "^18.0.0",
     "@types/react": "~19.0.10",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~9.2.0",
