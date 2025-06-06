@@ -118,6 +118,7 @@ export const benefitsStyles = StyleSheet.create({
     borderTopColor: appColors.disabled + "30",
   },
   timestampText: {
+    paddingVertical: 2,
     fontSize: 11,
     color: appColors.disabled,
     marginBottom: 2,
