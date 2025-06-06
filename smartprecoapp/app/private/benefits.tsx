@@ -58,9 +58,6 @@ const BenefitsScreen = () => {
   const benefitsData = benefitsResponse?.data;
   const benefits = benefitsData?.records || [];
 
-  console.log("Benefits Response:", benefitsResponse);
-  console.log("Benefits Data:", benefitsData);
-
   const handleClaimBenefit = (benefitId: string, benefitName: string) => {
     Alert.alert(
       "Resgatar Benefício",
@@ -102,7 +99,11 @@ const BenefitsScreen = () => {
     }
   };
 
-  const filteredBenefits = filterBenefits(benefits);
+  const filteredBenefits = filterBenefits(
+    benefits.filter(
+      (item): item is UserBenefitDto => "userId" in item && "benefitId" in item
+    )
+  );
 
   const renderFilterButtons = () => (
     <View style={benefitsStyles.filterContainer}>
