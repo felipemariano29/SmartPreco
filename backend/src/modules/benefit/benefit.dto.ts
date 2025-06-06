@@ -352,7 +352,7 @@ export class UserBenefitTimestampDto extends IntersectionType(
     "benefit",
   ] as const),
   UserIdRepositoryDto,
-  BenefitRepositoryIdDto
+  BenefitRepositoryIdDto,
 ) {
   @ApiProperty({
     description: "Date when the benefit was assigned in repository format",
@@ -371,6 +371,12 @@ export class UserBenefitTimestampDto extends IntersectionType(
     example: "2024-01-01T15:30:00.000Z",
   })
   public consumed_at?: Date;
+
+  @ApiProperty({
+    description: "Benefit details in repository format",
+    type: BenefitTimestampDto,
+  })
+  public benefits?: BenefitTimestampDto;
 }
 
 export class UserBenefitCreateRepositoryDto extends IntersectionType(

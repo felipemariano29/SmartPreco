@@ -5,8 +5,8 @@ import { Module } from "@nestjs/common";
 
 @Module({
   imports: [],
-  controllers: [BenefitController],
-  providers: [BenefitService, BenefitRepository],
-  exports: [BenefitService, BenefitRepository],
+  controllers: [ BenefitController ],
+  providers: [ BenefitService, BenefitRepository ],
+  exports: [ BenefitService, BenefitRepository ],
 })
 export class BenefitModule {}
