@@ -7,30 +7,30 @@
 "use client";
 
 import {
-    ChevronDown,
-    Copy,
-    Edit,
-    Eye,
-    Filter,
-    Plus,
-    QrCode,
-    Search,
-    Trash
+  ChevronDown,
+  Copy,
+  Edit,
+  Eye,
+  Filter,
+  Plus,
+  QrCode,
+  Search,
+  Trash
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import {
-    BenefitDtoType,
-    useCreateBenefit,
-    useDeleteBenefit,
-    useReadBenefits,
-    useReadMarkets,
-    useUpdateBenefit,
-    type BenefitCreateDto,
-    type BenefitDto,
-    type BenefitUpdateDto
+  BenefitDtoType,
+  useCreateBenefit,
+  useDeleteBenefit,
+  useReadBenefits,
+  useReadMarkets,
+  useUpdateBenefit,
+  type BenefitCreateDto,
+  type BenefitDto,
+  type BenefitUpdateDto
 } from "@/api";
 
 import { BenefitDetails } from "@/components/benefits/benefit-details";
@@ -39,26 +39,26 @@ import { ConsumeBenefitForm } from "@/components/benefits/consume-benefit-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 
 export default function BenefitsPage() {
@@ -75,7 +75,7 @@ export default function BenefitsPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isConsuming, setIsConsuming] = useState(false);
 
-  const { data, isLoading, refetch } = useReadBenefits();
+  const { data: benefitsData, isLoading, refetch } = useReadBenefits();
   const { data: marketsData } = useReadMarkets();
   const markets = marketsData?.records ?? [];
 
@@ -131,7 +131,7 @@ export default function BenefitsPage() {
     },
   });
 
-  const benefits = data?.records ?? [];
+  const benefits = benefitsData?.data.records as BenefitDto[] ?? [];
 
   const getMarketName = (marketId: string) => {
     const market = markets.find(m => m.id === marketId);

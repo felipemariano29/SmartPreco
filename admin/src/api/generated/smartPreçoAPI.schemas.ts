@@ -236,38 +236,6 @@ export interface ReportUpdateDto {
 /**
  * Type of benefit
  */
-export type BenefitCreateDtoType =
-  (typeof BenefitCreateDtoType)[keyof typeof BenefitCreateDtoType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const BenefitCreateDtoType = {
-  VOUCHER: "VOUCHER",
-  GIFT: "GIFT",
-  DISCOUNT: "DISCOUNT",
-  CASHBACK: "CASHBACK",
-  FREEBIE: "FREEBIE",
-} as const;
-
-export interface BenefitCreateDto {
-  /** Market identifier this benefit belongs to */
-  marketId: string;
-  /** Type of benefit */
-  type: BenefitCreateDtoType;
-  /** Name of the benefit */
-  name: string;
-  /** Detailed description of the benefit */
-  description: string;
-  /** Date when the benefit becomes valid */
-  validFrom: string;
-  /** Date when the benefit expires */
-  validTo: string;
-  /** URL of the benefit image */
-  imageUrl?: string;
-}
-
-/**
- * Type of benefit
- */
 export type BenefitDtoType =
   (typeof BenefitDtoType)[keyof typeof BenefitDtoType];
 
@@ -316,6 +284,96 @@ export interface BenefitsDto {
 }
 
 /**
+ * Status of the user benefit
+ */
+export type UserBenefitDtoStatus =
+  (typeof UserBenefitDtoStatus)[keyof typeof UserBenefitDtoStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const UserBenefitDtoStatus = {
+  ASSIGNED: "ASSIGNED",
+  CLAIMED: "CLAIMED",
+  CONSUMED: "CONSUMED",
+} as const;
+
+export interface UserBenefitDto {
+  /** Unique identifier of the user-benefit relationship */
+  id: string;
+  /** User identifier */
+  userId: string;
+  /** Benefit identifier */
+  benefitId: string;
+  /** Status of the user benefit */
+  status: UserBenefitDtoStatus;
+  /** Validation code for claiming/consuming the benefit */
+  code?: string;
+  /** Date when the benefit was assigned */
+  assignedAt?: string;
+  /** Date when the benefit was claimed */
+  claimedAt?: string;
+  /** Date when the benefit was consumed */
+  consumedAt?: string;
+  /** Benefit details */
+  benefit?: BenefitDto;
+}
+
+export interface UserBenefitsDto {
+  /** List of user benefits returned in the current page */
+  records: UserBenefitDto[];
+  /** Number of records in this page */
+  count: number;
+  /** Total number of records across all pages */
+  total: number;
+  /**
+   * Next offset for fetching the next page, null if no more records
+   * @nullable
+   */
+  nextOffset?: number | null;
+}
+
+/**
+ * Type of benefit
+ */
+export type BenefitCreateDtoType =
+  (typeof BenefitCreateDtoType)[keyof typeof BenefitCreateDtoType];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const BenefitCreateDtoType = {
+  VOUCHER: "VOUCHER",
+  GIFT: "GIFT",
+  DISCOUNT: "DISCOUNT",
+  CASHBACK: "CASHBACK",
+  FREEBIE: "FREEBIE",
+} as const;
+
+export interface BenefitCreateDto {
+  /** Market identifier this benefit belongs to */
+  marketId: string;
+  /** Type of benefit */
+  type: BenefitCreateDtoType;
+  /** Name of the benefit */
+  name: string;
+  /** Detailed description of the benefit */
+  description: string;
+  /** Date when the benefit becomes valid */
+  validFrom: string;
+  /** Date when the benefit expires */
+  validTo: string;
+  /** URL of the benefit image */
+  imageUrl?: string;
+}
+
+/**
+ * Data containing benefits or user benefits
+ */
+export type BenefitsResponseDtoData = BenefitsDto | UserBenefitsDto;
+
+export interface BenefitsResponseDto {
+  /** Data containing benefits or user benefits */
+  data: BenefitsResponseDtoData;
+}
+
+/**
  * Type of benefit
  */
 export type BenefitUpdateDtoType =
@@ -360,7 +418,6 @@ export interface UserBenefitConsumeDto {
 }
 
 export interface BenefitConsumeResponseDto {
-  data(data: any): unknown;
   /** Confirmation message */
   message: string;
   /** Date when the benefit was consumed */

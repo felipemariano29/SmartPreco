@@ -1,5 +1,5 @@
 {
-    "common": {
+  "common": {
     "buttons": {
       "save": "Salvar",
       "cancel": "Cancelar",
@@ -8,7 +8,8 @@
       "view": "Visualizar",
       "add": "Adicionar",
       "search": "Buscar",
-      "copy": "Copiar"
+      "copy": "Copiar",
+      "close": "Fechar"
     },
     "validation": {
       "required": "Este campo é obrigatório"
@@ -28,7 +29,7 @@
     },
     "theme": {
       "light": "Claro",
-      "dark": "Escuro", 
+      "dark": "Escuro",
       "system": "Sistema"
     },
     "language": {
@@ -122,7 +123,7 @@
     "table": {
       "image": "Imagem",
       "name": "Nome",
-      "category": "Categoria", 
+      "category": "Categoria",
       "description": "Descrição",
       "price": "Preço",
       "id": "ID",
@@ -376,4 +377,4 @@
       "merge": "Falha ao mesclar {entity}. Por favor, tente novamente."
     }
   }
-} 
+}

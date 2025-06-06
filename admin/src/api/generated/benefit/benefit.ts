@@ -27,7 +27,7 @@ import type {
   BenefitCreateDto,
   BenefitDto,
   BenefitUpdateDto,
-  BenefitsDto,
+  BenefitsResponseDto,
   ReadBenefitsParams,
   UserBenefitConsumeDto,
 } from "../smartPreçoAPI.schemas";
@@ -134,7 +134,7 @@ export const readBenefits = (
   options?: SecondParameter<typeof axiosInstance>,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<BenefitsDto>(
+  return axiosInstance<BenefitsResponseDto>(
     { url: `/benefits`, method: "GET", params, signal },
     options,
   );

@@ -10,7 +10,7 @@
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 "use client"
 
-import { useReadBenefits, useReadMarkets, useReadProducts, useReadReports } from "@/api"
+import { type BenefitDto, useReadBenefits, useReadMarkets, useReadProducts, useReadReports } from "@/api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle, Clock, FileText, Gift, Package, Store } from "lucide-react"
 import { useTranslations } from "next-intl"
@@ -37,7 +37,7 @@ export default function AdminDashboard() {
   const totalMarkets = markets.length
 
   // Benefits stats
-  const benefits = benefitsData?.records ?? []
+  const benefits = benefitsData?.data.records as BenefitDto[] ?? []
   const totalBenefits = benefits.length
   const now = new Date()
   const activeBenefits = benefits.filter(benefit => {

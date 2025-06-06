@@ -8,7 +8,8 @@
       "view": "View",
       "add": "Add",
       "search": "Search",
-      "copy": "Copy"
+      "copy": "Copy",
+      "close": "Close"
     },
     "validation": {
       "required": "This field is required"
@@ -376,4 +377,4 @@
       "merge": "Failed to merge {entity}. Please try again."
     }
   }
-} 
+}

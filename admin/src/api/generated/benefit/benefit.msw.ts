@@ -14,6 +14,8 @@ import type {
   BenefitConsumeResponseDto,
   BenefitDto,
   BenefitsDto,
+  BenefitsResponseDto,
+  UserBenefitsDto,
 } from "../smartPreçoAPI.schemas";
 
 export const getCreateBenefitResponseMock = (
@@ -37,37 +39,117 @@ export const getCreateBenefitResponseMock = (
   ...overrideResponse,
 });
 
-export const getReadBenefitsResponseMock = (
+export const getReadBenefitsResponseBenefitsDtoMock = (
   overrideResponse: Partial<BenefitsDto> = {},
 ): BenefitsDto => ({
-  records: Array.from(
-    { length: faker.number.int({ min: 1, max: 10 }) },
-    (_, i) => i + 1,
-  ).map(() => ({
-    updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-    id: faker.string.alpha(20),
-    marketId: faker.string.alpha(20),
-    type: faker.helpers.arrayElement([
-      "VOUCHER",
-      "GIFT",
-      "DISCOUNT",
-      "CASHBACK",
-      "FREEBIE",
-    ] as const),
-    name: faker.string.alpha(20),
-    description: faker.string.alpha(20),
-    validFrom: faker.string.alpha(20),
-    validTo: faker.string.alpha(20),
-    imageUrl: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-  })),
-  count: faker.number.int({ min: undefined, max: undefined }),
-  total: faker.number.int({ min: undefined, max: undefined }),
-  nextOffset: faker.helpers.arrayElement([
-    faker.helpers.arrayElement([
-      faker.number.int({ min: undefined, max: undefined }),
-      null,
+  ...{
+    records: Array.from(
+      { length: faker.number.int({ min: 1, max: 10 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+      id: faker.string.alpha(20),
+      marketId: faker.string.alpha(20),
+      type: faker.helpers.arrayElement([
+        "VOUCHER",
+        "GIFT",
+        "DISCOUNT",
+        "CASHBACK",
+        "FREEBIE",
+      ] as const),
+      name: faker.string.alpha(20),
+      description: faker.string.alpha(20),
+      validFrom: faker.string.alpha(20),
+      validTo: faker.string.alpha(20),
+      imageUrl: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    })),
+    count: faker.number.int({ min: undefined, max: undefined }),
+    total: faker.number.int({ min: undefined, max: undefined }),
+    nextOffset: faker.helpers.arrayElement([
+      faker.helpers.arrayElement([
+        faker.number.int({ min: undefined, max: undefined }),
+        null,
+      ]),
+      undefined,
     ]),
-    undefined,
+  },
+  ...overrideResponse,
+});
+
+export const getReadBenefitsResponseUserBenefitsDtoMock = (
+  overrideResponse: Partial<UserBenefitsDto> = {},
+): UserBenefitsDto => ({
+  ...{
+    records: Array.from(
+      { length: faker.number.int({ min: 1, max: 10 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      id: faker.string.alpha(20),
+      userId: faker.string.alpha(20),
+      benefitId: faker.string.alpha(20),
+      status: faker.helpers.arrayElement([
+        "ASSIGNED",
+        "CLAIMED",
+        "CONSUMED",
+      ] as const),
+      code: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+      assignedAt: faker.helpers.arrayElement([
+        `${faker.date.past().toISOString().split(".")[0]}Z`,
+        undefined,
+      ]),
+      claimedAt: faker.helpers.arrayElement([
+        `${faker.date.past().toISOString().split(".")[0]}Z`,
+        undefined,
+      ]),
+      consumedAt: faker.helpers.arrayElement([
+        `${faker.date.past().toISOString().split(".")[0]}Z`,
+        undefined,
+      ]),
+      benefit: faker.helpers.arrayElement([
+        {
+          ...{
+            updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+            id: faker.string.alpha(20),
+            marketId: faker.string.alpha(20),
+            type: faker.helpers.arrayElement([
+              "VOUCHER",
+              "GIFT",
+              "DISCOUNT",
+              "CASHBACK",
+              "FREEBIE",
+            ] as const),
+            name: faker.string.alpha(20),
+            description: faker.string.alpha(20),
+            validFrom: faker.string.alpha(20),
+            validTo: faker.string.alpha(20),
+            imageUrl: faker.helpers.arrayElement([
+              faker.string.alpha(20),
+              undefined,
+            ]),
+          },
+        },
+        undefined,
+      ]),
+    })),
+    count: faker.number.int({ min: undefined, max: undefined }),
+    total: faker.number.int({ min: undefined, max: undefined }),
+    nextOffset: faker.helpers.arrayElement([
+      faker.helpers.arrayElement([
+        faker.number.int({ min: undefined, max: undefined }),
+        null,
+      ]),
+      undefined,
+    ]),
+  },
+  ...overrideResponse,
+});
+
+export const getReadBenefitsResponseMock = (
+  overrideResponse: Partial<BenefitsResponseDto> = {},
+): BenefitsResponseDto => ({
+  data: faker.helpers.arrayElement([
+    { ...getReadBenefitsResponseBenefitsDtoMock() },
+    { ...getReadBenefitsResponseUserBenefitsDtoMock() },
   ]),
   ...overrideResponse,
 });
@@ -174,10 +256,10 @@ export const getCreateBenefitMockHandler = (
 
 export const getReadBenefitsMockHandler = (
   overrideResponse?:
-    | BenefitsDto
+    | BenefitsResponseDto
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<BenefitsDto> | BenefitsDto),
+      ) => Promise<BenefitsResponseDto> | BenefitsResponseDto),
 ) => {
   return http.get("*/benefits", async (info) => {
     await delay(1000);

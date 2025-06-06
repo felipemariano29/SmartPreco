@@ -11,19 +11,19 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import {
-    useConsumeBenefit,
-    type BenefitConsumeResponseDto,
-    type UserBenefitConsumeDto,
+  useConsumeBenefit,
+  type BenefitConsumeResponseDto,
+  type UserBenefitConsumeDto,
 } from "@/api";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,7 +52,7 @@ export function ConsumeBenefitForm({ onClose }: ConsumeBenefitFormProps) {
     mutation: {
       onSuccess: (data) => {
         console.log("Response from Consume Benefit", data);
-        setConsumeResult(data.data);
+        setConsumeResult(data);
         setError(null);
         reset();
       },
@@ -165,19 +165,59 @@ export function ConsumeBenefitForm({ onClose }: ConsumeBenefitFormProps) {
                   {t("consume.success.title")}
                 </p>
                 <p className="text-sm text-green-700 dark:text-green-300">
-                  {consumeResult.message}
+                  {t("form.name")}: {consumeResult.benefit.name}
                 </p>
               </div>
             </div>
 
             <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-muted-foreground">
-                  {t("consume.consumedAt")}
-                </span>
-                <Badge variant="outline">
-                  {formatDate(consumeResult.consumedAt)}
-                </Badge>
+              <div className="grid grid-cols-1 gap-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {t("form.type")}
+                  </span>
+                  <Badge variant="outline">
+                    {t(`form.types.${consumeResult.benefit.type.toLowerCase()}`)}
+                  </Badge>
+                </div>
+                
+                {consumeResult.benefit.description && (
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm font-medium text-muted-foreground">
+                      {t("form.description")}
+                    </span>
+                    <p className="text-sm text-foreground">
+                      {consumeResult.benefit.description}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {t("details.validFrom")}
+                  </span>
+                  <span className="text-sm text-foreground">
+                    {formatDate(consumeResult.benefit.validFrom)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {t("details.validTo")}
+                  </span>
+                  <span className="text-sm text-foreground">
+                    {formatDate(consumeResult.benefit.validTo)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {t("consume.consumedAt")}
+                  </span>
+                  <Badge variant="outline">
+                    {formatDate(consumeResult.consumedAt)}
+                  </Badge>
+                </div>
               </div>
             </div>
 
