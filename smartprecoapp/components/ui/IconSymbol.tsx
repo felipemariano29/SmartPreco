@@ -18,6 +18,7 @@ const MAPPING = {
   "star.slash": "star-border",
   doubt: "help-outline",
   ai: "auto-awesome",
+  benefits: "card-giftcard",
 };
 
 export type IconSymbolName = keyof typeof MAPPING;

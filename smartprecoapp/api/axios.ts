@@ -30,6 +30,7 @@ export const customInstance = async <T>(config: FetchConfig): Promise<T> => {
       const token = await clerkInstance.session.getToken({
         template: undefined,
       });
+      console.log("🔑 Token obtido:", token);
       if (token) {
         authHeaders = { Authorization: `Bearer ${token}` };
       }
