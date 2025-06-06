@@ -11,8 +11,6 @@ export interface ProductDto {
   updatedAt: string;
   /** Product's image URL */
   imageUrl?: string;
-
-  image_url?: string;
   /** Unique identifier of the product */
   id: string;
   /** Name of the product */

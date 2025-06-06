@@ -1,3 +1,4 @@
+import { appColors } from "@/constants/theme";
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
@@ -17,6 +18,7 @@ export const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "bold",
+    color: appColors.primary,
   },
   scrollView: {
     flex: 1,
@@ -90,7 +92,7 @@ export const styles = StyleSheet.create({
     height: 120,
   },
   submitButton: {
-    backgroundColor: "#2e8b57",
+    backgroundColor: appColors.primary,
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",

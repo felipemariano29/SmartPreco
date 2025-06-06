@@ -8,10 +8,11 @@ interface FetchConfig {
   data?: any;
   params?: Record<string, any>;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export const customInstance = async <T>(config: FetchConfig): Promise<T> => {
-  const { url, method = "GET", data, params, headers = {} } = config;
+  const { url, method = "GET", data, params, headers = {}, signal } = config;
 
   const clerkInstance = getClerkInstance();
 
@@ -38,17 +39,26 @@ export const customInstance = async <T>(config: FetchConfig): Promise<T> => {
     console.error("🚨 Erro ao buscar token:", error);
   }
 
+  // Check if data is FormData
+  const isFormData = data instanceof FormData;
+
   const requestOptions: RequestInit = {
     method,
     headers: {
-      "Content-Type": "application/json",
+      // Only set Content-Type for non-FormData requests
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...authHeaders,
       ...headers,
     },
+    signal,
   };
 
   if (data && method !== "GET") {
-    requestOptions.body = JSON.stringify(data);
+    if (isFormData) {
+      requestOptions.body = data;
+    } else {
+      requestOptions.body = JSON.stringify(data);
+    }
   }
 
   try {

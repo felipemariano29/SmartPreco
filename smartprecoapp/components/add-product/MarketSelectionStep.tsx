@@ -129,6 +129,38 @@ const MarketForm = ({
   showMarketImageOptions?: () => void;
 }) => (
   <>
+    {showMarketImageOptions && (
+      <View style={styles.imageSection}>
+        <Text style={styles.imageLabel}>Foto do Mercado (Opcional)</Text>
+        <TouchableOpacity
+          style={styles.imageContainer}
+          onPress={showMarketImageOptions}
+          activeOpacity={0.8}
+        >
+          {marketImage ? (
+            <Image source={{ uri: marketImage }} style={styles.image} />
+          ) : (
+            <View style={styles.imagePlaceholder}>
+              <MaterialCommunityIcons
+                name="camera-plus-outline"
+                size={40}
+                color="#9E9E9E"
+                style={styles.placeholderIcon}
+              />
+              <Text style={styles.placeholderText}>
+                Toque para adicionar uma foto do mercado
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+        {marketImage && (
+          <Text style={styles.imageInfo}>
+            Toque na imagem para alterar a foto
+          </Text>
+        )}
+      </View>
+    )}
+
     <View style={styles.formGroup}>
       <Text style={styles.inputLabel}>Nome do Mercado</Text>
       <TextInput
@@ -202,44 +234,6 @@ const MarketForm = ({
         {errors.state && <Text style={styles.errorText}>{errors.state}</Text>}
       </View>
     </View>
-
-    {showMarketImageOptions && (
-      <View style={styles.formGroup}>
-        <Text style={styles.inputLabel}>Imagem do Mercado (Opcional)</Text>
-        <TouchableOpacity
-          style={styles.scannerButton}
-          onPress={showMarketImageOptions}
-          activeOpacity={0.7}
-        >
-          <View style={styles.scannerButtonContent}>
-            {marketImage ? (
-              <>
-                <Image
-                  source={{ uri: marketImage }}
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 8,
-                    marginRight: 10,
-                  }}
-                />
-                <Text style={styles.createNewButtonText}>Alterar Imagem</Text>
-              </>
-            ) : (
-              <>
-                <MaterialCommunityIcons
-                  name="camera-plus"
-                  size={24}
-                  color={appColors.primary}
-                  style={{ marginRight: 8 }}
-                />
-                <Text style={styles.createNewButtonText}>Adicionar Imagem</Text>
-              </>
-            )}
-          </View>
-        </TouchableOpacity>
-      </View>
-    )}
   </>
 );
 

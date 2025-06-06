@@ -6,6 +6,17 @@
  * OpenAPI spec version: 1.0
  */
 
+export * from './benefitClaimResponseDto';
+export * from './benefitConsumeResponseDto';
+export * from './benefitCreateDto';
+export * from './benefitCreateDtoType';
+export * from './benefitDto';
+export * from './benefitDtoType';
+export * from './benefitUpdateDto';
+export * from './benefitUpdateDtoType';
+export * from './benefitsDto';
+export * from './benefitsResponseDto';
+export * from './benefitsResponseDtoData';
 export * from './marketCreateDto';
 export * from './marketDto';
 export * from './marketUpdateDto';
@@ -18,6 +29,8 @@ export * from './productDto';
 export * from './productUpdateDto';
 export * from './productsDto';
 export * from './productsMergeDto';
+export * from './readBenefitsParams';
+export * from './readBenefitsType';
 export * from './readMarketsParams';
 export * from './readPricesParams';
 export * from './readProductsParams';
@@ -29,3 +42,7 @@ export * from './reportUpdateDtoStatus';
 export * from './reportsDto';
 export * from './uploadControllerUploadImageBody';
 export * from './uploadImageDto';
+export * from './userBenefitConsumeDto';
+export * from './userBenefitDto';
+export * from './userBenefitDtoStatus';
+export * from './userBenefitsDto';
