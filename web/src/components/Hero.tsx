@@ -20,9 +20,9 @@ const Hero = () => {
               <Button
                 size="lg"
                 className="bg-brand-green hover:bg-brand-green/90 hover:scale-105 transition-all"
-                onClick={() => (window.location.href = "#download")}
+                onClick={() => window.open("https://forms.gle/Hj2ohMtq16mpcpCX6", "_blank")}
               >
-                Baixar Agora
+                Quero Economizar
                 <ArrowRight className="ml-2" />
               </Button>
               <Button

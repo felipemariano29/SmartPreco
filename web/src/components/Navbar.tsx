@@ -16,8 +16,8 @@ const Navbar = () => {
           <a href="#funcionalidades" className="text-gray-600 hover:text-brand-green">Funcionalidades</a>
           <a href="#como-funciona" className="text-gray-600 hover:text-brand-green">Como Funciona</a>
           <a href="#parcerias" className="text-gray-600 hover:text-brand-green">Parcerias</a>
-          <Button variant="default" className="bg-brand-green hover:bg-brand-green/90">
-            Baixar App
+          <Button variant="default" className="bg-brand-green hover:bg-brand-green/90" onClick={() => window.open("https://forms.gle/Hj2ohMtq16mpcpCX6", "_blank")}>
+            Quero Economizar
           </Button>
         </div>
 
@@ -33,8 +33,8 @@ const Navbar = () => {
               <a href="#funcionalidades" className="text-lg">Funcionalidades</a>
               <a href="#como-funciona" className="text-lg">Como Funciona</a>
               <a href="#parcerias" className="text-lg">Parcerias</a>
-              <Button className="w-full bg-brand-green hover:bg-brand-green/90">
-                Baixar App
+              <Button className="w-full bg-brand-green hover:bg-brand-green/90" onClick={() => window.open("https://forms.gle/Hj2ohMtq16mpcpCX6", "_blank")}>
+                Quero Economizar
               </Button>
             </div>
           </SheetContent>
