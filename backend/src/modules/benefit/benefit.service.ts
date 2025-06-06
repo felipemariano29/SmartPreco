@@ -168,16 +168,6 @@ export class BenefitService {
     };
   }
 
-  public async readAllUserBenefits(
-    params: UserBenefitReadDto
-  ): Promise<UserBenefitsDto> {
-    // This method is for admin use - gets all user benefits across all users
-    // We would need to modify the repository to support this, but for now let's keep it simple
-    throw new Error(
-      "Not implemented - would require admin-specific repository method"
-    );
-  }
-
   public async claimBenefit(
     benefitId: string
   ): Promise<BenefitClaimResponseDto> {
@@ -214,7 +204,8 @@ export class BenefitService {
     }
 
     // Generate 8-character ULID code
-    const code = ulid().substring(0, 8);
+    const ulidCode = ulid();
+    const code = ulidCode.substring(0, 3) + ulidCode.substring(ulidCode.length - 5);
 
     // Update status to claimed
     const updatedUserBenefit =
@@ -297,9 +288,9 @@ export class BenefitService {
   }
 
   private userBenefitToDto(
-    userBenefit: UserBenefitTimestampDto
+  userBenefit: UserBenefitTimestampDto
   ): UserBenefitDto {
-    const dto: UserBenefitDto = {
+    return {
       id: userBenefit.id,
       userId: userBenefit.user_id,
       benefitId: userBenefit.benefit_id,
@@ -308,8 +299,9 @@ export class BenefitService {
       assignedAt: userBenefit.assigned_at,
       claimedAt: userBenefit.claimed_at,
       consumedAt: userBenefit.consumed_at,
+      benefit: userBenefit.benefits
+        ? this.benefitToDto(userBenefit.benefits)
+        : undefined,
     };
-
-    return dto;
   }
 }
