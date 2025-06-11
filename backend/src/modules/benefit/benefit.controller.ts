@@ -9,7 +9,6 @@ import {
   BenefitsResponseDto,
   BenefitUpdateDto,
   UserBenefitConsumeDto,
-  UserBenefitReadDto,
   UserBenefitsDto
 } from "@modules/benefit/benefit.dto";
 import { BenefitService } from "@modules/benefit/benefit.service";
@@ -33,8 +32,6 @@ import {
   ApiOperation,
   ApiTags,
 } from "@nestjs/swagger";
-import { ContextEnum } from "@shared/context/context.enum";
-import { ContextService } from "@shared/context/context.service";
 import { UseAdmin } from "@shared/guards/use-admin.decorator";
 import { UseUser } from "@shared/guards/use-user.decorator";
 
@@ -47,8 +44,7 @@ import { UseUser } from "@shared/guards/use-user.decorator";
 )
 export class BenefitController {
   public constructor(
-    private readonly benefitService: BenefitService,
-    private readonly contextService: ContextService
+    private readonly benefitService: BenefitService
   ) {}
 
   // === Benefits management (Admin only) ===
@@ -85,23 +81,7 @@ export class BenefitController {
   public async readBenefits(
     @Query() query: BenefitReadDto
   ): Promise<BenefitsResponseDto> {
-    const user = this.contextService.get(ContextEnum.USER);
-    const isAdmin = user?.privateMetadata?.isAdmin;
-
-    let data: UserBenefitsDto | BenefitsDto;
-
-    // TODO: Migrate logic to service
-    if (isAdmin) {
-      data = await this.benefitService.readBenefits(query);
-    } else {
-      const userBenefitQuery: UserBenefitReadDto = {
-        ...query,
-        activeAndClaimedOnly: true,
-      };
-      data = await this.benefitService.readUserBenefits(userBenefitQuery);
-    }
-
-    return { data };
+    return this.benefitService.listBenefits(query);
   }
 
   @Get(":benefitId")

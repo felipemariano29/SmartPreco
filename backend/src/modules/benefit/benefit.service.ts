@@ -5,6 +5,7 @@ import {
   BenefitDto,
   BenefitReadDto,
   BenefitsDto,
+  BenefitsResponseDto,
   BenefitTimestampDto,
   BenefitUpdateDto,
   UserBenefitConsumeDto,
@@ -66,6 +67,27 @@ export class BenefitService {
       total,
       nextOffset: offset + limit < total ? offset + limit : null,
     };
+  }
+
+  public async listBenefits(
+    params: BenefitReadDto
+  ): Promise<BenefitsResponseDto> {
+    const user = this.contextService.get(ContextEnum.USER);
+    const isAdmin = user?.privateMetadata?.isAdmin;
+
+    if (isAdmin) {
+      const data = await this.readBenefits(params);
+      return { data };
+    }
+
+    const userBenefitParams: UserBenefitReadDto = {
+      ...params,
+      activeAndClaimedOnly: true,
+    };
+
+    const data = await this.readUserBenefits(userBenefitParams);
+
+    return { data };
   }
 
   public async readBenefitById(benefitId: string): Promise<BenefitDto> {
